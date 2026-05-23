@@ -14,6 +14,7 @@ Completed:
 
 Next Steps:
 - Support the ML model development with the cleaned dataset.
+
 **Dilay Tarhan – Testing & Documentation**
 
 Completed:
@@ -28,3 +29,26 @@ Next Steps:
 - Prepare System Design document.
 - Prepare Testing Report.
 - Prepare Progress Report.
+
+
+
+
+**Eylül Özekinci – ML Model & Predictions**
+
+Completed:
+- Loaded the cleaned student dataset.
+- Checked dataset structure and columns.
+- Split the dataset into training and testing data.
+- Trained a Random Forest classification model.
+- Generated student risk level predictions.
+- Evaluated the model with accuracy and classification report.
+- Achieved 0.75 accuracy on the test set.
+- Saved predictions to Outputs/predictions.csv.
+- Saved trained model to Models/study_risk_model.pkl.
+
+Note:
+- The dataset currently has only 20 rows, so the model accuracy may change with more data.
+
+Next Steps:
+- Support Streamlit dashboard integration using the saved model file.
+ (Update README and ML outputs)
