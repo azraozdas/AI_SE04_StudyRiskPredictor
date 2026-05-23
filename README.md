@@ -33,6 +33,7 @@ Next Steps:
 
 
 
+
 **Eylül Özekinci – ML Model & Predictions**
 
 Completed:
@@ -52,3 +53,5 @@ Note:
 Next Steps:
 - Support Streamlit dashboard integration using the saved model file.
  (Update README and ML outputs)
+
+Updated contributor identity
