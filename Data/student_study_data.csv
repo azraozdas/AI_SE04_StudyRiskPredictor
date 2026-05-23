@@ -1,0 +1,6 @@
+student_id,course,study_hours,attendance,deadline_days,past_grade,assignment_difficulty,risk_level
+1,Programming,2,40,1,55,High,High
+2,Database,5,85,7,78,Medium,Low
+3,AI,1,30,0,45,High,High
+4,Math,4,70,3,68,Medium,Medium
+5,Security,6,90,10,88,Low,Low
