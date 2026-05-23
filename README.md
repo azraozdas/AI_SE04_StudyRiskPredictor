@@ -14,3 +14,17 @@ Completed:
 
 Next Steps:
 - Support the ML model development with the cleaned dataset.
+**Dilay Tarhan – Testing & Documentation**
+
+Completed:
+- Created the `Documentation` folder in the repository.
+- Added `problem_analysis.md`.
+- Designed and improved the workflow diagram using Figma AI.
+- Exported and uploaded `workflow_diagram.png`.
+- Created `workflow_diagram.md` for GitHub documentation.
+- Synced VS Code project with GitHub using Git.
+
+Next Steps:
+- Prepare System Design document.
+- Prepare Testing Report.
+- Prepare Progress Report.
