@@ -254,7 +254,7 @@ def get_recommendation(risk_label):
     return "No recommendation available."
 
 
-def fallback_prediction(study_hours, attendance, deadline_days, past_grade, difficulty, workload):
+def fallback_prediction(study_hours, attendance, deadline_days, pass_grade, difficulty, workload):
     score = 0
 
     if study_hours < 3:
@@ -272,9 +272,9 @@ def fallback_prediction(study_hours, attendance, deadline_days, past_grade, diff
     elif deadline_days <= 5:
         score += 1
 
-    if past_grade < 60:
+    if pass_grade < 60:
         score += 2
-    elif past_grade < 75:
+    elif pass_grade < 75:
         score += 1
 
     if difficulty == "High":
@@ -352,7 +352,7 @@ if page == "Project Overview":
         <h3>Project Purpose</h3>
         <p>
             This system analyzes study hours, attendance, assignment deadlines,
-            workload level, assignment difficulty, and past grades to estimate
+            workload level, assignment difficulty, and pass grades to estimate
             student academic risk and provide clear study recommendations.
         </p>
     </div>
@@ -402,7 +402,7 @@ elif page == "Risk Prediction":
 
     with col2:
         deadline_days = st.slider("Days Until Deadline", 0, 30, 5)
-        past_grade = st.slider("Past Grade", 0, 100, 70)
+        pass_grade = st.slider("Pass Grade", 0, 100, 70)
         assignment_difficulty = st.selectbox("Assignment Difficulty", ["Low", "Medium", "High"])
         workload_level = st.selectbox("Workload Level", ["Low", "Medium", "High"])
 
@@ -426,7 +426,7 @@ elif page == "Risk Prediction":
             "study_hours": study_hours,
             "attendance": attendance,
             "deadline_days": deadline_days,
-            "past_grade": past_grade,
+            "pass_grade": pass_grade,
             "assignment_difficulty": difficulty_encoded,
             "workload_level": workload_encoded
         }])
@@ -440,7 +440,7 @@ elif page == "Risk Prediction":
                 study_hours,
                 attendance,
                 deadline_days,
-                past_grade,
+                pass_grade,
                 assignment_difficulty,
                 workload_level
             )
@@ -466,8 +466,8 @@ elif page == "Risk Prediction":
         st.info(get_recommendation(risk_label))
 
         chart_data = pd.DataFrame({
-            "Factor": ["Study Hours", "Attendance", "Deadline Days", "Past Grade"],
-            "Value": [study_hours, attendance, deadline_days, past_grade]
+            "Factor": ["Study Hours", "Attendance", "Deadline Days", "Pass Grade"],
+            "Value": [study_hours, attendance, deadline_days, pass_grade]
         })
 
         st.subheader("Input Overview")
