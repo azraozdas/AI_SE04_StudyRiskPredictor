@@ -35,7 +35,7 @@ accuracy = accuracy_score(y_test, predictions)
 
 print("Model Accuracy:", accuracy)
 print("Classification Report:")
-print(classification_report(y_test, predictions))
+print(classification_report(y_test, predictions, zero_division=0))
 
 # 7. Save predictions
 results = X_test.copy()
