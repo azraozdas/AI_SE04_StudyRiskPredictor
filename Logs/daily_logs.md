@@ -73,3 +73,55 @@ Next Steps:
 - Start implementing the Streamlit dashboard interface.
 - Connect the trained ML model to the frontend.
 - Add prediction result cards and dataset preview sections.
+
+### 24.05.2026
+
+Dilay Tarhan – Testing & Documentation
+
+Completed:
+
+Created testing_report.md
+Updated project documentation structure in GitHub
+Synced repository changes through VS Code
+Verified Git commit history and documentation consistency
+Reviewed Streamlit frontend implementation progress
+Planned Gantt chart structure for final documentation
+Prepared Teams progress update for project channel
+
+Next Steps:
+
+Design and finalize project Gantt chart
+Add Gantt chart documentation to repository
+Update README daily logs
+Prepare remaining system design documentation
+
+### 25.05.2026
+
+Dilay Tarhan – Testing & Documentation
+
+Completed:
+
+Designed the project Gantt chart in Figma
+Structured 6-week project timeline visualization
+Added milestone indicators and project phase breakdown
+Adjusted milestone spacing, positioning, and alignment
+Finalized milestone labels and formatting
+Exported gantt_chart.png
+Added Gantt chart to Documentation/
+Updated repository documentation files
+Prepared final README daily log updates
+Synced documentation updates with GitHub
+
+Documentation Completed:
+
+problem_analysis.md
+workflow_diagram.md
+testing_report.md
+gantt_chart.png
+
+Next Steps:
+
+Complete System Design document
+Finalize Progress Report
+Perform final documentation review
+Prepare repository for final submission
