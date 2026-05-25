@@ -76,52 +76,37 @@ Next Steps:
 
 ### 24.05.2026
 
-Dilay Tarhan – Testing & Documentation
+**Dilay Tarhan – Testing & Documentation**
 
 Completed:
-
-Created testing_report.md
-Updated project documentation structure in GitHub
-Synced repository changes through VS Code
-Verified Git commit history and documentation consistency
-Reviewed Streamlit frontend implementation progress
-Planned Gantt chart structure for final documentation
-Prepared Teams progress update for project channel
+- Created `testing_report.md`.
+- Updated project documentation structure in the repository.
+- Synced local documentation changes with GitHub using Git.
+- Reviewed repository documentation consistency.
+- Planned the Gantt chart structure for project timeline documentation.
+- Prepared Teams project progress updates.
 
 Next Steps:
-
-Design and finalize project Gantt chart
-Add Gantt chart documentation to repository
-Update README daily logs
-Prepare remaining system design documentation
+- Design and finalize the Gantt chart.
+- Add Gantt chart documentation to the repository.
+- Update daily logs.
+- Prepare System Design document.
 
 ### 25.05.2026
 
-Dilay Tarhan – Testing & Documentation
+**Dilay Tarhan – Testing & Documentation**
 
 Completed:
-
-Designed the project Gantt chart in Figma
-Structured 6-week project timeline visualization
-Added milestone indicators and project phase breakdown
-Adjusted milestone spacing, positioning, and alignment
-Finalized milestone labels and formatting
-Exported gantt_chart.png
-Added Gantt chart to Documentation/
-Updated repository documentation files
-Prepared final README daily log updates
-Synced documentation updates with GitHub
-
-Documentation Completed:
-
-problem_analysis.md
-workflow_diagram.md
-testing_report.md
-gantt_chart.png
+- Designed and finalized the project Gantt chart using Figma.
+- Added project milestones and 6-week timeline structure.
+- Exported and uploaded `gantt_chart.png`.
+- Created `gantt_chart.md` for GitHub documentation.
+- Updated repository documentation files.
+- Prepared final daily log updates.
+- Synced documentation updates with GitHub.
 
 Next Steps:
-
-Complete System Design document
-Finalize Progress Report
-Perform final documentation review
-Prepare repository for final submission
+- Complete System Design document.
+- Finalize Progress Report.
+- Perform final documentation review.
+- Prepare repository for final submission.
