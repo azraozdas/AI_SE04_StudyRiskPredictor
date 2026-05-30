@@ -352,7 +352,7 @@ if page == "Project Overview":
         <h3>Project Purpose</h3>
         <p>
             This system analyzes study hours, attendance, assignment deadlines,
-            workload level, assignment difficulty, and pass grades to estimate
+            workload level, assignment difficulty, and past grades to estimate
             student academic risk and provide clear study recommendations.
         </p>
     </div>
@@ -402,7 +402,7 @@ elif page == "Risk Prediction":
 
     with col2:
         deadline_days = st.slider("Days Until Deadline", 0, 30, 5)
-        pass_grade = st.slider("Pass Grade", 0, 100, 70)
+        past_grade = st.slider("Pass Grade", 0, 100, 70)
         assignment_difficulty = st.selectbox("Assignment Difficulty", ["Low", "Medium", "High"])
         workload_level = st.selectbox("Workload Level", ["Low", "Medium", "High"])
 
@@ -426,7 +426,7 @@ elif page == "Risk Prediction":
             "study_hours": study_hours,
             "attendance": attendance,
             "deadline_days": deadline_days,
-            "pass_grade": pass_grade,
+            "past_grade": past_grade,
             "assignment_difficulty": difficulty_encoded,
             "workload_level": workload_encoded
         }])
@@ -440,7 +440,7 @@ elif page == "Risk Prediction":
                 study_hours,
                 attendance,
                 deadline_days,
-                pass_grade,
+                past_grade,
                 assignment_difficulty,
                 workload_level
             )
@@ -467,7 +467,7 @@ elif page == "Risk Prediction":
 
         chart_data = pd.DataFrame({
             "Factor": ["Study Hours", "Attendance", "Deadline Days", "Pass Grade"],
-            "Value": [study_hours, attendance, deadline_days, pass_grade]
+            "Value": [study_hours, attendance, deadline_days, past_grade]
         })
 
         st.subheader("Input Overview")
