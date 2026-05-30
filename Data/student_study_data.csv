@@ -1,4 +1,4 @@
-student_id,course,study_hours,attendance,deadline_days,past_grade,assignment_difficulty,workload_level,risk_level
+student_id,course,study_hours,attendance,deadline_days,pass_grade,assignment_difficulty,workload_level,risk_level
 1,Introduction to Programming,2,40,1,55,High,High,High
 2,Database Systems,5,85,7,78,Medium,Medium,Low
 3,Machine Learning,1,30,0,45,High,High,High
