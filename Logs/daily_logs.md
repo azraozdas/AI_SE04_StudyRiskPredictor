@@ -110,3 +110,28 @@ Next Steps:
 - Finalize Progress Report.
 - Perform final documentation review.
 - Prepare repository for final submission.
+
+
+### 30.05.2026
+
+**Dilay Tarhan – Bug Fixing & Repository Cleanup**
+
+Completed:
+
+* Pulled latest project updates from GitHub and synced local repository.
+* Recreated and configured the Python virtual environment.
+* Installed missing project dependencies for local execution.
+* Debugged Streamlit localhost setup issues.
+* Identified prediction error caused by frontend and model feature mismatch.
+* Fixed `pass_grade` / `past_grade` naming inconsistency in `app.py`.
+* Retested application after bug fix implementation.
+* Verified Streamlit app launches and functions correctly on localhost.
+* Deleted unnecessary `Outputs` folder from the repository.
+* Committed and pushed bug fixes and repository cleanup updates to GitHub.
+
+Next Steps:
+
+* Perform full prediction workflow validation.
+* Test all frontend input scenarios for stability.
+* Review model integration for additional inconsistencies.
+* Continue final system testing before submission.
