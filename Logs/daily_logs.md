@@ -154,3 +154,18 @@ Next Steps:
 - Perform final documentation consistency review.
 - Support final system validation and submission preparation.
 
+
+**Müslüm Selim Akşahin – Data Collection & Preprocessing**
+
+Completed:
+- Expanded `student_study_data.csv` from 20 to 210 rows with balanced class distribution (~70 rows per risk level: High / Medium / Low).
+- Fixed column name inconsistency: `past_grade` corrected to `pass_grade` throughout the preprocessing script.
+- Dropped `student_id` from cleaned output; raw dataset retains it for future backend use.
+- Moved `drop_duplicates()` to run after `fillna()` for correct deduplication on complete rows.
+- Replaced shared `LabelEncoder` instance with a per-column encoder dictionary; serialized to `Models/encoders.pkl` via joblib so downstream code no longer needs hardcoded category mappings.
+- Made all file paths resolve relative to script location using `os.path`, eliminating working directory dependency.
+- Added `.streamlit/config.toml` to suppress the usage-statistics prompt on first launch.
+- Regenerated `Data/cleaned_student_data.csv` and `Models/encoders.pkl` from updated dataset.
+
+Next Steps:
+- Eylül retrain with the 210-row dataset and update evaluation metrics.
