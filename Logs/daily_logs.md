@@ -170,17 +170,27 @@ Completed:
 Next Steps:
 - Eylül retrain with the 210-row dataset and update evaluation metrics.
 
-Azra Özdaş – Prediction Bug Fix
+### — Azra Özdaş
 
-Completed:
+- Investigated and fixed the prediction issue in the Streamlit application.
+- Identified a feature mismatch between training and prediction data.
+- Removed student_id from the prediction input payload.
+- Resolved the prediction error and verified successful model predictions.
+- Tested the updated application to ensure stable functionality.
 
-Investigated the prediction failure in the Streamlit application.
-Identified a feature mismatch between training and inference data.
-Removed student_id from the prediction input payload in app.py.
-Fixed the prediction crash caused by the unsupported feature.
-Tested and verified successful prediction execution.
+Next Step:
+- Continue frontend improvements and support final integration testing.
 
-Next Steps:
 
-Continue frontend improvements and deployment preparation.
-Support final integration testing and MVP stabilization.
+
+### — Eylül Özekinci
+
+- Updated ml_model.py with portable file paths using os.path.
+- Added automatic creation of Models and Outputs folders.
+- Implemented 5-Fold Cross Validation for model evaluation.
+- Added confusion matrix generation and feature importance analysis.
+- Exported evaluation results to the Outputs folder.
+- Retrained the model using the updated 210-row dataset and regenerated model outputs.
+
+Next Step:
+- Support API integration and connect model predictions to the Streamlit dashboard.
