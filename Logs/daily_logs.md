@@ -213,3 +213,26 @@ Next Steps:
 
 * Perform final repository review.
 * Confirm all documentation and screenshots are committed.
+
+**Azra Özdaş – Frontend / Auth UI / Repository Cleanup**
+
+Completed:
+
+- Fixed the urgent prediction input issue in `Source/Frontend/app.py` by removing `student_id` from the model input payload and aligning the feature name with the model's expected `pass_grade`.
+- Verified the **Predict Risk** workflow end-to-end with the trained Random Forest model loaded.
+- Updated `README.md` with real evaluation metrics, corrected the `Results/` reference to `Outputs/`, and removed the broken `workflow_diagram.png` image link.
+- Added the authentication UI as the new app entry point:
+  - `Source/Frontend/login.py` — Sign In / Create Account flow with JSON-backed user storage and validation.
+  - `Source/Frontend/styles.py` — shared dark login theme.
+  - `Source/Frontend/utils.py` — `render_html` helper.
+  - `Source/Frontend/assets/logo.png` — application logo (lowercase filename to match the loader path).
+- Refactored `Source/Frontend/app.py` to require login before rendering the dashboard and to expose a Sign Out button in the sidebar.
+- Cleaned up `.gitignore` by removing the `Models/*.pkl` and `Outputs/*.csv` rules so that the trained model and ML artifacts ship with the repository (clean-clone reproducibility for v1.0).
+- Committed `Outputs/confusion_matrix.csv` and `Outputs/feature_importance.csv` as v1.0 evaluation artifacts.
+
+Next Steps:
+
+- Capture five real screenshots of the running app (login, project overview, risk prediction, dataset preview, model outputs) and save them under `Documentation/Screenshots/`.
+- Replace the screenshot placeholder in `README.md` with the captured images.
+- Participate in tonight's clean-machine rehearsal and tag `v1.0`.
+- Plan the migration from the sidebar-radio layout to Streamlit's native `pages/` structure for the 2 June scaffold work.
