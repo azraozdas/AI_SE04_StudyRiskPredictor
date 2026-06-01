@@ -143,8 +143,6 @@ streamlit run Source/Frontend/app.py
 
 ## Model Performance
 
-## Model Performance
-
 **Random Forest Classifier — 210-row simulated dataset**
 
 | Metric | Value |
