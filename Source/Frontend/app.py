@@ -421,12 +421,11 @@ elif page == "Risk Prediction":
             course_encoded = 0
 
         input_data = pd.DataFrame([{
-            "student_id": student_id,
             "course": course_encoded,
             "study_hours": study_hours,
             "attendance": attendance,
             "deadline_days": deadline_days,
-            "past_grade": past_grade,
+            "pass_grade": past_grade,
             "assignment_difficulty": difficulty_encoded,
             "workload_level": workload_encoded
         }])
