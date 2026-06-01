@@ -16,7 +16,7 @@
 - Data preprocessing implemented
 - Random Forest model training completed
 - Streamlit frontend developed
-- Prediction feature bug fixed (`pass_grade` → `past_grade`)
+- Prediction feature bug fixed — frontend corrected to use pass_grade to match the trained model.
 - Local environment setup issues resolved
 - Streamlit application successfully tested
 - Requirements configuration updated with working versions
