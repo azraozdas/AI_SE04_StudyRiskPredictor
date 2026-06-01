@@ -136,10 +136,6 @@ Next Steps:
 
 **Dilay Tarhan – Testing & Documentation**
 
-### 26.05.2026
-
-**Dilay Tarhan – Testing & Documentation**
-
 Completed:
 - Updated `requirements.txt` with working dependency versions.
 - Added `.gitignore` to exclude virtual environment, cache files, environment files, and generated files.
