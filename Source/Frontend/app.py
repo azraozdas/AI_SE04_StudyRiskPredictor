@@ -9,6 +9,18 @@ st.set_page_config(
     layout="wide"
 )
 
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "student_id" not in st.session_state:
+    st.session_state.student_id = None
+
+if not st.session_state.logged_in:
+    from login import render_login_page
+    render_login_page()
+    st.stop()
+
+
 RAW_DATA_PATH = "Data/student_study_data.csv"
 CLEANED_DATA_PATH = "Data/cleaned_student_data.csv"
 MODEL_PATH = "Models/study_risk_model.pkl"
@@ -309,6 +321,17 @@ page = st.sidebar.radio(
 )
 
 
+st.sidebar.markdown("---")
+st.sidebar.caption(f"Signed in as Student #{st.session_state.student_id}")
+if st.sidebar.button("Sign Out", key="signout_btn"):
+    st.session_state.logged_in = False
+    st.session_state.student_id = None
+    for k in ("login_student_id", "login_password", "login_error"):
+        st.session_state.pop(k, None)
+    st.rerun()
+
+
+
 if page == "Project Overview":
     st.markdown("""
     <div class="hero-box">
@@ -385,24 +408,29 @@ elif page == "Risk Prediction":
             "Software Engineering"
         ]
 
-    st.markdown("""
-    <div class="info-card">
-        <h3>Student Input Form</h3>
-        <p>Fill in the academic information below to estimate the student's risk level.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="info-card">
+            <h3>Student Input Form</h3>
+            <p>
+                Predicting for <b>Student #{st.session_state.student_id}</b>.
+                Fill in the academic information below to estimate the risk level.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     col1, col2 = st.columns(2)
 
     with col1:
-        student_id = st.number_input("Student ID", min_value=1, value=1)
         course = st.selectbox("Course", course_options)
         study_hours = st.slider("Weekly Study Hours", 0, 15, 4)
         attendance = st.slider("Attendance (%)", 0, 100, 75)
 
     with col2:
         deadline_days = st.slider("Days Until Deadline", 0, 30, 5)
-        past_grade = st.slider("Pass Grade", 0, 100, 70)
+        pass_grade = st.slider("Pass Grade", 0, 100, 70)
         assignment_difficulty = st.selectbox("Assignment Difficulty", ["Low", "Medium", "High"])
         workload_level = st.selectbox("Workload Level", ["Low", "Medium", "High"])
 
@@ -425,23 +453,35 @@ elif page == "Risk Prediction":
             "study_hours": study_hours,
             "attendance": attendance,
             "deadline_days": deadline_days,
-            "pass_grade": past_grade,
+            "pass_grade": pass_grade,
             "assignment_difficulty": difficulty_encoded,
-            "workload_level": workload_encoded
+            "workload_level": workload_encoded,
         }])
 
         if model is not None:
-            prediction = model.predict(input_data)[0]
-            risk_label = decode_risk(prediction)
-            prediction_source = "Trained Random Forest model"
+            try:
+                prediction = model.predict(input_data)[0]
+                risk_label = decode_risk(prediction)
+                prediction_source = "Trained Random Forest model"
+            except Exception as e:
+                st.warning(f"Model prediction failed ({e}). Using fallback logic.")
+                risk_label = fallback_prediction(
+                    study_hours,
+                    attendance,
+                    deadline_days,
+                    pass_grade,
+                    assignment_difficulty,
+                    workload_level,
+                )
+                prediction_source = "Fallback (model error)"
         else:
             risk_label = fallback_prediction(
                 study_hours,
                 attendance,
                 deadline_days,
-                past_grade,
+                pass_grade,
                 assignment_difficulty,
-                workload_level
+                workload_level,
             )
             prediction_source = "Temporary prototype logic"
 
@@ -466,7 +506,7 @@ elif page == "Risk Prediction":
 
         chart_data = pd.DataFrame({
             "Factor": ["Study Hours", "Attendance", "Deadline Days", "Pass Grade"],
-            "Value": [study_hours, attendance, deadline_days, past_grade]
+            "Value": [study_hours, attendance, deadline_days, pass_grade],
         })
 
         st.subheader("Input Overview")

@@ -7,5 +7,5 @@ __pycache__/
 Uploads/
 
 # Project generated files
-Models/*.pkl
-Outputs/*.csv
+# Models/*.pkl
+# Outputs/*.csv

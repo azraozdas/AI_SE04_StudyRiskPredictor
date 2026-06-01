@@ -108,6 +108,15 @@ pip install -r requirements.txt
 
 ---
 
+## First-Run Setup
+
+The trained model and prediction outputs are not committed to the repository (they are listed in `.gitignore`). After installing dependencies, regenerate them once with:
+
+```bash
+python Source/preprocessing.py
+python Source/ml_model.py
+
+
 ## Running the Project
 
 ### Step 1 — Data Preprocessing
