@@ -194,3 +194,26 @@ Next Step:
 
 Next Step:
 - Support API integration and connect model predictions to the Streamlit dashboard.
+
+### 01.06.2026
+
+**Azra Özdaş – Frontend Stabilization & README Update**
+
+Completed:
+
+* Fixed the urgent prediction input issue in `Source/Frontend/app.py`.
+* Removed `student_id` from the model input data to prevent feature mismatch errors.
+* Renamed `past_grade` to `pass_grade` to match the model’s expected feature name.
+* Ran the Streamlit application and tested the **Predict Risk** workflow.
+* Verified that the prediction process works with the trained model loaded.
+* Captured screenshots of all 5 application pages.
+* Saved screenshots under `Documentation/Screenshots/`.
+* Added the screenshots to the README documentation.
+* Updated README model metrics with real evaluation results.
+* Corrected the output folder reference from `Results/` to `Outputs/`.
+* Removed the broken `workflow_diagram.png` image link from README.
+
+Next Steps:
+
+* Perform final repository review.
+* Confirm all documentation and screenshots are committed.
