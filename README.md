@@ -56,7 +56,7 @@ Source/
 Models/
 └── study_risk_model.pkl
 
-Results/
+Outputs/
 └── predictions.csv
 
 Documentation/
@@ -143,9 +143,19 @@ streamlit run Source/Frontend/app.py
 
 ## Model Performance
 
-**TBD (June 1, 2026)**
+## Model Performance
 
-The model will be retrained using an expanded dataset and evaluated using cross-validation. Updated metrics, confusion matrix, feature importance, and evaluation results will be added here.
+**Random Forest Classifier — 210-row simulated dataset**
+
+| Metric | Value |
+| --- | --- |
+| Test Accuracy | 97.6% |
+| 5-Fold CV Mean Accuracy | 98.6% |
+| 5-Fold CV Std Deviation | ±2.9% |
+| Macro Avg F1 Score | 0.98 |
+
+> Note: High accuracy reflects the structured nature of the simulated dataset.
+> Real-world performance would require validation with actual student data.
 
 ---
 
@@ -168,5 +178,4 @@ The model will be retrained using an expanded dataset and evaluated using cross-
 
 ## License
 
-This project is developed for academic and educational purposes.
-MIT License will be added in the final version.
+This project is released under the MIT License. See the LICENSE file for details.
