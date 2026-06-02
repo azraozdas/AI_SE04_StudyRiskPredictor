@@ -46,27 +46,45 @@ Student Input → Dataset → Preprocessing → Machine Learning Model → Risk 
 Data/
 ├── student_study_data.csv
 ├── cleaned_student_data.csv
+└── data_dictionary.md
 
 Source/
 ├── preprocessing.py
 ├── ml_model.py
 └── Frontend/
-    └── app.py
+    ├── app.py
+    ├── login.py
+    ├── styles.py
+    ├── utils.py
+    └── assets/
+        └── logo.png
 
 Models/
-└── study_risk_model.pkl
+├── study_risk_model.pkl
+└── encoders.pkl
 
 Outputs/
-└── predictions.csv
+├── predictions.csv
+├── confusion_matrix.csv
+├── confusion_matrix.png
+├── feature_importance.csv
+└── feature_importance.png
 
 Documentation/
 ├── workflow_diagram.png
 ├── system_design.md
 ├── problem_analysis.md
-└── testing_report.md
+├── progress_report.md
+├── testing_report.md
+├── evaluation_report.md
+├── team_contributions.md
+└── Screenshots/
 
 Logs/
 └── daily_logs.md
+
+Reports/
+└── final_audit_summary.md
 ```
 
 ---
@@ -110,14 +128,9 @@ pip install -r requirements.txt
 
 ## First-Run Setup
 
-The trained model and prediction outputs are not committed to the repository (they are listed in `.gitignore`). After installing dependencies, regenerate them once with:
+The trained model (`Models/study_risk_model.pkl`), the encoders (`Models/encoders.pkl`), and the ML output files in `Outputs/` are **already included** in this repository so the app runs out of the box.
 
-```bash
-python Source/preprocessing.py
-python Source/ml_model.py
-
-
-## Running the Project
+You only need to re-run the steps below if you change the dataset and want to retrain.
 
 ### Step 1 — Data Preprocessing
 
@@ -133,14 +146,24 @@ python Source/ml_model.py
 
 ### Step 3 — Launch the Dashboard
 
+Always run from the **project root** (the folder that contains `Source/`, `Data/`, and `Models/`):
+
 ```bash
 streamlit run Source/Frontend/app.py
 ```
+
+Default demo accounts:
+
+| Email             | Password      |
+| ----------------- | ------------- |
+| demo@study.ai     | password123   |
+| test@study.ai     | password123   |
 
 ---
 
 ## Dashboard Features
 
+* Login and registration (prototype)
 * Academic risk prediction
 * Study recommendations
 * Dataset preview
@@ -156,27 +179,34 @@ streamlit run Source/Frontend/app.py
 
 | Metric | Value |
 | --- | --- |
-| Test Accuracy | 97.6% |
-| 5-Fold CV Mean Accuracy | 98.6% |
-| 5-Fold CV Std Deviation | ±2.9% |
+| Test Accuracy | 97.62% |
+| 5-Fold CV Mean Accuracy | 100.00% |
+| 5-Fold CV Std Deviation | 0.0000 |
 | Macro Avg F1 Score | 0.98 |
 
-> Note: High accuracy reflects the structured nature of the simulated dataset.
-> Real-world performance would require validation with actual student data.
+> Note: The dataset is simulated using the rules described in `Data/data_dictionary.md`, so accuracy is unrealistically high.
+> Cross-validation runs only on the training set to avoid leakage.
+> See `Documentation/evaluation_report.md` for the full discussion of limitations.
 
 ---
 
 ## Screenshots
 
-<!-- Screenshots will be added on June 1 -->
+<!-- Replace with real captures saved under Documentation/Screenshots/ -->
+
+![Login](Documentation/Screenshots/01_login.png)
+![Project Overview](Documentation/Screenshots/02_overview.png)
+![Risk Prediction](Documentation/Screenshots/03_risk_prediction.png)
+![Dataset Preview](Documentation/Screenshots/04_dataset_preview.png)
+![Model Outputs](Documentation/Screenshots/05_model_outputs.png)
 
 ---
 
 ## Future Improvements
 
-* Larger academic datasets
+* Larger and real-world academic datasets
 * More advanced machine learning models
-* Personalized AI recommendations
+* Personalized AI recommendations (OpenAI / Gemini API)
 * PDF and document analysis
 * Real-time notifications and reminders
 * Cloud deployment support
@@ -185,4 +215,4 @@ streamlit run Source/Frontend/app.py
 
 ## License
 
-This project is released under the MIT License. See the LICENSE file for details.
+This project is released under the MIT License. See the `LICENSE` file for details.

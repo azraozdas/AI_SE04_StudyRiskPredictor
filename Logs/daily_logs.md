@@ -253,3 +253,23 @@ Next Steps:
 
 - Investigate why CV reports 1.0 — likely small N + highly separable features; try a held-out validation slice.
 - Surface the new PNGs in the Streamlit dashboard.
+
+**Azra Özdaş – Frontend Development & Documentation**
+
+**Completed:**
+
+* Refactored frontend file paths using portable path handling.
+* Added encoder (`encoders.pkl`) integration with fallback support.
+* Replaced hardcoded encoding/decoding logic with encoder-based functions.
+* Updated Risk Prediction and Model Outputs pages to use saved encoders.
+* Improved frontend-model consistency and portability.
+* Reworked README structure and setup instructions.
+* Added demo account information and updated repository structure.
+* Updated model performance metrics and documentation references.
+* Added screenshots section placeholders to README.
+
+**Next Steps:**
+
+* Capture application screenshots.
+* Add screenshots to `Documentation/Screenshots/`.
+* Perform final UI review and testing.

@@ -21,10 +21,13 @@ if not st.session_state.logged_in:
     st.stop()
 
 
-RAW_DATA_PATH = "Data/student_study_data.csv"
-CLEANED_DATA_PATH = "Data/cleaned_student_data.csv"
-MODEL_PATH = "Models/study_risk_model.pkl"
-PREDICTIONS_PATH = "Outputs/predictions.csv"
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+RAW_DATA_PATH = os.path.join(ROOT, "Data", "student_study_data.csv")
+CLEANED_DATA_PATH = os.path.join(ROOT, "Data", "cleaned_student_data.csv")
+MODEL_PATH = os.path.join(ROOT, "Models", "study_risk_model.pkl")
+ENCODERS_PATH = os.path.join(ROOT, "Models", "encoders.pkl")
+PREDICTIONS_PATH = os.path.join(ROOT, "Outputs", "predictions.csv")
 
 st.markdown("""
 <style>
@@ -244,16 +247,55 @@ def load_model():
     return None
 
 
-def encode_difficulty(value):
-    return {"High": 0, "Low": 1, "Medium": 2}[value]
+@st.cache_resource
+def load_encoders():
+    if os.path.exists(ENCODERS_PATH):
+        return joblib.load(ENCODERS_PATH)
+    return None
 
 
-def encode_workload(value):
-    return {"High": 0, "Low": 1, "Medium": 2}[value]
+DIFFICULTY_FALLBACK = {"High": 0, "Low": 1, "Medium": 2}
+WORKLOAD_FALLBACK = {"High": 0, "Low": 1, "Medium": 2}
+RISK_FALLBACK = {0: "High Risk", 1: "Low Risk", 2: "Medium Risk"}
 
 
-def decode_risk(value):
-    return {0: "High Risk", 1: "Low Risk", 2: "Medium Risk"}.get(int(value), "Unknown Risk")
+def _encode_with(encoders, column, value, fallback):
+    if encoders is not None and column in encoders:
+        try:
+            return int(encoders[column].transform([value])[0])
+        except Exception:
+            pass
+    return fallback[value]
+
+
+def encode_difficulty(value, encoders=None):
+    return _encode_with(encoders, "assignment_difficulty", value, DIFFICULTY_FALLBACK)
+
+
+def encode_workload(value, encoders=None):
+    return _encode_with(encoders, "workload_level", value, WORKLOAD_FALLBACK)
+
+
+def encode_course(value, encoders, raw_df):
+    if encoders is not None and "course" in encoders:
+        try:
+            return int(encoders["course"].transform([value])[0])
+        except Exception:
+            pass
+    if raw_df is not None and "course" in raw_df.columns:
+        mapping = {name: i for i, name in enumerate(sorted(raw_df["course"].unique()))}
+        return mapping.get(value, 0)
+    return 0
+
+
+def decode_risk(value, encoders=None):
+    if encoders is not None and "risk_level" in encoders:
+        try:
+            label = encoders["risk_level"].inverse_transform([int(value)])[0]
+            return f"{label} Risk"
+        except Exception:
+            pass
+    return RISK_FALLBACK.get(int(value), "Unknown Risk")
 
 
 def get_recommendation(risk_label):
@@ -437,16 +479,10 @@ elif page == "Risk Prediction":
     predict_clicked = st.button("Predict Risk", use_container_width=True)
 
     if predict_clicked:
-        difficulty_encoded = encode_difficulty(assignment_difficulty)
-        workload_encoded = encode_workload(workload_level)
-
-        if raw_df is not None:
-            course_mapping = {
-                name: index for index, name in enumerate(sorted(raw_df["course"].unique()))
-            }
-            course_encoded = course_mapping.get(course, 0)
-        else:
-            course_encoded = 0
+        encoders = load_encoders()
+        difficulty_encoded = encode_difficulty(assignment_difficulty, encoders)
+        workload_encoded = encode_workload(workload_level, encoders)
+        course_encoded = encode_course(course, encoders, raw_df)
 
         input_data = pd.DataFrame([{
             "course": course_encoded,
@@ -461,7 +497,7 @@ elif page == "Risk Prediction":
         if model is not None:
             try:
                 prediction = model.predict(input_data)[0]
-                risk_label = decode_risk(prediction)
+                risk_label = decode_risk(prediction, encoders)
                 prediction_source = "Trained Random Forest model"
             except Exception as e:
                 st.warning(f"Model prediction failed ({e}). Using fallback logic.")
@@ -556,6 +592,7 @@ elif page == "Model Outputs":
     st.title("Model Outputs")
 
     predictions_df = load_csv(PREDICTIONS_PATH)
+    encoders = load_encoders()
 
     if predictions_df is not None:
         st.markdown("""
@@ -569,7 +606,7 @@ elif page == "Model Outputs":
 
         if "predicted_risk_level" in predictions_df.columns:
             st.subheader("Predicted Risk Distribution")
-            decoded = predictions_df["predicted_risk_level"].apply(decode_risk)
+            decoded = predictions_df["predicted_risk_level"].apply(lambda v: decode_risk(v, encoders))
             st.bar_chart(decoded.value_counts())
     else:
         st.warning("Predictions file not found. Please run the ML model first.")
