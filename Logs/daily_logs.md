@@ -236,3 +236,20 @@ Next Steps:
 - Replace the screenshot placeholder in `README.md` with the captured images.
 - Participate in tonight's clean-machine rehearsal and tag `v1.0`.
 - Plan the migration from the sidebar-radio layout to Streamlit's native `pages/` structure for the 2 June scaffold work.
+
+### 02.06.2026
+
+**Eylül Özekinci – ML Honest Evaluation**
+
+Completed:
+
+- Fixed CV leakage in `Source/ml_model.py`: `cross_val_score` now uses `X_train, y_train` instead of full `X, y`.
+- Added matplotlib/seaborn plots saved before `joblib.dump`: `Outputs/confusion_matrix.png` and `Outputs/feature_importance.png`.
+- Re-ran pipeline on 210-row dataset — 5-Fold CV mean **1.0000** (std 0.0), test accuracy **0.9762**.
+- Rewrote `Documentation/evaluation_report.md`: dataset summary, train/test split, CV table, embedded PNGs, bug-fix note ("frontend was corrected to use `pass_grade`"), and Limitations (leakage, dataset size, no noise).
+- Committed under `ml: honest evaluation — fix CV split, add chart PNGs, document leakage`.
+
+Next Steps:
+
+- Investigate why CV reports 1.0 — likely small N + highly separable features; try a held-out validation slice.
+- Surface the new PNGs in the Streamlit dashboard.
