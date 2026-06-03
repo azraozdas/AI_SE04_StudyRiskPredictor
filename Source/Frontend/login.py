@@ -6,34 +6,33 @@ Public hooks used by app.py:
     - handle_login(email, password)
     - handle_register(full_name, email, password, confirm_password)
 
-Storage: prototype-only JSON at Data/users.json (plain-text passwords, keyed by email).
+Storage: hosted PostgreSQL via Supabase (Source/Backend/db.py).
 Logo:    Source/Frontend/assets/logo.png (PNG, square, transparent background recommended).
          If the file is missing, falls back to the inline graduation-cap SVG.
 """
 
 import base64
-import json
 import os
 import re
+import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 import streamlit as st
 
 from utils import render_html
 from styles import inject_login_styles
 
+# Allow imports from Source/Backend regardless of working directory
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_BACKEND = os.path.join(_ROOT, "Source", "Backend")
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-USERS_PATH = os.path.join(ROOT, "Data", "users.json")
+from db import create_user, get_user_by_email, verify_user_password  # noqa: E402
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 LOGO_PATH = ASSETS_DIR / "logo.png"
-
-DEFAULT_USERS = {
-    "demo@study.ai": {"password": "password123", "full_name": "Demo User"},
-    "test@study.ai": {"password": "password123", "full_name": "Test User"},
-}
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -59,7 +58,6 @@ WARNING_SVG = """
 
 
 def _logo_html() -> str:
-    """Return an <img> tag for assets/logo.png; fall back to SVG if missing."""
     try:
         if LOGO_PATH.exists():
             b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("ascii")
@@ -72,44 +70,11 @@ def _logo_html() -> str:
     return LOGO_SVG
 
 
-def _normalize_user(record: Any) -> Dict[str, str]:
-    if isinstance(record, str):
-        return {"password": record, "full_name": ""}
-    return {
-        "password": record.get("password", ""),
-        "full_name": record.get("full_name", ""),
-    }
-
-
-def load_users() -> Dict[str, Dict[str, str]]:
-    users = {k.lower(): _normalize_user(v) for k, v in DEFAULT_USERS.items()}
-    if os.path.exists(USERS_PATH):
-        try:
-            with open(USERS_PATH, encoding="utf-8") as f:
-                raw = json.load(f)
-            for key, rec in raw.items():
-                users[str(key).lower()] = _normalize_user(rec)
-        except (json.JSONDecodeError, OSError):
-            pass
-    return users
-
-
-def save_registered_users(users: Dict[str, Dict[str, str]]) -> None:
-    default_keys = {k.lower() for k in DEFAULT_USERS}
-    registered = {k: v for k, v in users.items() if k not in default_keys}
-    os.makedirs(os.path.dirname(USERS_PATH), exist_ok=True)
-    with open(USERS_PATH, "w", encoding="utf-8") as f:
-        json.dump(registered, f, indent=2)
-
 def handle_login(email: str, password: str) -> bool:
     mail = (email or "").strip().lower()
     if not mail:
         return False
-    users = load_users()
-    rec = users.get(mail)
-    if rec is None:
-        return False
-    return rec.get("password", "") == (password or "")
+    return verify_user_password(mail, password)
 
 
 def handle_register(
@@ -132,14 +97,20 @@ def handle_register(
     if pwd != conf:
         return False, "Passwords do not match."
 
-    users = load_users()
-    if mail in users:
+    try:
+        create_user(email=mail, password=pwd, full_name=name)
+        return True, None
+    except ValueError:
         return False, "This email is already registered. Please sign in instead."
+    except Exception as e:
+        return False, f"Registration failed: {e}"
 
-    users[mail] = {"password": pwd, "full_name": name}
-    save_registered_users(users)
-    return True, None
 
+def _get_full_name(email: str) -> str:
+    user = get_user_by_email(email)
+    if user:
+        return user[3] or ""  # full_name is the 4th column
+    return ""
 
 
 def _clear_auth_messages() -> None:
@@ -219,11 +190,10 @@ def _render_login_form() -> None:
             st.rerun()
         elif handle_login(email, password):
             mail = (email or "").strip().lower()
-            rec = load_users().get(mail, {})
             st.session_state.logged_in = True
             st.session_state.user_email = mail
-            st.session_state.full_name = rec.get("full_name", "")
-            st.session_state.student_id = mail  # back-compat for app.py sidebar caption
+            st.session_state.full_name = _get_full_name(mail)
+            st.session_state.student_id = mail
             st.session_state.login_error = False
             st.rerun()
         else:
@@ -274,13 +244,12 @@ def _render_register_form() -> None:
             st.session_state.logged_in = True
             st.session_state.user_email = mail
             st.session_state.full_name = (full_name or "").strip()
-            st.session_state.student_id = mail  # back-compat for app.py sidebar caption
+            st.session_state.student_id = mail
             st.session_state.signup_error = None
             st.rerun()
         else:
             st.session_state.signup_error = err
             st.rerun()
-
 
 
 def render_login_page() -> None:
