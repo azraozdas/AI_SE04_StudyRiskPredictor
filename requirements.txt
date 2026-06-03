@@ -6,3 +6,6 @@ joblib
 plotly
 matplotlib
 seaborn
+psycopg2-binary
+python-dotenv
+bcrypt
