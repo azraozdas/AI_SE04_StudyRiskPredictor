@@ -35,6 +35,7 @@ Student Input → Dataset → Preprocessing → Machine Learning Model → Risk 
 * Scikit-learn
 * Streamlit
 * Joblib
+* PostgreSQL (Supabase — hosted, shared database)
 * GitHub
 * Microsoft Teams
 
@@ -51,6 +52,9 @@ Data/
 Source/
 ├── preprocessing.py
 ├── ml_model.py
+├── data_generation.py
+├── Backend/
+│   └── db.py
 └── Frontend/
     ├── app.py
     ├── login.py
@@ -130,6 +134,8 @@ pip install -r requirements.txt
 
 The trained model (`Models/study_risk_model.pkl`), the encoders (`Models/encoders.pkl`), and the ML output files in `Outputs/` are **already included** in this repository so the app runs out of the box.
 
+The `.env` file is also included and pre-configured with the shared Supabase database — no additional database setup is required.
+
 You only need to re-run the steps below if you change the dataset and want to retrain.
 
 ### Step 1 — Data Preprocessing
@@ -146,24 +152,17 @@ python Source/ml_model.py
 
 ### Step 3 — Launch the Dashboard
 
-Always run from the **project root** (the folder that contains `Source/`, `Data/`, and `Models/`):
-
 ```bash
 streamlit run Source/Frontend/app.py
 ```
 
-Default demo accounts:
-
-| Email             | Password      |
-| ----------------- | ------------- |
-| demo@study.ai     | password123   |
-| test@study.ai     | password123   |
+Register a new account on the login screen. All users share the same hosted Supabase database.
 
 ---
 
 ## Dashboard Features
 
-* Login and registration (prototype)
+* Login and registration (Supabase PostgreSQL)
 * Academic risk prediction
 * Study recommendations
 * Dataset preview

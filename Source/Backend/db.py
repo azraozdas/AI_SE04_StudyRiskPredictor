@@ -153,6 +153,25 @@ def verify_user_password(email: str, password: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
+def save_prediction(user_id: int, risk_level: str, course_id: int = None) -> int:
+    """Persist a prediction result for a user and return the new prediction id."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO predictions (user_id, course_id, risk_level)
+                    VALUES (%s, %s, %s)
+                    RETURNING id
+                    """,
+                    (user_id, course_id, risk_level),
+                )
+                return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     init_db()
     print("Database initialized successfully.")

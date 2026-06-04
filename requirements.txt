@@ -3,7 +3,6 @@ scikit-learn
 pandas
 numpy
 joblib
-plotly
 matplotlib
 seaborn
 psycopg2-binary

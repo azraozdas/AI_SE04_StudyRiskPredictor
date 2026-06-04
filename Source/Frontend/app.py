@@ -1,4 +1,5 @@
 import os
+import sys
 import joblib
 import pandas as pd
 import streamlit as st
@@ -9,9 +10,30 @@ st.set_page_config(
     layout="wide"
 )
 
+# Backend module path
+_BACKEND = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Backend"
+)
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
 
+from db import init_db, save_prediction  # noqa: E402
+
+# Initialize DB tables on every startup (no-op if tables already exist)
+try:
+    init_db()
+except Exception:
+    pass  # Login page will surface DB errors when the user tries to sign in
+
+# Session state defaults
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+if "user_id" not in st.session_state:
+    st.session_state.user_id = None
+if "user_email" not in st.session_state:
+    st.session_state.user_email = None
+if "full_name" not in st.session_state:
+    st.session_state.full_name = ""
 if "student_id" not in st.session_state:
     st.session_state.student_id = None
 
@@ -362,14 +384,11 @@ page = st.sidebar.radio(
     ]
 )
 
-
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Signed in as Student #{st.session_state.student_id}")
+_display_name = st.session_state.full_name or st.session_state.user_email or ""
+st.sidebar.caption(f"Signed in as {_display_name}")
 if st.sidebar.button("Sign Out", key="signout_btn"):
-    st.session_state.logged_in = False
-    st.session_state.student_id = None
-    for k in ("login_student_id", "login_password", "login_error"):
-        st.session_state.pop(k, None)
+    st.session_state.clear()
     st.rerun()
 
 
@@ -450,12 +469,13 @@ elif page == "Risk Prediction":
             "Software Engineering"
         ]
 
+    _pred_name = st.session_state.full_name or st.session_state.user_email or "Student"
     st.markdown(
         f"""
         <div class="info-card">
             <h3>Student Input Form</h3>
             <p>
-                Predicting for <b>Student #{st.session_state.student_id}</b>.
+                Predicting for <b>{_pred_name}</b>.
                 Fill in the academic information below to estimate the risk level.
             </p>
         </div>
@@ -520,6 +540,14 @@ elif page == "Risk Prediction":
                 workload_level,
             )
             prediction_source = "Temporary prototype logic"
+
+        # Persist prediction to Supabase
+        _uid = st.session_state.get("user_id")
+        if _uid:
+            try:
+                save_prediction(_uid, risk_label)
+            except Exception:
+                pass  # Non-critical — don't block the UI if DB is temporarily unreachable
 
         st.subheader("Prediction Result")
 

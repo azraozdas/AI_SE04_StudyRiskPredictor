@@ -3,12 +3,11 @@ Authentication page for the AI Smart Study Risk & Performance Predictor.
 
 Public hooks used by app.py:
     - render_login_page()
-    - handle_login(email, password)
-    - handle_register(full_name, email, password, confirm_password)
+    - handle_login(email, password)      -> bool
+    - handle_register(full_name, email, password, confirm_password) -> (bool, str|None)
 
 Storage: hosted PostgreSQL via Supabase (Source/Backend/db.py).
-Logo:    Source/Frontend/assets/logo.png (PNG, square, transparent background recommended).
-         If the file is missing, falls back to the inline graduation-cap SVG.
+Logo:    Source/Frontend/assets/logo.png — falls back to inline SVG if missing.
 """
 
 import base64
@@ -74,7 +73,10 @@ def handle_login(email: str, password: str) -> bool:
     mail = (email or "").strip().lower()
     if not mail:
         return False
-    return verify_user_password(mail, password)
+    try:
+        return verify_user_password(mail, password)
+    except Exception:
+        raise ConnectionError("Unable to reach the database. Please try again later.")
 
 
 def handle_register(
@@ -102,25 +104,28 @@ def handle_register(
         return True, None
     except ValueError:
         return False, "This email is already registered. Please sign in instead."
-    except Exception as e:
-        return False, f"Registration failed: {e}"
-
-
-def _get_full_name(email: str) -> str:
-    user = get_user_by_email(email)
-    if user:
-        return user[3] or ""  # full_name is the 4th column
-    return ""
+    except Exception:
+        return False, "Unable to reach the database. Please try again later."
 
 
 def _clear_auth_messages() -> None:
-    st.session_state.login_error = False
+    st.session_state.login_error = None
     st.session_state.signup_error = None
 
 
 def _set_mode(mode: str) -> None:
     st.session_state.auth_mode = mode
     _clear_auth_messages()
+
+
+def _set_session_from_user(email: str, full_name: str = "") -> None:
+    """Populate session state after a successful login or registration."""
+    user_row = get_user_by_email(email)
+    st.session_state.logged_in = True
+    st.session_state.user_id = user_row[0] if user_row else None
+    st.session_state.user_email = email
+    st.session_state.full_name = (user_row[3] if user_row else full_name) or ""
+    st.session_state.student_id = email  # kept for back-compat with app.py
 
 
 def _render_tabs(active_mode: str) -> None:
@@ -168,37 +173,31 @@ def _render_login_form() -> None:
         on_change=_clear_auth_messages,
     )
 
-    render_html('<div class="login-meta-row">')
-    m1, m2 = st.columns(2)
-    with m1:
-        st.checkbox("Remember me", key="remember_me", on_change=_clear_auth_messages)
-    with m2:
-        render_html('<div class="login-forgot-link">Forgot password?</div>')
-    render_html("</div>")
-
     if st.session_state.login_error:
         render_html(f"""
             <div class="login-error">
                 <span>{WARNING_SVG}</span>
-                <span>Invalid email or password. Please try again.</span>
+                <span>{st.session_state.login_error}</span>
             </div>
         """)
 
     if st.button("Sign In", key="login_submit", type="primary", use_container_width=True):
-        if not (email or "").strip():
-            st.session_state.login_error = True
-            st.rerun()
-        elif handle_login(email, password):
-            mail = (email or "").strip().lower()
-            st.session_state.logged_in = True
-            st.session_state.user_email = mail
-            st.session_state.full_name = _get_full_name(mail)
-            st.session_state.student_id = mail
-            st.session_state.login_error = False
+        mail = (email or "").strip().lower()
+        if not mail:
+            st.session_state.login_error = "Please enter your email address."
             st.rerun()
         else:
-            st.session_state.login_error = True
-            st.rerun()
+            try:
+                if handle_login(email, password):
+                    _set_session_from_user(mail)
+                    st.session_state.login_error = None
+                    st.rerun()
+                else:
+                    st.session_state.login_error = "Invalid email or password. Please try again."
+                    st.rerun()
+            except ConnectionError as e:
+                st.session_state.login_error = str(e)
+                st.rerun()
 
 
 def _render_register_form() -> None:
@@ -241,10 +240,8 @@ def _render_register_form() -> None:
         ok, err = handle_register(full_name, email, new_password, confirm_password)
         if ok:
             mail = (email or "").strip().lower()
-            st.session_state.logged_in = True
-            st.session_state.user_email = mail
-            st.session_state.full_name = (full_name or "").strip()
-            st.session_state.student_id = mail
+            name = (full_name or "").strip()
+            _set_session_from_user(mail, full_name=name)
             st.session_state.signup_error = None
             st.rerun()
         else:
@@ -258,11 +255,9 @@ def render_login_page() -> None:
     if "auth_mode" not in st.session_state:
         st.session_state.auth_mode = "Sign In"
     if "login_error" not in st.session_state:
-        st.session_state.login_error = False
+        st.session_state.login_error = None
     if "signup_error" not in st.session_state:
         st.session_state.signup_error = None
-    if "remember_me" not in st.session_state:
-        st.session_state.remember_me = False
 
     _, center, _ = st.columns([1, 1.2, 1])
 

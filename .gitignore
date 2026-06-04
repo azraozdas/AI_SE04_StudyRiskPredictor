@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 *.db
+.idea/
 .DS_Store
 Uploads/
 
