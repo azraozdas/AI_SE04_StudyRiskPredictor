@@ -20,11 +20,17 @@ if _BACKEND not in sys.path:
 from db import init_db, save_prediction, get_session_user, delete_session  # noqa: E402
 from cookie_session import get_session_token, set_session_token, clear_session_token  # noqa: E402
 
-# Initialize DB tables on every startup (no-op if tables already exist)
-try:
-    init_db()
-except Exception:
-    pass  # Login page will surface DB errors when the user tries to sign in
+
+@st.cache_resource
+def _init_db_once():
+    """Run init_db exactly once per Streamlit server process, not on every rerun."""
+    try:
+        init_db()
+    except Exception:
+        pass  # Login page will surface DB errors when the user tries to sign in
+
+
+_init_db_once()
 
 # Session state defaults
 st.session_state.setdefault("logged_in", False)
