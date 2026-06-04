@@ -174,18 +174,19 @@ Register a new account on the login screen. All users share the same hosted Supa
 
 ## Model Performance
 
-**Random Forest Classifier — 210-row simulated dataset**
+**Random Forest Classifier — 300-row simulated dataset (with label noise)**
 
 | Metric | Value |
 | --- | --- |
-| Test Accuracy | 97.62% |
-| 5-Fold CV Mean Accuracy | 100.00% |
-| 5-Fold CV Std Deviation | 0.0000 |
-| Macro Avg F1 Score | 0.98 |
+| Test Accuracy | 91.11% |
+| Validation Accuracy | 88.89% |
+| 5-Fold CV Mean Accuracy | 86.67% |
+| 5-Fold CV Std Deviation | 0.0513 |
+| Macro Avg F1 Score | 0.91 |
 
-> Note: The dataset is simulated using the rules described in `Data/data_dictionary.md`, so accuracy is unrealistically high.
-> Cross-validation runs only on the training set to avoid leakage.
-> See `Documentation/evaluation_report.md` for the full discussion of limitations.
+> The dataset uses overlapping feature ranges and ~12% label noise so metrics reflect learnable signal, not a deterministic lookup.
+> Cross-validation runs only on the training set; validation and test sets are held out.
+> See `Documentation/evaluation_report.md` for limitations and the Q&A answer on earlier 100% CV.
 
 ---
 

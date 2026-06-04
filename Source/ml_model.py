@@ -8,7 +8,7 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 
 
 def train():
@@ -26,9 +26,14 @@ def train():
     X = df.drop("risk_level", axis=1)
     y = df["risk_level"]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, test_size=0.30, random_state=42, stratify=y
     )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=0.50, random_state=42, stratify=y_temp
+    )
+
+    print(f"\nSplit sizes — train: {len(X_train)}, val: {len(X_val)}, test: {len(X_test)}")
 
     model = RandomForestClassifier(random_state=42)
     model.fit(X_train, y_train)
@@ -38,11 +43,17 @@ def train():
     print("CV Mean Accuracy:", cv_scores.mean())
     print("CV Std Deviation:", cv_scores.std())
 
+    val_predictions = model.predict(X_val)
+    val_accuracy = accuracy_score(y_val, val_predictions)
+    print("\nValidation Accuracy:", val_accuracy)
+
     predictions = model.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
+    macro_f1 = f1_score(y_test, predictions, average="macro", zero_division=0)
 
-    print("\nModel Accuracy:", accuracy)
-    print("Classification Report:")
+    print("\nTest Accuracy:", accuracy)
+    print("Test Macro F1:", macro_f1)
+    print("Classification Report (test):")
     print(classification_report(y_test, predictions, zero_division=0))
 
     cm = confusion_matrix(y_test, predictions)
@@ -51,7 +62,7 @@ def train():
         index=[f"actual_{c}" for c in sorted(y.unique())],
         columns=[f"predicted_{c}" for c in sorted(y.unique())],
     )
-    print("\nConfusion Matrix:")
+    print("\nConfusion Matrix (test):")
     print(cm_df)
     cm_df.to_csv(os.path.join(ROOT, "Outputs", "confusion_matrix.csv"))
 

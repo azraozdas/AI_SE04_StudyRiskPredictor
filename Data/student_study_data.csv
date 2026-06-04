@@ -1,211 +1,301 @@
 student_id,course,study_hours,attendance,deadline_days,pass_grade,assignment_difficulty,workload_level,risk_level
-1,Introduction to Programming,2,40,1,55,High,High,High
-2,Database Systems,5,85,7,78,Medium,Medium,Low
-3,Machine Learning,1,30,0,45,High,High,High
-4,Linear Algebra,4,70,3,68,Medium,Medium,Medium
-5,Cybersecurity Fundamentals,6,90,10,88,Low,Low,Low
-6,Web Development,3,60,2,58,High,Medium,Medium
-7,Computer Networks,2,50,1,52,High,High,High
-8,Data Science,5,80,5,82,Medium,Medium,Low
-9,Algorithms,1,35,0,40,High,High,High
-10,Cloud Computing,4,75,4,72,Medium,Medium,Medium
-11,Object-Oriented Programming,7,92,12,89,Low,Low,Low
-12,Operating Systems,2,48,2,54,High,High,High
-13,Artificial Intelligence,3,62,4,66,Medium,Medium,Medium
-14,Statistics,6,88,9,84,Low,Low,Low
-15,Software Engineering,1,42,1,49,High,High,High
-16,Human-Computer Interaction,5,77,6,74,Medium,Medium,Low
-17,Discrete Mathematics,2,53,2,56,High,High,High
-18,Mobile App Development,6,86,8,83,Low,Low,Low
-19,Computer Architecture,3,64,3,63,Medium,Medium,Medium
-20,Information Systems,4,71,5,69,Medium,Medium,Medium
-21,Introduction to Programming,1,31,0,41,High,High,High
-22,Machine Learning,2,44,1,53,High,High,High
-23,Algorithms,1,38,0,47,High,High,High
-24,Database Systems,3,55,2,61,High,High,High
-25,Computer Networks,2,33,1,44,High,High,High
-26,Linear Algebra,1,36,0,43,High,High,High
-27,Operating Systems,3,57,3,62,High,High,High
-28,Discrete Mathematics,2,46,1,50,High,High,High
-29,Software Engineering,1,39,0,42,High,High,High
-30,Cybersecurity Fundamentals,2,48,2,57,High,High,High
-31,Web Development,3,52,2,59,High,High,High
-32,Cloud Computing,1,34,0,46,High,High,High
-33,Data Science,2,41,1,48,High,High,High
-34,Artificial Intelligence,1,37,0,44,High,High,High
-35,Statistics,3,54,3,60,High,High,High
-36,Human-Computer Interaction,2,43,1,51,High,High,High
-37,Mobile App Development,1,32,0,43,High,High,High
-38,Computer Architecture,3,56,2,62,High,High,High
-39,Information Systems,2,47,1,52,High,High,High
-40,Introduction to Programming,1,40,1,49,High,High,High
-41,Machine Learning,2,35,0,45,High,High,High
-42,Algorithms,3,58,3,63,High,High,High
-43,Database Systems,1,33,0,41,High,High,High
-44,Computer Networks,2,45,2,54,High,High,High
-45,Linear Algebra,3,53,2,58,High,High,High
-46,Operating Systems,1,38,1,47,High,High,High
-47,Discrete Mathematics,2,44,1,53,High,High,High
-48,Software Engineering,3,57,3,60,High,High,High
-49,Cybersecurity Fundamentals,1,30,0,40,High,High,High
-50,Web Development,2,42,1,50,High,High,High
-51,Cloud Computing,3,55,2,61,High,High,High
-52,Data Science,1,36,0,44,High,High,High
-53,Artificial Intelligence,2,49,2,55,High,High,High
-54,Statistics,1,31,0,41,High,High,High
-55,Human-Computer Interaction,3,54,3,62,High,High,High
-56,Mobile App Development,2,43,1,52,High,High,High
-57,Computer Architecture,1,37,1,46,High,High,High
-58,Information Systems,3,56,2,59,High,High,High
-59,Introduction to Programming,2,46,2,53,High,High,High
-60,Machine Learning,1,34,0,43,High,High,High
-61,Algorithms,2,50,2,57,High,High,High
-62,Database Systems,3,52,3,61,High,High,High
-63,Computer Networks,1,35,0,42,High,High,High
-64,Linear Algebra,2,48,1,55,High,High,High
-65,Operating Systems,3,58,3,63,High,High,High
-66,Discrete Mathematics,1,32,0,44,High,High,High
-67,Software Engineering,2,41,1,49,High,High,High
-68,Cybersecurity Fundamentals,3,54,2,60,High,High,High
-69,Web Development,1,38,0,46,High,High,High
-70,Cloud Computing,2,47,2,54,High,High,High
-71,Data Science,3,53,3,61,High,High,High
-72,Artificial Intelligence,1,33,0,41,High,High,High
-73,Statistics,2,44,1,51,High,High,High
-74,Human-Computer Interaction,3,57,3,62,High,High,High
-75,Mobile App Development,1,36,0,43,High,High,High
-76,Computer Architecture,2,43,1,52,High,High,High
-77,Information Systems,1,31,0,40,High,High,High
-78,Introduction to Programming,3,56,2,60,High,High,High
-79,Machine Learning,2,45,2,54,High,High,High
-80,Algorithms,1,39,1,48,High,High,High
-81,Database Systems,2,42,1,51,High,High,High
-82,Computer Networks,3,55,3,62,High,High,High
-83,Linear Algebra,1,34,0,42,High,High,High
-84,Operating Systems,4,65,4,67,Medium,Medium,Medium
-85,Discrete Mathematics,3,60,3,64,Medium,Medium,Medium
-86,Software Engineering,5,76,6,73,Medium,Medium,Medium
-87,Cybersecurity Fundamentals,4,68,5,69,Medium,Medium,Medium
-88,Web Development,3,62,3,65,Medium,Medium,Medium
-89,Cloud Computing,5,74,6,72,Medium,Medium,Medium
-90,Data Science,4,70,5,70,Medium,Medium,Medium
-91,Artificial Intelligence,3,58,2,63,Medium,Medium,Medium
-92,Statistics,5,77,7,75,Medium,Medium,Medium
-93,Human-Computer Interaction,4,66,4,67,Medium,Medium,Medium
-94,Mobile App Development,3,61,3,64,Medium,Medium,Medium
-95,Computer Architecture,5,75,6,74,Medium,Medium,Medium
-96,Information Systems,4,69,5,68,Medium,Medium,Medium
-97,Introduction to Programming,3,57,2,61,Medium,Medium,Medium
-98,Machine Learning,5,78,7,76,Medium,Medium,Medium
-99,Algorithms,4,72,5,71,Medium,Medium,Medium
-100,Database Systems,3,63,3,65,Medium,Medium,Medium
-101,Computer Networks,5,76,6,73,Medium,Medium,Medium
-102,Linear Algebra,4,67,4,68,Medium,Medium,Medium
-103,Operating Systems,3,59,2,62,Medium,Medium,Medium
-104,Discrete Mathematics,5,77,7,74,Medium,Medium,Medium
-105,Software Engineering,4,71,5,70,Medium,Medium,Medium
-106,Cybersecurity Fundamentals,3,62,3,65,Medium,Medium,Medium
-107,Web Development,5,75,6,72,Medium,Medium,Medium
-108,Cloud Computing,4,68,4,69,Medium,Medium,Medium
-109,Data Science,3,60,2,63,Medium,Medium,Medium
-110,Artificial Intelligence,5,79,8,76,Medium,Medium,Medium
-111,Statistics,4,66,5,67,Medium,Medium,Medium
-112,Human-Computer Interaction,3,58,3,62,Medium,Medium,Medium
-113,Mobile App Development,5,76,6,74,Medium,Medium,Medium
-114,Computer Architecture,4,69,5,69,Medium,Medium,Medium
-115,Information Systems,3,64,3,66,Medium,Medium,Medium
-116,Introduction to Programming,5,74,6,72,Medium,Medium,Medium
-117,Machine Learning,4,70,5,71,Medium,Medium,Medium
-118,Algorithms,3,61,3,64,Medium,Medium,Medium
-119,Database Systems,5,77,7,75,Medium,Medium,Medium
-120,Computer Networks,4,67,4,68,Medium,Medium,Medium
-121,Linear Algebra,3,57,2,60,Medium,Medium,Medium
-122,Operating Systems,5,75,6,73,Medium,Medium,Medium
-123,Discrete Mathematics,4,71,5,70,Medium,Medium,Medium
-124,Software Engineering,3,63,3,66,Medium,Medium,Medium
-125,Cybersecurity Fundamentals,5,78,7,75,Medium,Medium,Medium
-126,Web Development,4,68,5,69,Medium,Medium,Medium
-127,Cloud Computing,3,59,2,62,Medium,Medium,Medium
-128,Data Science,5,76,6,74,Medium,Medium,Medium
-129,Artificial Intelligence,4,72,5,71,Medium,Medium,Medium
-130,Statistics,3,62,3,65,Medium,Medium,Medium
-131,Human-Computer Interaction,5,77,7,73,Medium,Medium,Medium
-132,Mobile App Development,4,65,4,67,Medium,Medium,Medium
-133,Computer Architecture,3,58,2,61,Medium,Medium,Medium
-134,Information Systems,5,74,6,72,Medium,Medium,Medium
-135,Introduction to Programming,4,68,5,69,Medium,Medium,Medium
-136,Machine Learning,3,61,3,65,Medium,Medium,Medium
-137,Algorithms,5,76,6,73,Medium,Medium,Medium
-138,Database Systems,4,70,5,70,Medium,Medium,Medium
-139,Computer Networks,3,60,2,63,Medium,Medium,Medium
-140,Linear Algebra,5,75,7,74,Medium,Medium,Medium
-141,Operating Systems,4,66,4,67,Medium,Medium,Medium
-142,Discrete Mathematics,3,57,2,60,Medium,Medium,Medium
-143,Software Engineering,5,78,7,75,Medium,Medium,Medium
-144,Cybersecurity Fundamentals,4,69,5,70,Medium,Medium,Medium
-145,Web Development,3,63,3,64,Medium,Medium,Medium
-146,Cloud Computing,5,76,6,73,Medium,Medium,Medium
-147,Data Science,7,91,11,87,Low,Low,Low
-148,Artificial Intelligence,6,84,9,82,Low,Low,Low
-149,Statistics,8,95,13,92,Low,Low,Low
-150,Human-Computer Interaction,5,80,7,76,Low,Low,Low
-151,Mobile App Development,7,89,11,86,Low,Low,Low
-152,Computer Architecture,6,87,10,84,Low,Low,Low
-153,Information Systems,8,96,13,91,Low,Low,Low
-154,Introduction to Programming,5,79,7,75,Low,Low,Low
-155,Machine Learning,7,93,12,89,Low,Low,Low
-156,Algorithms,6,85,9,83,Low,Low,Low
-157,Database Systems,8,97,14,93,Low,Low,Low
-158,Computer Networks,5,81,7,77,Low,Low,Low
-159,Linear Algebra,7,90,11,87,Low,Low,Low
-160,Operating Systems,6,86,9,83,Low,Low,Low
-161,Discrete Mathematics,8,95,13,92,Low,Low,Low
-162,Software Engineering,5,78,6,74,Low,Low,Low
-163,Cybersecurity Fundamentals,7,92,12,90,Low,Low,Low
-164,Web Development,6,84,9,82,Low,Low,Low
-165,Cloud Computing,8,96,14,93,Low,Low,Low
-166,Data Science,5,80,7,76,Low,Low,Low
-167,Artificial Intelligence,7,89,11,86,Low,Low,Low
-168,Statistics,6,87,10,85,Low,Low,Low
-169,Human-Computer Interaction,8,94,13,91,Low,Low,Low
-170,Mobile App Development,5,79,7,75,Low,Low,Low
-171,Computer Architecture,7,91,11,88,Low,Low,Low
-172,Information Systems,6,85,9,83,Low,Low,Low
-173,Introduction to Programming,8,98,15,96,Low,Low,Low
-174,Machine Learning,5,81,7,77,Low,Low,Low
-175,Algorithms,7,90,12,88,Low,Low,Low
-176,Database Systems,6,86,9,84,Low,Low,Low
-177,Computer Networks,8,95,13,92,Low,Low,Low
-178,Linear Algebra,5,79,6,75,Low,Low,Low
-179,Operating Systems,7,91,11,87,Low,Low,Low
-180,Discrete Mathematics,6,84,9,82,Low,Low,Low
-181,Software Engineering,8,97,14,94,Low,Low,Low
-182,Cybersecurity Fundamentals,5,80,7,76,Low,Low,Low
-183,Web Development,7,92,12,89,Low,Low,Low
-184,Cloud Computing,6,87,10,85,Low,Low,Low
-185,Data Science,8,95,13,92,Low,Low,Low
-186,Artificial Intelligence,5,78,6,74,Low,Low,Low
-187,Statistics,7,91,11,88,Low,Low,Low
-188,Human-Computer Interaction,6,85,9,82,Low,Low,Low
-189,Mobile App Development,8,96,14,93,Low,Low,Low
-190,Computer Architecture,5,80,7,77,Low,Low,Low
-191,Information Systems,7,90,11,87,Low,Low,Low
-192,Introduction to Programming,6,86,10,84,Low,Low,Low
-193,Machine Learning,8,94,13,91,Low,Low,Low
-194,Algorithms,5,79,7,75,Low,Low,Low
-195,Database Systems,7,91,12,88,Low,Low,Low
-196,Computer Networks,6,84,9,82,Low,Low,Low
-197,Linear Algebra,8,96,14,93,Low,Low,Low
-198,Operating Systems,5,81,7,77,Low,Low,Low
-199,Discrete Mathematics,7,90,11,86,Low,Low,Low
-200,Software Engineering,6,87,10,85,Low,Low,Low
-201,Cybersecurity Fundamentals,8,95,13,91,Low,Low,Low
-202,Web Development,5,78,6,74,Low,Low,Low
-203,Cloud Computing,7,92,12,89,Low,Low,Low
-204,Data Science,6,86,9,83,Low,Low,Low
-205,Artificial Intelligence,8,97,14,94,Low,Low,Low
-206,Statistics,5,80,7,76,Low,Low,Low
-207,Human-Computer Interaction,7,91,11,87,Low,Low,Low
-208,Mobile App Development,6,84,9,82,Low,Low,Low
-209,Computer Architecture,8,95,13,91,Low,Low,Low
-210,Information Systems,5,79,7,75,Low,Low,Low
+1,Information Systems,1,48,3,45,High,High,High
+2,Statistics,3,56,5,60,High,Low,Medium
+3,Object-Oriented Programming,5,56,6,67,High,Low,Medium
+4,Software Engineering,3,71,6,57,Low,Medium,Medium
+5,Introduction to Programming,3,51,2,68,High,High,High
+6,Database Systems,7,86,20,90,Low,Low,Low
+7,Mobile App Development,6,94,17,94,High,Low,Low
+8,Statistics,3,79,7,73,Low,High,Medium
+9,Object-Oriented Programming,1,64,1,44,High,High,High
+10,Human-Computer Interaction,3,62,4,72,High,Medium,Medium
+11,Information Systems,7,91,20,98,Low,Low,Low
+12,Information Systems,5,88,26,81,Medium,Medium,Low
+13,Information Systems,1,56,3,43,High,Medium,High
+14,Human-Computer Interaction,4,78,4,68,High,High,High
+15,Software Engineering,1,54,0,57,Medium,High,High
+16,Human-Computer Interaction,4,55,5,46,Low,High,High
+17,Cloud Computing,7,93,21,90,Low,Medium,Low
+18,Artificial Intelligence,8,76,26,89,Low,Low,Low
+19,Software Engineering,2,50,0,47,High,High,High
+20,Machine Learning,3,80,4,75,Medium,High,High
+21,Human-Computer Interaction,8,79,27,94,High,Low,Low
+22,Artificial Intelligence,6,82,9,68,Medium,Medium,Medium
+23,Information Systems,2,46,1,63,High,High,High
+24,Machine Learning,3,64,3,53,Low,High,Medium
+25,Software Engineering,4,63,3,56,Medium,Medium,Medium
+26,Cloud Computing,4,63,12,76,High,Low,Medium
+27,Discrete Mathematics,3,80,10,64,Medium,Low,Medium
+28,Human-Computer Interaction,5,87,8,82,Low,High,High
+29,Computer Architecture,6,77,22,77,Medium,Low,Low
+30,Cybersecurity Fundamentals,4,31,1,63,High,High,High
+31,Software Engineering,9,76,29,82,Medium,Medium,Low
+32,Linear Algebra,9,77,20,99,Low,Low,Low
+33,Data Science,6,92,27,88,Low,Medium,Low
+34,Linear Algebra,4,82,9,56,Medium,Medium,Medium
+35,Data Science,7,86,9,99,Medium,Low,Low
+36,Cloud Computing,4,75,12,55,Low,Medium,Medium
+37,Information Systems,3,39,1,64,Medium,Low,High
+38,Cybersecurity Fundamentals,8,76,21,83,Medium,Low,Low
+39,Computer Architecture,1,47,1,47,Medium,Medium,High
+40,Software Engineering,8,97,26,81,Low,Low,Low
+41,Computer Architecture,6,58,5,70,High,Medium,Medium
+42,Information Systems,5,85,11,89,Medium,Low,Low
+43,Statistics,6,98,9,90,Low,Low,Low
+44,Mobile App Development,9,91,27,77,Low,High,Low
+45,Data Science,3,43,5,60,High,High,High
+46,Software Engineering,7,79,28,81,Medium,Low,Low
+47,Information Systems,4,56,7,70,Low,Low,Medium
+48,Mobile App Development,3,57,5,63,High,High,Medium
+49,Artificial Intelligence,3,65,1,53,Medium,Medium,High
+50,Mobile App Development,1,45,1,42,Medium,High,High
+51,Computer Networks,3,75,3,64,High,Low,Medium
+52,Cloud Computing,2,36,3,48,High,High,High
+53,Software Engineering,2,60,1,65,High,High,High
+54,Cybersecurity Fundamentals,8,91,20,89,Low,Medium,Low
+55,Discrete Mathematics,6,80,27,76,Medium,Medium,Low
+56,Introduction to Programming,4,57,7,65,Medium,Low,Medium
+57,Database Systems,2,42,4,54,Medium,Medium,High
+58,Computer Architecture,3,52,4,48,High,High,High
+59,Linear Algebra,1,54,3,40,High,Medium,High
+60,Cloud Computing,6,66,9,65,Medium,Low,Medium
+61,Database Systems,3,78,11,64,Medium,High,Medium
+62,Statistics,9,85,28,82,Low,Low,Low
+63,Human-Computer Interaction,4,50,0,40,High,High,High
+64,Linear Algebra,4,55,1,44,High,Low,High
+65,Mobile App Development,6,94,24,76,Low,Medium,Low
+66,Mobile App Development,5,61,9,70,Low,Medium,Medium
+67,Operating Systems,1,50,3,40,Medium,Medium,High
+68,Computer Networks,4,37,4,46,High,Medium,High
+69,Mobile App Development,7,77,21,99,Low,Low,Low
+70,Machine Learning,8,89,14,82,Medium,Low,Low
+71,Object-Oriented Programming,3,73,3,59,Low,Medium,Medium
+72,Software Engineering,3,57,4,52,Medium,High,High
+73,Operating Systems,8,90,17,87,Low,High,Low
+74,Computer Networks,4,57,11,61,Medium,High,Medium
+75,Statistics,6,64,12,74,Low,High,Medium
+76,Data Science,3,66,9,58,Medium,Medium,Medium
+77,Computer Networks,4,82,9,80,Medium,Low,Medium
+78,Data Science,4,50,3,54,High,Medium,High
+79,Mobile App Development,5,78,23,91,Low,Medium,Low
+80,Artificial Intelligence,6,63,6,58,High,High,Medium
+81,Human-Computer Interaction,7,78,10,82,Medium,Low,Low
+82,Human-Computer Interaction,5,58,12,71,Low,Medium,Medium
+83,Object-Oriented Programming,2,35,2,56,High,High,High
+84,Software Engineering,3,69,4,65,Medium,Low,Medium
+85,Information Systems,7,87,12,96,Low,Low,Low
+86,Artificial Intelligence,3,43,5,47,High,Medium,Low
+87,Mobile App Development,2,57,1,63,High,High,High
+88,Computer Architecture,8,79,16,95,Low,Low,Medium
+89,Database Systems,2,31,5,46,Medium,Medium,High
+90,Discrete Mathematics,2,62,0,67,High,High,High
+91,Linear Algebra,8,99,18,93,Low,Medium,Low
+92,Software Engineering,1,37,5,68,High,Medium,High
+93,Statistics,1,52,4,53,High,Low,High
+94,Discrete Mathematics,3,73,3,74,Medium,High,Medium
+95,Computer Networks,2,54,5,44,High,Low,High
+96,Artificial Intelligence,8,100,26,92,Low,Medium,Low
+97,Artificial Intelligence,7,87,27,85,Low,Medium,Low
+98,Linear Algebra,4,64,5,63,High,High,High
+99,Algorithms,4,68,5,57,Medium,High,Medium
+100,Cloud Computing,7,82,8,82,High,Medium,Low
+101,Computer Architecture,4,64,6,66,Low,Low,Medium
+102,Linear Algebra,3,76,11,69,Medium,Low,Medium
+103,Introduction to Programming,2,37,1,49,Medium,Low,High
+104,Web Development,3,37,5,68,Medium,Medium,High
+105,Software Engineering,1,52,1,60,Low,High,High
+106,Human-Computer Interaction,5,66,3,60,High,Medium,Medium
+107,Computer Networks,8,89,27,72,High,Low,Low
+108,Operating Systems,2,33,4,42,High,Low,Low
+109,Information Systems,5,89,22,93,Low,Low,Low
+110,Computer Architecture,6,66,9,78,Low,Medium,High
+111,Object-Oriented Programming,3,58,6,72,Low,Medium,Medium
+112,Introduction to Programming,2,34,0,61,Medium,Medium,High
+113,Computer Architecture,1,57,2,53,High,High,High
+114,Computer Architecture,9,79,17,77,Low,High,Low
+115,Human-Computer Interaction,1,65,2,61,Medium,High,High
+116,Discrete Mathematics,6,81,8,58,Medium,Medium,Medium
+117,Mobile App Development,2,34,3,65,High,High,High
+118,Computer Networks,5,69,10,58,Low,Medium,Medium
+119,Database Systems,3,66,11,66,Low,Medium,Medium
+120,Database Systems,1,49,5,59,High,High,High
+121,Operating Systems,6,76,22,75,Medium,Medium,Low
+122,Software Engineering,1,50,0,41,High,High,High
+123,Discrete Mathematics,2,50,1,48,Medium,High,High
+124,Discrete Mathematics,6,81,10,70,Low,Medium,Medium
+125,Object-Oriented Programming,5,78,8,80,Low,High,Medium
+126,Web Development,4,59,3,66,High,Medium,High
+127,Mobile App Development,9,84,22,79,Low,Low,Low
+128,Software Engineering,3,31,0,68,High,Medium,High
+129,Algorithms,7,92,26,83,Low,High,Low
+130,Linear Algebra,2,49,3,57,High,Medium,High
+131,Algorithms,6,78,9,60,Low,Medium,Medium
+132,Algorithms,2,53,3,42,High,High,High
+133,Database Systems,6,82,11,79,High,Medium,Medium
+134,Cybersecurity Fundamentals,9,93,12,77,Medium,Medium,Low
+135,Database Systems,5,57,9,78,Low,Low,Medium
+136,Database Systems,6,73,5,62,Medium,Medium,High
+137,Cybersecurity Fundamentals,3,63,4,53,High,High,Low
+138,Algorithms,3,64,6,67,Medium,Medium,Medium
+139,Introduction to Programming,4,72,3,73,High,Medium,Medium
+140,Linear Algebra,2,59,1,59,High,High,High
+141,Database Systems,4,64,11,55,Medium,Low,Medium
+142,Computer Networks,6,58,3,73,Medium,Medium,High
+143,Statistics,5,70,11,71,Medium,High,Medium
+144,Computer Networks,6,77,17,99,Medium,Low,High
+145,Information Systems,6,77,24,92,Low,Low,Low
+146,Algorithms,9,90,16,92,Medium,Medium,Low
+147,Linear Algebra,3,56,2,66,Low,Low,High
+148,Database Systems,4,47,0,64,High,High,High
+149,Computer Networks,4,72,7,80,Low,Medium,High
+150,Operating Systems,6,88,10,79,Medium,Medium,Low
+151,Human-Computer Interaction,3,62,7,77,Medium,High,High
+152,Artificial Intelligence,1,56,5,58,High,Medium,High
+153,Introduction to Programming,5,91,25,88,Medium,Low,Low
+154,Artificial Intelligence,3,34,4,47,Medium,High,High
+155,Discrete Mathematics,1,35,5,53,High,Low,High
+156,Human-Computer Interaction,6,81,18,96,Low,Low,Low
+157,Computer Architecture,4,75,5,63,High,Low,Medium
+158,Introduction to Programming,6,75,10,79,Low,Medium,Low
+159,Artificial Intelligence,1,35,1,45,High,High,High
+160,Cybersecurity Fundamentals,8,97,23,83,High,Low,Low
+161,Linear Algebra,4,74,11,78,High,High,Medium
+162,Mobile App Development,7,86,22,96,Low,Low,Low
+163,Cybersecurity Fundamentals,3,60,3,68,Medium,Medium,Medium
+164,Computer Architecture,4,44,1,65,High,High,High
+165,Artificial Intelligence,3,54,2,46,High,Medium,Medium
+166,Linear Algebra,7,79,29,94,Medium,Medium,Low
+167,Human-Computer Interaction,4,74,8,62,Medium,Medium,Medium
+168,Computer Architecture,6,60,7,55,Low,High,Medium
+169,Database Systems,3,63,3,60,Medium,High,High
+170,Web Development,1,65,1,62,High,High,High
+171,Software Engineering,9,80,12,85,Low,Medium,High
+172,Statistics,6,97,12,81,Low,Medium,Low
+173,Discrete Mathematics,1,36,5,57,Medium,Medium,Medium
+174,Operating Systems,6,78,14,97,Low,Medium,Low
+175,Computer Networks,9,77,10,81,Low,Medium,Low
+176,Web Development,5,67,12,71,Medium,Medium,Medium
+177,Cloud Computing,2,53,2,45,High,High,High
+178,Introduction to Programming,8,85,28,80,Low,Low,Medium
+179,Computer Architecture,1,64,1,56,Medium,High,High
+180,Information Systems,9,86,12,78,Medium,Low,Low
+181,Human-Computer Interaction,6,82,5,69,Medium,Medium,Medium
+182,Cybersecurity Fundamentals,8,97,23,92,Low,Low,Low
+183,Cloud Computing,8,77,21,91,High,Low,Low
+184,Computer Architecture,9,78,17,74,Medium,Low,Low
+185,Human-Computer Interaction,2,33,1,68,High,Low,High
+186,Computer Networks,4,35,0,67,Medium,High,High
+187,Software Engineering,6,73,5,68,Medium,High,Medium
+188,Web Development,6,85,10,90,Medium,High,Low
+189,Database Systems,4,44,2,53,High,Medium,High
+190,Database Systems,7,78,9,79,Low,Medium,Low
+191,Object-Oriented Programming,6,86,29,90,High,Low,Low
+192,Algorithms,8,95,25,81,Medium,Low,Low
+193,Web Development,6,83,9,92,Low,Low,Low
+194,Human-Computer Interaction,6,63,11,72,Medium,Low,Medium
+195,Algorithms,8,76,20,88,Low,Low,Low
+196,Operating Systems,8,82,14,90,Low,Low,Low
+197,Cloud Computing,2,55,0,68,High,High,Low
+198,Introduction to Programming,9,88,16,92,High,High,Low
+199,Software Engineering,1,57,0,40,Low,Medium,High
+200,Operating Systems,5,95,29,85,Low,Low,Low
+201,Algorithms,8,90,9,92,Low,Low,Low
+202,Algorithms,4,63,3,59,Medium,Medium,Low
+203,Cybersecurity Fundamentals,8,89,26,96,Low,Medium,Low
+204,Cybersecurity Fundamentals,5,74,12,64,Medium,Medium,Medium
+205,Computer Networks,6,57,4,57,Low,Low,Medium
+206,Statistics,1,35,5,53,Medium,High,High
+207,Data Science,5,58,11,79,Medium,Low,Medium
+208,Data Science,3,55,5,60,Medium,High,High
+209,Object-Oriented Programming,4,59,1,48,Medium,High,High
+210,Cloud Computing,3,52,5,56,Medium,High,High
+211,Human-Computer Interaction,6,58,5,56,High,Medium,Medium
+212,Artificial Intelligence,4,44,1,66,High,Medium,High
+213,Web Development,7,93,9,98,Medium,Low,Low
+214,Database Systems,5,79,5,80,High,Low,Medium
+215,Linear Algebra,3,34,1,58,High,Medium,High
+216,Machine Learning,1,54,4,46,Medium,High,High
+217,Discrete Mathematics,1,36,4,53,Medium,High,High
+218,Mobile App Development,5,73,7,75,High,Medium,Medium
+219,Software Engineering,3,74,7,55,Low,Medium,Medium
+220,Computer Networks,5,71,11,63,High,Medium,Medium
+221,Database Systems,2,30,0,62,High,Medium,Medium
+222,Linear Algebra,1,40,3,40,High,Medium,High
+223,Web Development,9,78,12,75,Low,Medium,Low
+224,Cybersecurity Fundamentals,7,93,18,78,Medium,Low,Low
+225,Linear Algebra,5,75,10,72,Low,Low,Medium
+226,Cloud Computing,2,49,1,65,Medium,Low,High
+227,Software Engineering,6,69,8,61,High,Low,Medium
+228,Object-Oriented Programming,9,95,29,87,Low,Low,Low
+229,Software Engineering,1,37,0,68,High,Medium,High
+230,Software Engineering,4,39,1,67,Medium,High,High
+231,Artificial Intelligence,6,78,8,74,Medium,Low,Medium
+232,Linear Algebra,3,59,3,57,Medium,Low,Medium
+233,Machine Learning,3,55,5,49,High,Medium,Medium
+234,Database Systems,5,58,8,72,High,Medium,Medium
+235,Web Development,4,79,11,67,Medium,Medium,Medium
+236,Algorithms,6,94,29,97,Low,Low,Low
+237,Operating Systems,2,39,2,64,Medium,High,High
+238,Machine Learning,3,65,9,65,Medium,Medium,Medium
+239,Web Development,8,80,30,86,Low,Low,Low
+240,Cloud Computing,2,64,5,47,Medium,Medium,High
+241,Software Engineering,3,58,4,66,High,High,High
+242,Object-Oriented Programming,2,42,2,46,High,High,High
+243,Introduction to Programming,7,98,28,98,Low,Low,Low
+244,Data Science,5,61,5,79,Medium,Medium,Medium
+245,Statistics,7,95,14,96,Low,Medium,Low
+246,Database Systems,7,91,17,99,Low,Low,Low
+247,Mobile App Development,7,100,16,90,Low,Low,Low
+248,Software Engineering,4,77,10,75,Medium,Medium,Medium
+249,Human-Computer Interaction,8,91,24,85,High,Medium,Low
+250,Cybersecurity Fundamentals,8,94,17,90,Low,Medium,Low
+251,Linear Algebra,6,76,5,70,High,Low,Medium
+252,Algorithms,4,55,8,80,High,Medium,Medium
+253,Human-Computer Interaction,5,66,9,59,Low,Medium,Medium
+254,Information Systems,6,89,11,80,Low,Low,Low
+255,Artificial Intelligence,2,37,3,44,High,High,High
+256,Statistics,5,82,4,69,Low,High,Medium
+257,Mobile App Development,3,57,8,74,Low,Low,Medium
+258,Computer Architecture,9,98,18,76,Low,Low,Low
+259,Web Development,5,74,6,75,Low,High,Medium
+260,Introduction to Programming,8,87,22,100,High,Low,Low
+261,Database Systems,8,84,22,74,Medium,Low,Low
+262,Cybersecurity Fundamentals,4,60,4,74,High,Medium,Medium
+263,Cloud Computing,7,96,19,94,Low,Low,Low
+264,Computer Architecture,4,75,6,63,Medium,Low,Medium
+265,Introduction to Programming,5,77,7,55,High,Medium,Medium
+266,Information Systems,6,75,4,65,High,High,Medium
+267,Cybersecurity Fundamentals,5,68,10,64,Medium,Medium,Medium
+268,Linear Algebra,3,31,3,67,Medium,High,High
+269,Mobile App Development,5,84,14,73,Medium,Medium,Low
+270,Discrete Mathematics,6,65,11,63,High,Medium,Medium
+271,Data Science,6,69,6,68,Medium,Medium,Medium
+272,Cloud Computing,6,69,8,71,Medium,Medium,Medium
+273,Information Systems,6,79,9,81,High,Low,Low
+274,Artificial Intelligence,1,45,1,66,Low,Medium,High
+275,Cloud Computing,8,91,22,96,Low,Medium,Medium
+276,Machine Learning,6,65,5,66,Medium,Medium,Medium
+277,Object-Oriented Programming,9,88,21,98,Low,Low,Low
+278,Algorithms,7,100,10,83,Low,Medium,Low
+279,Web Development,6,63,3,77,Medium,Medium,Medium
+280,Object-Oriented Programming,5,78,12,79,Medium,Medium,Medium
+281,Human-Computer Interaction,6,97,30,94,Medium,Medium,Low
+282,Database Systems,4,34,3,53,High,High,High
+283,Artificial Intelligence,1,33,3,63,Medium,High,High
+284,Database Systems,9,88,13,93,Medium,Low,Low
+285,Cloud Computing,8,86,24,97,Medium,Low,Low
+286,Human-Computer Interaction,8,89,9,73,Low,Low,Low
+287,Software Engineering,5,66,10,63,Medium,Low,Medium
+288,Cloud Computing,9,94,24,84,Low,Low,Low
+289,Human-Computer Interaction,2,47,2,50,High,Low,High
+290,Cloud Computing,9,95,13,73,Low,Low,Low
+291,Linear Algebra,3,63,11,58,Medium,Medium,Medium
+292,Web Development,8,79,13,77,Medium,Medium,Low
+293,Cybersecurity Fundamentals,3,52,1,61,Medium,High,High
+294,Database Systems,1,47,3,47,High,High,High
+295,Machine Learning,2,47,1,65,High,Medium,High
+296,Artificial Intelligence,5,76,12,94,Low,Low,Low
+297,Machine Learning,1,54,3,59,High,High,High
+298,Object-Oriented Programming,6,63,5,73,Medium,High,Medium
+299,Software Engineering,4,40,5,67,High,Medium,High
+300,Cloud Computing,5,69,9,70,Medium,Medium,Medium

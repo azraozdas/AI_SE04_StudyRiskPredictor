@@ -296,3 +296,17 @@ Next Steps:
 - Implement `inject_app_styles()` for sidebar and dashboard dark theme.
 - Build out remaining `pages_/` modules (courses, profile, risk prediction, etc.).
 - Final UI review and testing.
+
+**Eylül Özekinci – ML Inference API & Honest Metrics**
+
+Completed:
+- Added `Source/model_utils.py` with `load_model()` (loads `study_risk_model.pkl` + `encoders.pkl`) and `predict_for_user()` (encodes human-readable inputs, returns risk level, confidence, and per-class probabilities).
+- Reworked `Source/data_generation.py` to remove deterministic leakage: 300 rows, overlapping feature ranges per class, probabilistic difficulty/workload, and ~12% label noise.
+- Updated `Source/ml_model.py` to a 70/15/15 train/validation/test split (stratified) and added a held-out validation accuracy check alongside 5-Fold CV.
+- Regenerated dataset, encoders, model, and Outputs; new metrics: CV mean 86.67% (±0.05), validation 88.89%, test 91.11%, macro F1 0.91.
+- Rewrote `Documentation/evaluation_report.md` with the new split, metrics, confusion matrix, feature importance, and a 30-second Q&A answer for the earlier 100% CV.
+- Updated the README Model Performance table to the realistic metrics.
+
+Next Steps:
+- Surface model outputs (confusion matrix / feature importance PNGs) in the Model Results page.
+
