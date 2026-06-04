@@ -237,6 +237,22 @@ Next Steps:
 - Participate in tonight's clean-machine rehearsal and tag `v1.0`.
 - Plan the migration from the sidebar-radio layout to Streamlit's native `pages/` structure for the 2 June scaffold work.
 
+### 01.06.2026
+
+**Dilay Tarhan – Testing & Documentation**
+
+Completed:
+- Reviewed repository documentation consistency.
+- Corrected `progress_report.md` prediction bug description.
+- Updated documentation to reflect frontend correction using `pass_grade` to match the trained model.
+- Synced documentation updates with repository progress tracking.
+- Prepared Teams project status update.
+
+Next Steps:
+- Continue final documentation review.
+- Support final repository consistency checks.
+- Assist final submission preparation.
+
 ### 02.06.2026
 
 **Eylül Özekinci – ML Honest Evaluation**
