@@ -4,19 +4,21 @@ Pure functions (no Streamlit) so they can be unit-tested directly.
 """
 
 import os
-
 import joblib
 import pandas as pd
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # project root
 MODEL_PATH = os.path.join(ROOT, "Models", "study_risk_model.pkl")
 ENCODERS_PATH = os.path.join(ROOT, "Models", "encoders.pkl")
+
+_CATEGORICAL = ("course", "assignment_difficulty", "workload_level")
 
 
 def load_model():
     """Load the trained model and the per-column LabelEncoders.
 
-    Returns (model, encoders). Raises FileNotFoundError if artifacts are missing.
+    Returns (model, encoders). Raises FileNotFoundError with a clear message
+    if the artifacts have not been generated yet.
     """
     if not os.path.exists(MODEL_PATH):
         raise FileNotFoundError(
@@ -41,21 +43,13 @@ def _encode(encoders, column, value):
     return int(enc.transform([value])[0])
 
 
-def predict_for_user(
-    model,
-    encoders,
-    *,
-    course,
-    study_hours,
-    attendance,
-    deadline_days,
-    pass_grade,
-    assignment_difficulty,
-    workload_level,
-):
-    """Predict risk for one student. Categorical args are human-readable strings.
+def predict_for_user(model, encoders, *, course, study_hours, attendance,
+                     deadline_days, pass_grade, assignment_difficulty,
+                     workload_level):
+    """Predict risk for one student. Categorical args are human-readable
+    strings (e.g. 'High'); they are encoded here to match training.
 
-    Returns dict with risk_level, confidence, and probabilities.
+    Returns: {"risk_level": str, "confidence": float, "probabilities": dict}
     """
     row = {
         "course": _encode(encoders, "course", course),
@@ -63,12 +57,11 @@ def predict_for_user(
         "attendance": float(attendance),
         "deadline_days": float(deadline_days),
         "pass_grade": float(pass_grade),
-        "assignment_difficulty": _encode(
-            encoders, "assignment_difficulty", assignment_difficulty
-        ),
+        "assignment_difficulty": _encode(encoders, "assignment_difficulty", assignment_difficulty),
         "workload_level": _encode(encoders, "workload_level", workload_level),
     }
 
+    # Guarantee the column order the model was trained on
     feature_order = list(getattr(model, "feature_names_in_", row.keys()))
     X = pd.DataFrame([[row[c] for c in feature_order]], columns=feature_order)
 
