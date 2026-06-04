@@ -273,3 +273,26 @@ Next Steps:
 * Capture application screenshots.
 * Add screenshots to `Documentation/Screenshots/`.
 * Perform final UI review and testing.
+
+
+### 04.06.2026
+
+**Azra Özdaş – Frontend / Auth UI & App Router**
+
+Completed:
+- Redesigned the Create Account page so the full registration form fits on a 1920×1080 screen at 100% browser zoom without scrolling.
+- Kept a single-column unified card layout; compacted logo, spacing, input/selectbox heights (34px), tabs (30px), and button height (38px).
+- Moved the Security Question hint into the selectbox label in `login.py`, removing extra vertical space.
+- Added Sign-In-only relaxed styles (`SIGNIN_RELAX_STYLES`) via `inject_login_styles(mode)` so Sign In stays balanced while Create Account stays compact; fixed the related `TypeError` on app launch.
+- Renamed the application to **Studor** across login branding, page title, sidebar, and dashboard hero.
+- Redesigned auth tabs (Sign In / Create Account) to match the dark premium theme — inactive dark navy, active blue gradient, unified segmented control.
+- Fixed input field styling: dark gradient backgrounds, readable labels/placeholders, focus glow; re-scoped CSS for Streamlit 1.57 (`stColumn` selector change).
+- Restored contextual field icons (mail, lock, shield, key) using `::before` pseudo-elements with `mask-image`.
+- Fixed "Remember me for 30 days" checkbox alignment with flexbox vertical centering in `styles.py`.
+- Refactored `app.py` to a router-based structure with `pages_/` dispatch, disk session persistence (`save_auth_session` / `restore_auth_session`), and defensive `inject_app_styles` import.
+- Verified app boots at `localhost:8501`, `plotly` and `pages_/dashboard.py` import cleanly, and dashboard is reachable after login.
+
+Next Steps:
+- Implement `inject_app_styles()` for sidebar and dashboard dark theme.
+- Build out remaining `pages_/` modules (courses, profile, risk prediction, etc.).
+- Final UI review and testing.

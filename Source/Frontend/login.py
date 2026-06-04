@@ -355,13 +355,11 @@ def _render_register_form() -> None:
         placeholder="Repeat your password", on_change=_clear_auth,
     )
 
-    st.markdown("---")
     render_html("""
-        <div style="font-size:13px;color:#94A3B8;margin-bottom:6px;font-weight:600;">
+        <div class="signup-section-label">
             Security Question — used if you ever forget your password
         </div>
     """)
-
     security_question = st.selectbox(
         "Choose a security question", SECURITY_QUESTIONS,
         key="signup_sec_question",
@@ -417,18 +415,19 @@ def _render_register_form() -> None:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def render_login_page() -> None:
-    inject_login_styles()
-
     st.session_state.setdefault("auth_mode", "Sign In")
     st.session_state.setdefault("login_error", None)
     st.session_state.setdefault("signup_error", None)
 
-    _, center, _ = st.columns([1, 1.2, 1])
+    inject_login_styles(st.session_state.auth_mode)
+
+    _, center, _ = st.columns([1, 1.5, 1])
+
     with center:
         render_html(f"""
             <div class="login-brand">
                 <div class="login-logo-icon">{_logo_html()}</div>
-                <div class="login-brand-name">AI Smart Study</div>
+                <div class="login-brand-name">Studor</div>
                 <div class="login-brand-subtitle">Risk &amp; Performance Predictor</div>
             </div>
             <hr class="login-divider" />

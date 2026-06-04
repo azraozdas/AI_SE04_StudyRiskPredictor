@@ -1,25 +1,51 @@
+"""Studor: Risk & Performance Predictor — main entry point."""
+
+import base64
+import importlib
 import os
 import sys
-import joblib
-import pandas as pd
+
+# Ensure imports from this directory resolve (pages_, utils, styles, login)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_BACKEND = os.path.join(os.path.dirname(_HERE), "Backend")
+_LOGO_PATH = os.path.join(_HERE, "assets", "logo.png")
+_SIDEBAR_LOGO_SVG = """
+<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+<path d="M6 12v5c3 3 9 3 12 0v-5"/>
+</svg>
+"""
+for _p in (_HERE, _BACKEND):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 import streamlit as st
+from streamlit import config as st_config
+
+# Slider active track uses theme primaryColor (inline gradient — not overridable via background-color CSS)
+try:
+    st_config.set_option("theme.primaryColor", "#3B82F6")
+except Exception:
+    pass
+
+from utils import render_html, restore_auth_session, save_auth_session
+from db import init_db, get_session_user  # noqa: E402
+from cookie_session import (  # noqa: E402
+    get_session_token,
+    set_session_token,
+    clear_session_token,
+)
 
 st.set_page_config(
-    page_title="AI Study Risk Predictor",
+    page_title="Studor",
     page_icon="📘",
-    layout="wide"
+    layout="wide",
 )
 
-# Backend module path
-_BACKEND = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Backend"
-)
-if _BACKEND not in sys.path:
-    sys.path.insert(0, _BACKEND)
 
-from db import init_db, save_prediction, get_session_user, delete_session  # noqa: E402
-from cookie_session import get_session_token, set_session_token, clear_session_token  # noqa: E402
-
+# ---------------------------------------------------------------------------
+# Database initialisation (once per server process)
+# ---------------------------------------------------------------------------
 
 @st.cache_resource
 def _init_db_once():
@@ -32,21 +58,43 @@ def _init_db_once():
 
 _init_db_once()
 
-# Session state defaults
-st.session_state.setdefault("logged_in", False)
-st.session_state.setdefault("user_id", None)
-st.session_state.setdefault("user_email", None)
-st.session_state.setdefault("full_name", "")
-st.session_state.setdefault("student_id", None)
-st.session_state.setdefault("_session_token", None)
+# ---------------------------------------------------------------------------
+# Session state initialisation
+# ---------------------------------------------------------------------------
 
-# ── Remember Me: write pending cookie (set by login.py after successful login) ──
+_DEFAULTS = {
+    "logged_in":          False,
+    "current_page":       "dashboard",
+    "prediction_result":  None,
+    "selected_course":    None,
+    "user_id":            None,
+    "student_id":         None,
+    "user_email":         "",
+    "full_name":          "",
+    "profile_department": "Computer Science",
+    "profile_semester":   "Semester 6",
+    "_session_token":     None,
+}
+for _k, _v in _DEFAULTS.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
+
+# Restore login after GET nav reload (full page load can reset Streamlit session)
+restore_auth_session()
+
+# ---------------------------------------------------------------------------
+# Remember Me: write pending cookie (set by login.py after successful login)
+# ---------------------------------------------------------------------------
+
 _pending = st.session_state.pop("_pending_session_cookie", None)
 if _pending:
     set_session_token(_pending)
     st.session_state._session_token = _pending
 
-# ── Remember Me: auto-login from existing browser cookie ────────────────────
+# ---------------------------------------------------------------------------
+# Remember Me: auto-login from existing browser cookie
+# ---------------------------------------------------------------------------
+
 if not st.session_state.logged_in:
     _cookie_token = get_session_token()
     if _cookie_token:
@@ -66,635 +114,211 @@ if not st.session_state.logged_in:
         except Exception:
             clear_session_token()
 
+# ---------------------------------------------------------------------------
+# Handle GET-form navigation (nav param preserved on full page reload)
+# ---------------------------------------------------------------------------
+
+_nav = st.query_params.get("nav")
+if isinstance(_nav, list):
+    _nav = _nav[0] if _nav else None
+if _nav:
+    _valid = {
+        "dashboard", "courses", "risk", "schedule",
+        "recommendations", "model", "profile",
+    }
+    if _nav in _valid:
+        st.session_state.current_page = _nav
+    st.query_params.clear()
+    st.rerun()
+
+# ---------------------------------------------------------------------------
+# Login gate
+# ---------------------------------------------------------------------------
+
 if not st.session_state.logged_in:
     from login import render_login_page
     render_login_page()
     st.stop()
 
+# Persist auth to disk so GET-form navigation reloads keep the user signed in
+save_auth_session()
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ---------------------------------------------------------------------------
+# Inject design-system styles
+# ---------------------------------------------------------------------------
 
-RAW_DATA_PATH = os.path.join(ROOT, "Data", "student_study_data.csv")
-CLEANED_DATA_PATH = os.path.join(ROOT, "Data", "cleaned_student_data.csv")
-MODEL_PATH = os.path.join(ROOT, "Models", "study_risk_model.pkl")
-ENCODERS_PATH = os.path.join(ROOT, "Models", "encoders.pkl")
-PREDICTIONS_PATH = os.path.join(ROOT, "Outputs", "predictions.csv")
+try:
+    from styles import inject_app_styles
+    inject_app_styles()
+except ImportError:
+    # inject_app_styles not implemented yet — app still runs, just unstyled.
+    pass
 
-st.markdown("""
-<style>
-.stApp {
-    background: linear-gradient(135deg, #06111F 0%, #0B1730 45%, #102A33 100%);
-    color: #E5E7EB;
+# ---------------------------------------------------------------------------
+# SVG icon definitions (Lucide-style, currentColor)
+# ---------------------------------------------------------------------------
+
+_ICON = {
+    "dashboard": """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>""",
+    "courses":   """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>""",
+    "risk":      """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.29 3.86-8.47 14.67A2 2 0 0 0 3.54 21h16.92a2 2 0 0 0 1.72-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>""",
+    "schedule":  """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>""",
+    "recommendations": """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>""",
+    "model":     """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>""",
 }
 
-.block-container {
-    padding-top: 3.2rem;
-    padding-bottom: 3rem;
-    max-width: 1180px;
+NAV_ITEMS = [
+    ("dashboard",       "Dashboard"),
+    ("courses",         "My Courses"),
+    ("risk",            "Risk Prediction"),
+    ("schedule",        "Study Schedule"),
+    ("recommendations", "Recommendations"),
+    ("model",           "Model Results"),
+]
+
+# Maps a nav key to the module under pages_/ that implements render()
+_PAGE_MODULES = {
+    "dashboard":       "dashboard",
+    "courses":         "courses",
+    "risk":            "risk_prediction",
+    "schedule":        "study_schedule",
+    "recommendations": "recommendations",
+    "model":           "model_results",
+    "profile":         "profile",
 }
 
-section[data-testid="stSidebar"] {
-    background: #07111F;
-    border-right: 1px solid rgba(148, 163, 184, 0.18);
-}
 
-section[data-testid="stSidebar"] * {
-    color: #CBD5E1 !important;
-}
-
-section[data-testid="stSidebar"] input[type="radio"] {
-    accent-color: #2DD4BF !important;
-}
-
-section[data-testid="stSidebar"] label[data-baseweb="radio"] {
-    background: transparent !important;
-}
-
-section[data-testid="stSidebar"] label[data-baseweb="radio"] span {
-    color: #E2E8F0 !important;
-}
-
-h1, h2, h3 {
-    color: #F8FAFC;
-    letter-spacing: -0.02em;
-}
-
-p, label, span, div {
-    color: #CBD5E1;
-}
-
-.hero-box {
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(56, 189, 248, 0.10));
-    border: 1px solid rgba(94, 234, 212, 0.22);
-    border-radius: 24px;
-    padding: 34px;
-    margin-bottom: 34px;
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.30);
-}
-
-.info-card,
-.metric-card {
-    background: rgba(15, 23, 42, 0.78);
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    border-radius: 18px;
-    padding: 22px;
-    margin-top: 14px;
-    margin-bottom: 22px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-}
-
-.metric-label {
-    font-size: 14px;
-    color: #94A3B8;
-    font-weight: 600;
-}
-
-.metric-value {
-    font-size: 30px;
-    color: #F8FAFC;
-    font-weight: 800;
-    margin-top: 6px;
-}
-
-.tag {
-    display: inline-block;
-    background: rgba(45, 212, 191, 0.12);
-    color: #5EEAD4;
-    border: 1px solid rgba(45, 212, 191, 0.35);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 14px;
-}
-
-.workflow-box {
-    background: rgba(30, 41, 59, 0.75);
-    border: 1px dashed rgba(148, 163, 184, 0.32);
-    border-radius: 16px;
-    padding: 18px;
-    text-align: center;
-    font-weight: 700;
-    color: #E2E8F0;
-}
-
-.risk-high {
-    background: rgba(239, 68, 68, 0.16);
-    border: 1px solid rgba(248, 113, 113, 0.7);
-    color: #FCA5A5;
-    border-radius: 18px;
-    padding: 24px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.risk-medium {
-    background: rgba(250, 204, 21, 0.14);
-    border: 1px solid rgba(250, 204, 21, 0.65);
-    color: #FDE68A;
-    border-radius: 18px;
-    padding: 24px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.risk-low {
-    background: rgba(34, 197, 94, 0.14);
-    border: 1px solid rgba(74, 222, 128, 0.65);
-    color: #86EFAC;
-    border-radius: 18px;
-    padding: 24px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.stSelectbox label,
-.stSlider label,
-.stNumberInput label {
-    color: #E2E8F0 !important;
-    font-weight: 600;
-}
-
-div[data-baseweb="select"] > div {
-    background-color: #111827 !important;
-    color: #F8FAFC !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 12px !important;
-}
-
-div[data-baseweb="select"] span {
-    color: #F8FAFC !important;
-}
-
-input {
-    background-color: #111827 !important;
-    color: #F8FAFC !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 12px !important;
-}
-
-.stButton > button {
-    background: linear-gradient(135deg, #14B8A6, #38BDF8) !important;
-    color: #04111F !important;
-    border: none !important;
-    border-radius: 14px !important;
-    font-weight: 900 !important;
-    font-size: 16px !important;
-    padding: 0.8rem 1rem !important;
-}
-
-.stButton > button:hover {
-    background: linear-gradient(135deg, #2DD4BF, #67E8F9) !important;
-    color: #04111F !important;
-}
-
-.stButton > button p,
-.stButton > button span,
-.stButton > button div {
-    color: #04111F !important;
-    font-weight: 900 !important;
-}
-
-.stSlider [data-baseweb="slider"] > div > div > div {
-    background: linear-gradient(90deg, #14B8A6, #38BDF8) !important;
-}
-
-.stSlider [role="slider"] {
-    background-color: #2DD4BF !important;
-    border: 2px solid #7DD3FC !important;
-    box-shadow: 0 0 10px rgba(45, 212, 191, 0.45) !important;
-}
-
-.stSlider span {
-    color: #E2E8F0 !important;
-}
-
-[data-testid="stDataFrame"] {
-    background-color: #0F172A;
-    border-radius: 14px;
-}
-
-:root {
-    --primary-color: #2DD4BF !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-@st.cache_data
-def load_csv(path):
-    if os.path.exists(path):
-        return pd.read_csv(path)
-    return None
-
-
-@st.cache_resource
-def load_model():
-    if os.path.exists(MODEL_PATH):
-        return joblib.load(MODEL_PATH)
-    return None
-
-
-@st.cache_resource
-def load_encoders():
-    if os.path.exists(ENCODERS_PATH):
-        return joblib.load(ENCODERS_PATH)
-    return None
-
-
-DIFFICULTY_FALLBACK = {"High": 0, "Low": 1, "Medium": 2}
-WORKLOAD_FALLBACK = {"High": 0, "Low": 1, "Medium": 2}
-RISK_FALLBACK = {0: "High Risk", 1: "Low Risk", 2: "Medium Risk"}
-
-
-def _encode_with(encoders, column, value, fallback):
-    if encoders is not None and column in encoders:
-        try:
-            return int(encoders[column].transform([value])[0])
-        except Exception:
-            pass
-    return fallback[value]
-
-
-def encode_difficulty(value, encoders=None):
-    return _encode_with(encoders, "assignment_difficulty", value, DIFFICULTY_FALLBACK)
-
-
-def encode_workload(value, encoders=None):
-    return _encode_with(encoders, "workload_level", value, WORKLOAD_FALLBACK)
-
-
-def encode_course(value, encoders, raw_df):
-    if encoders is not None and "course" in encoders:
-        try:
-            return int(encoders["course"].transform([value])[0])
-        except Exception:
-            pass
-    if raw_df is not None and "course" in raw_df.columns:
-        mapping = {name: i for i, name in enumerate(sorted(raw_df["course"].unique()))}
-        return mapping.get(value, 0)
-    return 0
-
-
-def decode_risk(value, encoders=None):
-    if encoders is not None and "risk_level" in encoders:
-        try:
-            label = encoders["risk_level"].inverse_transform([int(value)])[0]
-            return f"{label} Risk"
-        except Exception:
-            pass
-    return RISK_FALLBACK.get(int(value), "Unknown Risk")
-
-
-def get_recommendation(risk_label):
-    if risk_label == "High Risk":
-        return "Start studying immediately, prioritize this course, and divide the task into smaller parts."
-    elif risk_label == "Medium Risk":
-        return "Plan extra study time this week and review the most difficult topics first."
-    elif risk_label == "Low Risk":
-        return "Maintain your current study routine and keep monitoring upcoming deadlines."
-    return "No recommendation available."
-
-
-def fallback_prediction(study_hours, attendance, deadline_days, pass_grade, difficulty, workload):
-    score = 0
-
-    if study_hours < 3:
-        score += 2
-    elif study_hours < 5:
-        score += 1
-
-    if attendance < 60:
-        score += 2
-    elif attendance < 75:
-        score += 1
-
-    if deadline_days <= 2:
-        score += 2
-    elif deadline_days <= 5:
-        score += 1
-
-    if pass_grade < 60:
-        score += 2
-    elif pass_grade < 75:
-        score += 1
-
-    if difficulty == "High":
-        score += 2
-    elif difficulty == "Medium":
-        score += 1
-
-    if workload == "High":
-        score += 2
-    elif workload == "Medium":
-        score += 1
-
-    if score >= 7:
-        return "High Risk"
-    elif score >= 4:
-        return "Medium Risk"
-    return "Low Risk"
-
-
-st.sidebar.title("📘 Study Risk AI")
-st.sidebar.caption("Academic AI Prototype")
-
-page = st.sidebar.radio(
-    "Navigation",
-    [
-        "Project Overview",
-        "Risk Prediction",
-        "Dataset Preview",
-        "Model Outputs",
-        "Team Info"
-    ]
-)
-
-st.sidebar.markdown("---")
-_display_name = st.session_state.full_name or st.session_state.user_email or ""
-st.sidebar.caption(f"Signed in as {_display_name}")
-if st.sidebar.button("Sign Out", key="signout_btn"):
-    # Revoke the Remember Me session from the DB and clear the browser cookie
-    _token = st.session_state.get("_session_token")
-    if _token:
-        try:
-            delete_session(_token)
-        except Exception:
-            pass
-    clear_session_token()
-    st.session_state.clear()
-    st.rerun()
-
-
-
-if page == "Project Overview":
-    st.markdown("""
-    <div class="hero-box">
-        <span class="tag">Academic AI MVP</span>
-        <h1>AI Smart Study Risk & Performance Predictor</h1>
-        <p>
-            A clean Streamlit dashboard that helps students understand academic risk,
-            workload pressure, and study priorities using AI-based prediction logic.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-label">Project Type</div>
-            <div class="metric-value">AI MVP</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-label">Frontend</div>
-            <div class="metric-value">Streamlit</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-label">Prediction</div>
-            <div class="metric-value">Risk Level</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="info-card">
-        <h3>Project Purpose</h3>
-        <p>
-            This system analyzes study hours, attendance, assignment deadlines,
-            workload level, assignment difficulty, and past grades to estimate
-            student academic risk and provide clear study recommendations.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="info-card">
-        <h3>System Workflow</h3>
-        <div class="workflow-box">
-            Student Input → Dataset → Preprocessing → ML Model → Risk Prediction → Recommendation → Dashboard
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-elif page == "Risk Prediction":
-    st.title("Academic Risk Prediction")
-    st.write("Enter student academic information to predict risk level.")
-
-    model = load_model()
-    raw_df = load_csv(RAW_DATA_PATH)
-
-    if raw_df is not None and "course" in raw_df.columns:
-        course_options = sorted(raw_df["course"].unique().tolist())
-    else:
-        course_options = [
-            "Introduction to Programming",
-            "Database Systems",
-            "Machine Learning",
-            "Software Engineering"
-        ]
-
-    _pred_name = st.session_state.full_name or st.session_state.user_email or "Student"
-    st.markdown(
-        f"""
-        <div class="info-card">
-            <h3>Student Input Form</h3>
-            <p>
-                Predicting for <b>{_pred_name}</b>.
-                Fill in the academic information below to estimate the risk level.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
+# ---------------------------------------------------------------------------
+# Sidebar builder (HTML nav — original design)
+# ---------------------------------------------------------------------------
+
+def _sidebar_logo_html() -> tuple[str, str]:
+    """Return (logo inner HTML, sb-logo CSS class) for sidebar branding."""
+    try:
+        if os.path.exists(_LOGO_PATH):
+            with open(_LOGO_PATH, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("ascii")
+            img = (
+                f'<img src="data:image/png;base64,{b64}" '
+                f'alt="Studor logo" class="sb-logo-img" />'
+            )
+            return img, "sb-logo sb-logo--custom"
+    except OSError:
+        pass
+    return _SIDEBAR_LOGO_SVG, "sb-logo"
+
+
+def _nav_item_html(key: str, label: str, active: bool) -> str:
+    icon_svg = _ICON.get(key, "")
+    icon_html = f'<span class="sb-nav-icon">{icon_svg}</span>'
+    label_html = f'<span class="sb-nav-label">{label}</span>'
+
+    if active:
+        return (
+            f'<div class="sb-nav-item sb-nav-item--active">'
+            f'{icon_html}{label_html}'
+            f'</div>'
+        )
+    return (
+        f'<form method="GET" action="" class="sb-form">'
+        f'<button type="submit" name="nav" value="{key}" '
+        f'class="sb-nav-item sb-nav-item--inactive">'
+        f'{icon_html}{label_html}'
+        f'</button>'
+        f'</form>'
     )
 
-    col1, col2 = st.columns(2)
 
-    with col1:
-        course = st.selectbox("Course", course_options)
-        study_hours = st.slider("Weekly Study Hours", 0, 15, 4)
-        attendance = st.slider("Attendance (%)", 0, 100, 75)
+def _render_sidebar(current: str) -> None:
+    full_name = st.session_state.get("full_name", "") or "Student"
+    dept      = st.session_state.get("profile_department", "Computer Science")
+    sem       = st.session_state.get("profile_semester", "Semester 6")
+    initial   = full_name[0].upper() if full_name else "S"
+    name_disp = full_name[:20] + ("…" if len(full_name) > 20 else "")
+    meta_disp = f"{dept} · {sem}"
 
-    with col2:
-        deadline_days = st.slider("Days Until Deadline", 0, 30, 5)
-        pass_grade = st.slider("Pass Grade", 0, 100, 70)
-        assignment_difficulty = st.selectbox("Assignment Difficulty", ["Low", "Medium", "High"])
-        workload_level = st.selectbox("Workload Level", ["Low", "Medium", "High"])
+    nav_html = "".join(
+        _nav_item_html(key, label, key == current)
+        for key, label in NAV_ITEMS
+    )
 
-    predict_clicked = st.button("Predict Risk", use_container_width=True)
+    profile_active = current == "profile"
+    profile_cls = "sb-profile sb-profile--active" if profile_active else "sb-profile"
 
-    if predict_clicked:
-        encoders = load_encoders()
-        difficulty_encoded = encode_difficulty(assignment_difficulty, encoders)
-        workload_encoded = encode_workload(workload_level, encoders)
-        course_encoded = encode_course(course, encoders, raw_df)
-
-        input_data = pd.DataFrame([{
-            "course": course_encoded,
-            "study_hours": study_hours,
-            "attendance": attendance,
-            "deadline_days": deadline_days,
-            "pass_grade": pass_grade,
-            "assignment_difficulty": difficulty_encoded,
-            "workload_level": workload_encoded,
-        }])
-
-        if model is not None:
-            try:
-                prediction = model.predict(input_data)[0]
-                risk_label = decode_risk(prediction, encoders)
-                prediction_source = "Trained Random Forest model"
-            except Exception as e:
-                st.warning(f"Model prediction failed ({e}). Using fallback logic.")
-                risk_label = fallback_prediction(
-                    study_hours,
-                    attendance,
-                    deadline_days,
-                    pass_grade,
-                    assignment_difficulty,
-                    workload_level,
-                )
-                prediction_source = "Fallback (model error)"
-        else:
-            risk_label = fallback_prediction(
-                study_hours,
-                attendance,
-                deadline_days,
-                pass_grade,
-                assignment_difficulty,
-                workload_level,
-            )
-            prediction_source = "Temporary prototype logic"
-
-        # Persist prediction to Supabase
-        _uid = st.session_state.get("user_id")
-        if _uid:
-            try:
-                save_prediction(_uid, risk_label)
-            except Exception:
-                pass  # Non-critical — don't block the UI if DB is temporarily unreachable
-
-        st.subheader("Prediction Result")
-
-        if risk_label == "High Risk":
-            st.markdown(f'<div class="risk-high">{risk_label}</div>', unsafe_allow_html=True)
-        elif risk_label == "Medium Risk":
-            st.markdown(f'<div class="risk-medium">{risk_label}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="risk-low">{risk_label}</div>', unsafe_allow_html=True)
-
-        st.caption(f"Prediction source: {prediction_source}")
-
-        st.markdown("""
-        <div class="info-card">
-            <h3>Study Recommendation</h3>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.info(get_recommendation(risk_label))
-
-        chart_data = pd.DataFrame({
-            "Factor": ["Study Hours", "Attendance", "Deadline Days", "Pass Grade"],
-            "Value": [study_hours, attendance, deadline_days, pass_grade],
-        })
-
-        st.subheader("Input Overview")
-        st.bar_chart(chart_data.set_index("Factor"))
-
-
-elif page == "Dataset Preview":
-    st.title("Dataset Preview")
-
-    raw_df = load_csv(RAW_DATA_PATH)
-    cleaned_df = load_csv(CLEANED_DATA_PATH)
-
-    if raw_df is not None:
-        st.markdown("""
-        <div class="info-card">
-            <h3>Raw Dataset</h3>
-            <p>This is the simulated academic dataset used for the prototype.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.dataframe(raw_df, use_container_width=True)
-
-        col1, col2 = st.columns(2)
-        col1.metric("Rows", raw_df.shape[0])
-        col2.metric("Columns", raw_df.shape[1])
-
-        if "risk_level" in raw_df.columns:
-            st.subheader("Risk Level Distribution")
-            st.bar_chart(raw_df["risk_level"].value_counts())
+    if profile_active:
+        profile_inner = (
+            f'<div class="{profile_cls}">'
+            f'<div class="sb-avatar">{initial}</div>'
+            f'<div style="min-width:0;flex:1;">'
+            f'<div class="sb-profile-name">{name_disp}</div>'
+            f'<div class="sb-profile-meta">{meta_disp}</div>'
+            f'</div>'
+            f'</div>'
+        )
     else:
-        st.warning("Raw dataset not found.")
+        profile_inner = (
+            f'<form method="GET" action="" class="sb-form">'
+            f'<button type="submit" name="nav" value="profile" '
+            f'style="-webkit-appearance:none;appearance:none;border:none;background:transparent;'
+            f'font:inherit;text-align:left;cursor:pointer;width:100%;outline:none;padding:0;">'
+            f'<div class="{profile_cls}">'
+            f'<div class="sb-avatar">{initial}</div>'
+            f'<div style="min-width:0;flex:1;">'
+            f'<div class="sb-profile-name">{name_disp}</div>'
+            f'<div class="sb-profile-meta">{meta_disp}</div>'
+            f'</div>'
+            f'</div>'
+            f'</button>'
+            f'</form>'
+        )
 
-    if cleaned_df is not None:
-        st.markdown("""
-        <div class="info-card">
-            <h3>Cleaned Dataset</h3>
-            <p>This dataset is generated after preprocessing and is ready for ML usage.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    logo_inner, logo_cls = _sidebar_logo_html()
 
-        st.dataframe(cleaned_df, use_container_width=True)
+    sidebar_html = f"""
+<div class="sb-wrap">
+<div class="sb-brand">
+<div class="{logo_cls}">
+{logo_inner}
+</div>
+<div>
+<div class="sb-brand-name">Studor</div>
+<div class="sb-brand-sub">Risk &amp; Performance Predictor</div>
+</div>
+</div>
+<div class="sb-section-label">Navigation</div>
+<div class="sb-nav-list">{nav_html}</div>
+<hr class="sb-divider">
+{profile_inner}
+</div>
+"""
+
+    with st.sidebar:
+        render_html(sidebar_html)
+
+
+# ---------------------------------------------------------------------------
+# Page routing
+# ---------------------------------------------------------------------------
+
+def _dispatch(page: str) -> None:
+    """Import the page module under pages_/ and call its render(); show a
+    friendly placeholder if the page hasn't been implemented yet."""
+    module_name = _PAGE_MODULES.get(page, "dashboard")
+    try:
+        module = importlib.import_module(f"pages_.{module_name}")
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"Could not load the '{page}' page: {exc}")
+        return
+
+    render_fn = getattr(module, "render", None)
+    if callable(render_fn):
+        render_fn()
     else:
-        st.warning("Cleaned dataset not found.")
+        render_html(
+            '<div class="page-h1">Coming soon</div>'
+            '<div class="page-sub">This page has not been built yet.</div>'
+        )
 
 
-elif page == "Model Outputs":
-    st.title("Model Outputs")
-
-    predictions_df = load_csv(PREDICTIONS_PATH)
-    encoders = load_encoders()
-
-    if predictions_df is not None:
-        st.markdown("""
-        <div class="info-card">
-            <h3>Prediction Results</h3>
-            <p>These results were generated by the machine learning model.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.dataframe(predictions_df, use_container_width=True)
-
-        if "predicted_risk_level" in predictions_df.columns:
-            st.subheader("Predicted Risk Distribution")
-            decoded = predictions_df["predicted_risk_level"].apply(lambda v: decode_risk(v, encoders))
-            st.bar_chart(decoded.value_counts())
-    else:
-        st.warning("Predictions file not found. Please run the ML model first.")
-
-
-elif page == "Team Info":
-    st.title("Team and Responsibilities")
-
-    st.markdown("""
-    <div class="info-card">
-        <h3>Project Team</h3>
-        <p><b>Eylül Özekinci</b> – Machine Learning Model</p>
-        <p><b>Azra Özdaş</b> – Frontend / Streamlit Dashboard</p>
-        <p><b>Müslüm Selim Akşahin</b> – Data Collection & Preprocessing</p>
-        <p><b>Dilay Tarhan</b> – Testing & Documentation</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="info-card">
-        <h3>System Flow</h3>
-        <div class="workflow-box">
-            Student Input → Dataset → Preprocessing → ML Model → Risk Prediction → Recommendation → Dashboard
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+_render_sidebar(st.session_state.current_page)
+_dispatch(st.session_state.current_page)
