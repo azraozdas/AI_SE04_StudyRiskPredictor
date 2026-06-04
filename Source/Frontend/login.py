@@ -1,13 +1,13 @@
 """
 Authentication page for the AI Smart Study Risk & Performance Predictor.
 
-Public hooks used by app.py:
-    - render_login_page()
-    - handle_login(email, password)      -> bool
-    - handle_register(full_name, email, password, confirm_password) -> (bool, str|None)
+Public hook used by app.py:
+    render_login_page()
 
-Storage: hosted PostgreSQL via Supabase (Source/Backend/db.py).
-Logo:    Source/Frontend/assets/logo.png — falls back to inline SVG if missing.
+Storage  : hosted PostgreSQL via Supabase (Source/Backend/db.py)
+Sessions : 30-day browser cookie via cookie_session.py  (Remember Me)
+Recovery : in-app security-question flow — no email required
+Logo     : Source/Frontend/assets/logo.png — falls back to inline SVG
 """
 
 import base64
@@ -15,46 +15,68 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
-
 import streamlit as st
 
 from utils import render_html
 from styles import inject_login_styles
 
-# Allow imports from Source/Backend regardless of working directory
+# ── Backend path setup ────────────────────────────────────────────────────────
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _BACKEND = os.path.join(_ROOT, "Source", "Backend")
 if _BACKEND not in sys.path:
     sys.path.insert(0, _BACKEND)
 
-from db import create_user, get_user_by_email, verify_user_password  # noqa: E402
+from db import (  # noqa: E402
+    create_user,
+    get_user_by_email,
+    verify_user_password,
+    create_session,
+    get_security_question,
+    verify_security_answer,
+    reset_password_direct,
+)
 
+# ── Constants ─────────────────────────────────────────────────────────────────
 ASSETS_DIR = Path(__file__).parent / "assets"
 LOGO_PATH = ASSETS_DIR / "logo.png"
-
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+SECURITY_QUESTIONS = [
+    "What was the name of your first pet?",
+    "What was the name of your first teacher?",
+    "What is your mother's maiden name?",
+    "What city were you born in?",
+    "What was the name of your childhood best friend?",
+    "What was the make of your first car?",
+    "What is the name of the street you grew up on?",
+]
 
 LOGO_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
      fill="none" stroke="white" stroke-width="2"
      stroke-linecap="round" stroke-linejoin="round">
-    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-</svg>
-"""
+  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+  <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+</svg>"""
 
 WARNING_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
      fill="none" stroke="#DC2626" stroke-width="2.5"
      stroke-linecap="round" stroke-linejoin="round">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-</svg>
-"""
+  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+  <line x1="12" y1="9" x2="12" y2="13"/>
+  <line x1="12" y1="17" x2="12.01" y2="17"/>
+</svg>"""
 
+SUCCESS_SVG = """
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+     fill="none" stroke="#16a34a" stroke-width="2.5"
+     stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="20 6 9 17 4 12"/>
+</svg>"""
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _logo_html() -> str:
     try:
@@ -69,73 +91,57 @@ def _logo_html() -> str:
     return LOGO_SVG
 
 
-def handle_login(email: str, password: str) -> bool:
-    mail = (email or "").strip().lower()
-    if not mail:
-        return False
-    try:
-        return verify_user_password(mail, password)
-    except Exception:
-        raise ConnectionError("Unable to reach the database. Please try again later.")
+def _error_html(msg: str) -> str:
+    return f'<div class="login-error"><span>{WARNING_SVG}</span><span>{msg}</span></div>'
 
 
-def handle_register(
-    full_name: str,
-    email: str,
-    password: str,
-    confirm_password: str,
-) -> Tuple[bool, Optional[str]]:
-    name = (full_name or "").strip()
-    mail = (email or "").strip().lower()
-    pwd = password or ""
-    conf = confirm_password or ""
-
-    if not name:
-        return False, "Full name is required."
-    if not mail or not EMAIL_PATTERN.match(mail):
-        return False, "Please enter a valid email address."
-    if len(pwd) < 6:
-        return False, "Password must be at least 6 characters."
-    if pwd != conf:
-        return False, "Passwords do not match."
-
-    try:
-        create_user(email=mail, password=pwd, full_name=name)
-        return True, None
-    except ValueError:
-        return False, "This email is already registered. Please sign in instead."
-    except Exception:
-        return False, "Unable to reach the database. Please try again later."
+def _success_html(msg: str) -> str:
+    return (
+        f'<div class="login-error" style="border-color:rgba(34,197,94,.5);'
+        f'background:rgba(34,197,94,.08);color:#86efac;">'
+        f'<span>{SUCCESS_SVG}</span><span>{msg}</span></div>'
+    )
 
 
-def _clear_auth_messages() -> None:
+def _clear_auth() -> None:
     st.session_state.login_error = None
     st.session_state.signup_error = None
 
 
 def _set_mode(mode: str) -> None:
     st.session_state.auth_mode = mode
-    _clear_auth_messages()
+    _clear_auth()
+    # Clear forgot-password state when switching tabs
+    for k in ("forgot_step", "forgot_email", "forgot_question", "forgot_error", "reset_success"):
+        st.session_state.pop(k, None)
 
 
-def _set_session_from_user(email: str, full_name: str = "") -> None:
-    """Populate session state after a successful login or registration."""
+def _set_session_from_user(email: str, full_name: str = "", remember: bool = False) -> None:
+    """Populate session state and optionally create a persistent Remember Me cookie."""
     user_row = get_user_by_email(email)
     st.session_state.logged_in = True
     st.session_state.user_id = user_row[0] if user_row else None
     st.session_state.user_email = email
     st.session_state.full_name = (user_row[3] if user_row else full_name) or ""
-    st.session_state.student_id = email  # kept for back-compat with app.py
+    st.session_state.student_id = email  # back-compat
+    if remember and user_row:
+        try:
+            token = create_session(user_row[0])
+            # Stored here; app.py will write it to the cookie on the next render
+            st.session_state._pending_session_cookie = token
+        except Exception:
+            pass
 
+
+# ── Tab navigation ────────────────────────────────────────────────────────────
 
 def _render_tabs(active_mode: str) -> None:
-    render_html('<div id="auth-tabs-start"></div>')
     c1, c2 = st.columns(2)
     with c1:
         if st.button(
             "Sign In",
             key="tab_signin",
-            type=("primary" if active_mode == "Sign In" else "secondary"),
+            type="primary" if active_mode == "Sign In" else "secondary",
             use_container_width=True,
         ):
             if active_mode != "Sign In":
@@ -145,7 +151,7 @@ def _render_tabs(active_mode: str) -> None:
         if st.button(
             "Create Account",
             key="tab_register",
-            type=("primary" if active_mode == "Create Account" else "secondary"),
+            type="primary" if active_mode == "Create Account" else "secondary",
             use_container_width=True,
         ):
             if active_mode != "Create Account":
@@ -153,52 +159,178 @@ def _render_tabs(active_mode: str) -> None:
                 st.rerun()
 
 
+# ── Forgot-password 3-step flow ───────────────────────────────────────────────
+
+def _reset_forgot() -> None:
+    for k in ("forgot_step", "forgot_email", "forgot_question", "forgot_error", "reset_success"):
+        st.session_state.pop(k, None)
+
+
+def _render_forgot_password() -> None:
+    step = st.session_state.get("forgot_step", "email")
+
+    if st.button("← Back to Sign In", key="back_to_login", use_container_width=False):
+        _reset_forgot()
+        st.rerun()
+
+    if step == "email":
+        render_html("""
+            <div class="login-heading">Forgot Password</div>
+            <div class="login-subheading">Enter your email to verify your identity</div>
+        """)
+
+        email_input = st.text_input(
+            "Registered Email", key="fp_email", placeholder="name@example.com"
+        )
+
+        if st.session_state.get("forgot_error"):
+            render_html(_error_html(st.session_state.forgot_error))
+
+        if st.button("Continue →", key="fp_continue", type="primary", use_container_width=True):
+            mail = (email_input or "").strip().lower()
+            if not mail:
+                st.session_state.forgot_error = "Please enter your email address."
+                st.rerun()
+            try:
+                question = get_security_question(mail)
+                if question:
+                    st.session_state.forgot_email = mail
+                    st.session_state.forgot_question = question
+                    st.session_state.forgot_step = "question"
+                    st.session_state.forgot_error = None
+                else:
+                    # Always show same message — don't reveal whether email exists
+                    st.session_state.forgot_error = (
+                        "No security question found for this account. "
+                        "Please register a new account."
+                    )
+            except Exception:
+                st.session_state.forgot_error = "Database unavailable. Please try again later."
+            st.rerun()
+
+    elif step == "question":
+        render_html('<div class="login-heading">Security Question</div>')
+        question = st.session_state.get("forgot_question", "")
+        render_html(f'<div class="login-subheading" style="font-style:italic;">{question}</div>')
+
+        answer_input = st.text_input(
+            "Your Answer", key="fp_answer",
+            placeholder="Answer is not case-sensitive"
+        )
+
+        if st.session_state.get("forgot_error"):
+            render_html(_error_html(st.session_state.forgot_error))
+
+        if st.button("Verify Answer", key="fp_verify", type="primary", use_container_width=True):
+            if not (answer_input or "").strip():
+                st.session_state.forgot_error = "Please enter your answer."
+                st.rerun()
+            try:
+                mail = st.session_state.get("forgot_email", "")
+                if verify_security_answer(mail, answer_input):
+                    st.session_state.forgot_step = "reset"
+                    st.session_state.forgot_error = None
+                else:
+                    st.session_state.forgot_error = "Incorrect answer. Please try again."
+            except Exception:
+                st.session_state.forgot_error = "Database unavailable. Please try again later."
+            st.rerun()
+
+    elif step == "reset":
+        render_html("""
+            <div class="login-heading">Choose a New Password</div>
+            <div class="login-subheading">Your identity has been verified ✓</div>
+        """)
+
+        new_pw = st.text_input(
+            "New Password", key="fp_new_pw", type="password",
+            placeholder="At least 6 characters"
+        )
+        confirm_pw = st.text_input(
+            "Confirm Password", key="fp_confirm_pw", type="password",
+            placeholder="Repeat your password"
+        )
+
+        if st.session_state.get("forgot_error"):
+            render_html(_error_html(st.session_state.forgot_error))
+
+        if st.button("Reset Password", key="fp_reset", type="primary", use_container_width=True):
+            if len(new_pw or "") < 6:
+                st.session_state.forgot_error = "Password must be at least 6 characters."
+                st.rerun()
+            elif new_pw != confirm_pw:
+                st.session_state.forgot_error = "Passwords do not match."
+                st.rerun()
+            try:
+                mail = st.session_state.get("forgot_email", "")
+                if reset_password_direct(mail, new_pw):
+                    _reset_forgot()
+                    st.session_state.reset_success = True
+                else:
+                    st.session_state.forgot_error = "Reset failed. Please try again."
+            except Exception:
+                st.session_state.forgot_error = "Database unavailable. Please try again later."
+            st.rerun()
+
+
+# ── Sign-in form ──────────────────────────────────────────────────────────────
+
 def _render_login_form() -> None:
+    # Show forgot-password flow when active
+    if st.session_state.get("forgot_step"):
+        _render_forgot_password()
+        return
+
     render_html("""
         <div class="login-heading">Welcome back</div>
         <div class="login-subheading">Sign in to continue to your dashboard</div>
     """)
 
+    # Success banner after password reset
+    if st.session_state.pop("reset_success", False):
+        render_html(_success_html("Password reset successfully! Please sign in."))
+
     email = st.text_input(
-        "Email",
-        key="login_email",
-        placeholder="name@example.com",
-        on_change=_clear_auth_messages,
+        "Email", key="login_email",
+        placeholder="name@example.com", on_change=_clear_auth,
     )
     password = st.text_input(
-        "Password",
-        key="login_password",
-        type="password",
-        placeholder="Enter your password",
-        on_change=_clear_auth_messages,
+        "Password", key="login_password", type="password",
+        placeholder="Enter your password", on_change=_clear_auth,
     )
 
+    col_l, col_r = st.columns(2)
+    with col_l:
+        remember_me = st.checkbox("Remember me for 30 days", key="remember_me")
+    with col_r:
+        if st.button("Forgot password?", key="forgot_btn",
+                     use_container_width=True, type="secondary"):
+            st.session_state.forgot_step = "email"
+            st.session_state.forgot_error = None
+            st.rerun()
+
     if st.session_state.login_error:
-        render_html(f"""
-            <div class="login-error">
-                <span>{WARNING_SVG}</span>
-                <span>{st.session_state.login_error}</span>
-            </div>
-        """)
+        render_html(_error_html(st.session_state.login_error))
 
     if st.button("Sign In", key="login_submit", type="primary", use_container_width=True):
         mail = (email or "").strip().lower()
         if not mail:
             st.session_state.login_error = "Please enter your email address."
             st.rerun()
-        else:
-            try:
-                if handle_login(email, password):
-                    _set_session_from_user(mail)
-                    st.session_state.login_error = None
-                    st.rerun()
-                else:
-                    st.session_state.login_error = "Invalid email or password. Please try again."
-                    st.rerun()
-            except ConnectionError as e:
-                st.session_state.login_error = str(e)
+        try:
+            if verify_user_password(mail, password or ""):
+                _set_session_from_user(mail, remember=remember_me)
+                st.session_state.login_error = None
                 st.rerun()
+            else:
+                st.session_state.login_error = "Invalid email or password. Please try again."
+                st.rerun()
+        except Exception:
+            st.session_state.login_error = "Database unavailable. Please try again later."
+            st.rerun()
 
+
+# ── Registration form ─────────────────────────────────────────────────────────
 
 def _render_register_form() -> None:
     render_html("""
@@ -208,59 +340,90 @@ def _render_register_form() -> None:
 
     full_name = st.text_input(
         "Full Name", key="signup_full_name",
-        placeholder="e.g. Azra Özdaş", on_change=_clear_auth_messages,
+        placeholder="e.g. Azra Özdaş", on_change=_clear_auth,
     )
     email = st.text_input(
         "Email", key="signup_email",
-        placeholder="name@example.com", on_change=_clear_auth_messages,
+        placeholder="name@example.com", on_change=_clear_auth,
     )
     new_password = st.text_input(
         "Password", key="signup_password", type="password",
-        placeholder="At least 6 characters", on_change=_clear_auth_messages,
+        placeholder="At least 6 characters", on_change=_clear_auth,
     )
     confirm_password = st.text_input(
         "Confirm Password", key="signup_confirm", type="password",
-        placeholder="Repeat your password", on_change=_clear_auth_messages,
+        placeholder="Repeat your password", on_change=_clear_auth,
+    )
+
+    st.markdown("---")
+    render_html("""
+        <div style="font-size:13px;color:#94A3B8;margin-bottom:6px;font-weight:600;">
+            Security Question — used if you ever forget your password
+        </div>
+    """)
+
+    security_question = st.selectbox(
+        "Choose a security question", SECURITY_QUESTIONS,
+        key="signup_sec_question",
+    )
+    security_answer = st.text_input(
+        "Your Answer", key="signup_sec_answer",
+        placeholder="Not case-sensitive", on_change=_clear_auth,
     )
 
     if st.session_state.signup_error:
-        render_html(f"""
-            <div class="login-error">
-                <span>{WARNING_SVG}</span>
-                <span>{st.session_state.signup_error}</span>
-            </div>
-        """)
+        render_html(_error_html(st.session_state.signup_error))
 
-    if st.button(
-        "Create Account",
-        key="signup_submit",
-        type="primary",
-        use_container_width=True,
-    ):
-        ok, err = handle_register(full_name, email, new_password, confirm_password)
-        if ok:
-            mail = (email or "").strip().lower()
-            name = (full_name or "").strip()
-            _set_session_from_user(mail, full_name=name)
-            st.session_state.signup_error = None
-            st.rerun()
+    if st.button("Create Account", key="signup_submit", type="primary", use_container_width=True):
+        name = (full_name or "").strip()
+        mail = (email or "").strip().lower()
+        pwd = new_password or ""
+        conf = confirm_password or ""
+        answer = (security_answer or "").strip()
+
+        if not name:
+            st.session_state.signup_error = "Full name is required."
+        elif not mail or not EMAIL_PATTERN.match(mail):
+            st.session_state.signup_error = "Please enter a valid email address."
+        elif len(pwd) < 6:
+            st.session_state.signup_error = "Password must be at least 6 characters."
+        elif pwd != conf:
+            st.session_state.signup_error = "Passwords do not match."
+        elif not answer or len(answer) < 2:
+            st.session_state.signup_error = "Please provide an answer for your security question."
         else:
-            st.session_state.signup_error = err
-            st.rerun()
+            try:
+                create_user(
+                    email=mail,
+                    password=pwd,
+                    full_name=name,
+                    security_question=security_question,
+                    security_answer=answer,
+                )
+                _set_session_from_user(mail, full_name=name)
+                st.session_state.signup_error = None
+                st.rerun()
+            except ValueError:
+                st.session_state.signup_error = (
+                    "This email is already registered. Please sign in instead."
+                )
+            except Exception:
+                st.session_state.signup_error = (
+                    "Database unavailable. Please try again later."
+                )
+        st.rerun()
 
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 def render_login_page() -> None:
     inject_login_styles()
 
-    if "auth_mode" not in st.session_state:
-        st.session_state.auth_mode = "Sign In"
-    if "login_error" not in st.session_state:
-        st.session_state.login_error = None
-    if "signup_error" not in st.session_state:
-        st.session_state.signup_error = None
+    st.session_state.setdefault("auth_mode", "Sign In")
+    st.session_state.setdefault("login_error", None)
+    st.session_state.setdefault("signup_error", None)
 
     _, center, _ = st.columns([1, 1.2, 1])
-
     with center:
         render_html(f"""
             <div class="login-brand">

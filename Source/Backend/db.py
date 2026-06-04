@@ -1,19 +1,16 @@
 """
 PostgreSQL database helpers for AI Smart Study Risk Predictor.
 
-IMPORTANT: .env must never be committed to version control.
-           Copy .env.example to .env and fill in real credentials locally.
-
 Design notes:
-- Hosted PostgreSQL is used (e.g. Supabase or Neon) because the app needs a
-  shared database accessible from multiple devices and developers. A local
-  SQLite file would not be visible to other machines.
-- init_db() is non-destructive: it only creates tables that do not already
-  exist and will never drop or reset existing data.
-- Passwords are stored as bcrypt hashes. Plaintext passwords are never saved.
+- Hosted PostgreSQL via Supabase — shared across all devices and developers.
+- init_db() is non-destructive: CREATE TABLE IF NOT EXISTS + ALTER TABLE ADD COLUMN IF NOT EXISTS.
+- Passwords and security answers are stored as bcrypt hashes. Plaintext is never saved.
+- Security questions enable in-app password reset without any email infrastructure.
 """
 
 import os
+import secrets
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import psycopg2
@@ -21,13 +18,7 @@ from dotenv import load_dotenv
 
 
 def get_connection():
-    """Return a psycopg2 connection using DATABASE_URL from .env.
-
-    SSL settings embedded in the URL (e.g. ?sslmode=require) are preserved
-    automatically by psycopg2 — no extra kwarg needed.
-
-    Raises RuntimeError if DATABASE_URL is not set.
-    """
+    """Return a psycopg2 connection using DATABASE_URL from .env."""
     load_dotenv()
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
@@ -39,24 +30,25 @@ def get_connection():
 
 
 def init_db():
-    """Create all required tables if they do not already exist.
-
-    Safe to call multiple times — uses CREATE TABLE IF NOT EXISTS so no
-    existing data is dropped or modified.
-    """
+    """Create all tables and add any missing columns. Safe to call on every startup."""
     conn = get_connection()
     try:
         with conn:
             with conn.cursor() as cur:
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS users (
-                        id           SERIAL PRIMARY KEY,
-                        email        TEXT UNIQUE NOT NULL,
-                        password_hash TEXT NOT NULL,
-                        full_name    TEXT,
-                        created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        id                   SERIAL PRIMARY KEY,
+                        email                TEXT UNIQUE NOT NULL,
+                        password_hash        TEXT NOT NULL,
+                        full_name            TEXT,
+                        security_question    TEXT,
+                        security_answer_hash TEXT,
+                        created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
+                # Migrate existing installations that pre-date security columns
+                cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS security_question TEXT")
+                cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS security_answer_hash TEXT")
 
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS courses (
@@ -88,19 +80,41 @@ def init_db():
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
+
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS sessions (
+                        id         SERIAL PRIMARY KEY,
+                        user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        token      TEXT UNIQUE NOT NULL,
+                        expires_at TIMESTAMP NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
     finally:
         conn.close()
 
 
-def create_user(email: str, password: str, full_name: str = None):
+# ── User management ───────────────────────────────────────────────────────────
+
+def create_user(
+    email: str,
+    password: str,
+    full_name: str = None,
+    security_question: str = None,
+    security_answer: str = None,
+) -> int:
     """Register a new user and return the new user's id.
 
-    - email is trimmed and lowercased before storage.
-    - password is hashed with bcrypt; the plaintext is never stored.
+    - Security answer is normalised (stripped + lowercased) then bcrypt-hashed.
     - Raises ValueError if the email is already registered.
     """
     email = (email or "").strip().lower()
     password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    answer_hash = None
+    if security_answer:
+        normalised = (security_answer).strip().lower()
+        answer_hash = bcrypt.hashpw(normalised.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     conn = get_connection()
     try:
@@ -109,11 +123,12 @@ def create_user(email: str, password: str, full_name: str = None):
                 try:
                     cur.execute(
                         """
-                        INSERT INTO users (email, password_hash, full_name)
-                        VALUES (%s, %s, %s)
+                        INSERT INTO users
+                            (email, password_hash, full_name, security_question, security_answer_hash)
+                        VALUES (%s, %s, %s, %s, %s)
                         RETURNING id
                         """,
-                        (email, password_hash, full_name),
+                        (email, password_hash, full_name, security_question, answer_hash),
                     )
                     return cur.fetchone()[0]
                 except psycopg2.errors.UniqueViolation:
@@ -123,17 +138,17 @@ def create_user(email: str, password: str, full_name: str = None):
 
 
 def get_user_by_email(email: str):
-    """Return the user row for the given email, or None if not found.
-
-    email is trimmed and lowercased before the lookup.
-    Returns a psycopg2 Row (tuple) or None.
-    """
+    """Return the full user row for the given email, or None."""
     email = (email or "").strip().lower()
     conn = get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, email, password_hash, full_name, created_at FROM users WHERE email = %s",
+                """
+                SELECT id, email, password_hash, full_name,
+                       security_question, security_answer_hash, created_at
+                FROM users WHERE email = %s
+                """,
                 (email,),
             )
             return cur.fetchone()
@@ -142,19 +157,103 @@ def get_user_by_email(email: str):
 
 
 def verify_user_password(email: str, password: str) -> bool:
-    """Return True if the email/password pair is valid, False otherwise.
-
-    Uses bcrypt.checkpw so the comparison is constant-time.
-    """
+    """Return True if the email/password pair is valid."""
     user = get_user_by_email(email)
     if user is None:
         return False
-    password_hash = user[2]  # third column
-    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    return bcrypt.checkpw(password.encode("utf-8"), user[2].encode("utf-8"))
 
+
+# ── Security-question password reset ─────────────────────────────────────────
+
+def get_security_question(email: str) -> str | None:
+    """Return the security question for the given email, or None if not set."""
+    user = get_user_by_email(email)
+    if user is None:
+        return None
+    return user[4] or None  # security_question column
+
+
+def verify_security_answer(email: str, plain_answer: str) -> bool:
+    """Return True if plain_answer (case-insensitive) matches the stored hash."""
+    user = get_user_by_email(email)
+    if user is None or not user[5]:  # security_answer_hash column
+        return False
+    normalised = (plain_answer or "").strip().lower()
+    return bcrypt.checkpw(normalised.encode("utf-8"), user[5].encode("utf-8"))
+
+
+def reset_password_direct(email: str, new_password: str) -> bool:
+    """Overwrite the password for the given email. Call only after answer verification."""
+    email = (email or "").strip().lower()
+    new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE users SET password_hash = %s WHERE email = %s",
+                    (new_hash, email),
+                )
+                return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
+# ── Persistent sessions (Remember Me) ────────────────────────────────────────
+
+def create_session(user_id: int, days: int = 30) -> str:
+    """Create a 30-day persistent login session and return the opaque token."""
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=days)
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO sessions (user_id, token, expires_at) VALUES (%s, %s, %s)",
+                    (user_id, token, expires_at),
+                )
+    finally:
+        conn.close()
+    return token
+
+
+def get_session_user(token: str):
+    """Return the user row for a non-expired session token, or None."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT u.id, u.email, u.password_hash, u.full_name,
+                       u.security_question, u.security_answer_hash, u.created_at
+                FROM sessions s
+                JOIN users u ON u.id = s.user_id
+                WHERE s.token = %s AND s.expires_at > NOW()
+                """,
+                (token,),
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+
+def delete_session(token: str) -> None:
+    """Invalidate a session on sign-out."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM sessions WHERE token = %s", (token,))
+    finally:
+        conn.close()
+
+
+# ── Predictions ───────────────────────────────────────────────────────────────
 
 def save_prediction(user_id: int, risk_level: str, course_id: int = None) -> int:
-    """Persist a prediction result for a user and return the new prediction id."""
+    """Persist a prediction result and return the new prediction id."""
     conn = get_connection()
     try:
         with conn:

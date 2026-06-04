@@ -8,3 +8,4 @@ seaborn
 psycopg2-binary
 python-dotenv
 bcrypt
+streamlit-cookies-controller

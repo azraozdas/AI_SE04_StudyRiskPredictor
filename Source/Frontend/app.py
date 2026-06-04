@@ -17,7 +17,8 @@ _BACKEND = os.path.join(
 if _BACKEND not in sys.path:
     sys.path.insert(0, _BACKEND)
 
-from db import init_db, save_prediction  # noqa: E402
+from db import init_db, save_prediction, get_session_user, delete_session  # noqa: E402
+from cookie_session import get_session_token, set_session_token, clear_session_token  # noqa: E402
 
 # Initialize DB tables on every startup (no-op if tables already exist)
 try:
@@ -26,16 +27,38 @@ except Exception:
     pass  # Login page will surface DB errors when the user tries to sign in
 
 # Session state defaults
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "user_id" not in st.session_state:
-    st.session_state.user_id = None
-if "user_email" not in st.session_state:
-    st.session_state.user_email = None
-if "full_name" not in st.session_state:
-    st.session_state.full_name = ""
-if "student_id" not in st.session_state:
-    st.session_state.student_id = None
+st.session_state.setdefault("logged_in", False)
+st.session_state.setdefault("user_id", None)
+st.session_state.setdefault("user_email", None)
+st.session_state.setdefault("full_name", "")
+st.session_state.setdefault("student_id", None)
+st.session_state.setdefault("_session_token", None)
+
+# ── Remember Me: write pending cookie (set by login.py after successful login) ──
+_pending = st.session_state.pop("_pending_session_cookie", None)
+if _pending:
+    set_session_token(_pending)
+    st.session_state._session_token = _pending
+
+# ── Remember Me: auto-login from existing browser cookie ────────────────────
+if not st.session_state.logged_in:
+    _cookie_token = get_session_token()
+    if _cookie_token:
+        try:
+            _user = get_session_user(_cookie_token)
+            if _user:
+                st.session_state.logged_in = True
+                st.session_state.user_id = _user[0]
+                st.session_state.user_email = _user[1]
+                st.session_state.full_name = _user[3] or ""
+                st.session_state.student_id = _user[1]
+                st.session_state._session_token = _cookie_token
+                st.rerun()
+            else:
+                # Token expired or revoked — clear the stale cookie
+                clear_session_token()
+        except Exception:
+            clear_session_token()
 
 if not st.session_state.logged_in:
     from login import render_login_page
@@ -388,6 +411,14 @@ st.sidebar.markdown("---")
 _display_name = st.session_state.full_name or st.session_state.user_email or ""
 st.sidebar.caption(f"Signed in as {_display_name}")
 if st.sidebar.button("Sign Out", key="signout_btn"):
+    # Revoke the Remember Me session from the DB and clear the browser cookie
+    _token = st.session_state.get("_session_token")
+    if _token:
+        try:
+            delete_session(_token)
+        except Exception:
+            pass
+    clear_session_token()
     st.session_state.clear()
     st.rerun()
 
