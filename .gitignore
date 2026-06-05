@@ -5,7 +5,6 @@ __pycache__/
 .idea/
 .DS_Store
 Uploads/
-.env
 Data/.auth_session.json
 
 # Project generated files
