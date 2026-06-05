@@ -10,6 +10,7 @@ AUTH_SESSION_PATH = os.path.join(ROOT, "Data", ".auth_session.json")
 
 _AUTH_KEYS = (
     "logged_in",
+    "user_id",
     "user_email",
     "full_name",
     "student_id",

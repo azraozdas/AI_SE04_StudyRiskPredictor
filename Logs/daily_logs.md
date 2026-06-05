@@ -310,3 +310,24 @@ Completed:
 Next Steps:
 - Surface model outputs (confusion matrix / feature importance PNGs) in the Model Results page.
 
+### 05.06.2026
+
+**Azra Özdaş – Frontend Buildout & Page Modules**
+
+Completed:
+- Refactored `app.py` into a query-param router (`?nav=`, `?logout=`) with a custom HTML sidebar (icon nav, brand block, profile shortcut, logout) and a login gate that dispatches to the `pages_/` modules.
+- Built/polished the dark-theme login UI in `login.py`: Sign In / Create Account tabs, security-question selector, "Remember me for 30 days", a 3-step forgot-password flow, inline error/success banners, and Material field icons.
+- Implemented `styles.py` `inject_app_styles()` for the sidebar and dashboard dark theme, plus the compact/relaxed login styles (`inject_login_styles(mode)`).
+- Built out the `pages_/` modules:
+  - Risk Prediction — input form wired to the model helper with a heuristic fallback, confidence display, recommendation list, and a Plotly input-overview chart.
+  - Study Schedule — weekly plan generated from course risk levels and deadlines, with focus filters and a 7-day calendar grid.
+  - Recommendations — risk-based action plans tied to the latest prediction, plus general study-science tips.
+  - Dataset Course Stats, Model Results, Profile, My Courses, and Dashboard pages.
+- Added `course_colors.py` for consistent per-course color coding across schedule and recommendations.
+- Made all frontend paths portable via `os.path` and added defensive imports/fallbacks (missing model files, empty dataset).
+- Renamed the app to **Studor** across login branding, page title, sidebar, and dashboard.
+- Verified the app boots and the full login → navigation → prediction flow works on `localhost`; captured page screenshots under `Documentation/Screenshots/`.
+
+Next Steps:
+- Final UI review and responsive/layout polish across all pages.
+- End-to-end testing of the prediction and navigation flows.

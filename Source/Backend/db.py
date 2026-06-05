@@ -250,6 +250,102 @@ def delete_session(token: str) -> None:
         conn.close()
 
 
+# ── User courses (CRUD) ───────────────────────────────────────────────────────
+
+def list_user_courses(user_id: int) -> list[tuple]:
+    """Return rows: (id, name, difficulty, workload, created_at)."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, name, difficulty, workload, created_at
+                FROM courses
+                WHERE user_id = %s
+                ORDER BY created_at DESC, id DESC
+                """,
+                (user_id,),
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def add_user_course(
+    user_id: int,
+    name: str,
+    difficulty: str = None,
+    workload: int = None,
+) -> int:
+    """Insert a course for the user and return the new course id."""
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Course name is required.")
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO courses (user_id, name, difficulty, workload)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (user_id, name, difficulty, workload),
+                )
+                return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
+def update_user_course(
+    course_id: int,
+    user_id: int,
+    name: str = None,
+    difficulty: str = None,
+    workload: int = None,
+) -> bool:
+    """Update a course owned by user_id. Returns True if a row was updated."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE courses
+                    SET name = COALESCE(%s, name),
+                        difficulty = COALESCE(%s, difficulty),
+                        workload = COALESCE(%s, workload)
+                    WHERE id = %s AND user_id = %s
+                    """,
+                    (
+                        name.strip() if name else None,
+                        difficulty,
+                        workload,
+                        course_id,
+                        user_id,
+                    ),
+                )
+                return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
+def delete_user_course(course_id: int, user_id: int) -> bool:
+    """Delete a course owned by user_id. Returns True if a row was deleted."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM courses WHERE id = %s AND user_id = %s",
+                    (course_id, user_id),
+                )
+                return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
 # ── Predictions ───────────────────────────────────────────────────────────────
 
 def save_prediction(user_id: int, risk_level: str, course_id: int = None) -> int:

@@ -103,6 +103,28 @@ def _success_html(msg: str) -> str:
     )
 
 
+# Material Symbols (rounded) — rendered inside fields by Streamlit 1.57+
+_ICON_USER = ":material/person:"
+_ICON_MAIL = ":material/mail:"
+_ICON_LOCK = ":material/lock:"
+_ICON_KEY = ":material/key:"
+_ICON_SHIELD = ":material/shield:"
+
+def _auth_mode_slug() -> str:
+    return (st.session_state.get("auth_mode") or "Sign In").replace(" ", "-").lower()
+
+
+def _auth_text_input(label: str, key: str, icon: str, **kwargs) -> str:
+    """Text/password input with a built-in Material icon (Streamlit native)."""
+    kwargs.setdefault("on_change", _clear_auth)
+    return st.text_input(label, key=key, icon=icon, **kwargs)
+
+
+def _auth_selectbox(label: str, options, key: str, **kwargs):
+    """Selectbox; shield icon via CSS ::before on .st-key-{key}."""
+    return st.selectbox(label, options, key=key, **kwargs)
+
+
 def _clear_auth() -> None:
     st.session_state.login_error = None
     st.session_state.signup_error = None
@@ -179,8 +201,9 @@ def _render_forgot_password() -> None:
             <div class="login-subheading">Enter your email to verify your identity</div>
         """)
 
-        email_input = st.text_input(
-            "Registered Email", key="fp_email", placeholder="name@example.com"
+        email_input = _auth_text_input(
+            "Registered Email", key="fp_email", icon=_ICON_MAIL,
+            placeholder="name@example.com",
         )
 
         if st.session_state.get("forgot_error"):
@@ -213,9 +236,9 @@ def _render_forgot_password() -> None:
         question = st.session_state.get("forgot_question", "")
         render_html(f'<div class="login-subheading" style="font-style:italic;">{question}</div>')
 
-        answer_input = st.text_input(
-            "Your Answer", key="fp_answer",
-            placeholder="Answer is not case-sensitive"
+        answer_input = _auth_text_input(
+            "Your Answer", key="fp_answer", icon=_ICON_KEY,
+            placeholder="Answer is not case-sensitive",
         )
 
         if st.session_state.get("forgot_error"):
@@ -242,13 +265,13 @@ def _render_forgot_password() -> None:
             <div class="login-subheading">Your identity has been verified ✓</div>
         """)
 
-        new_pw = st.text_input(
-            "New Password", key="fp_new_pw", type="password",
-            placeholder="At least 6 characters"
+        new_pw = _auth_text_input(
+            "New Password", key="fp_new_pw", icon=_ICON_LOCK, type="password",
+            placeholder="At least 6 characters",
         )
-        confirm_pw = st.text_input(
-            "Confirm Password", key="fp_confirm_pw", type="password",
-            placeholder="Repeat your password"
+        confirm_pw = _auth_text_input(
+            "Confirm Password", key="fp_confirm_pw", icon=_ICON_LOCK, type="password",
+            placeholder="Repeat your password",
         )
 
         if st.session_state.get("forgot_error"):
@@ -290,13 +313,13 @@ def _render_login_form() -> None:
     if st.session_state.pop("reset_success", False):
         render_html(_success_html("Password reset successfully! Please sign in."))
 
-    email = st.text_input(
-        "Email", key="login_email",
-        placeholder="name@example.com", on_change=_clear_auth,
+    email = _auth_text_input(
+        "Email", key="login_email", icon=_ICON_MAIL,
+        placeholder="name@example.com",
     )
-    password = st.text_input(
-        "Password", key="login_password", type="password",
-        placeholder="Enter your password", on_change=_clear_auth,
+    password = _auth_text_input(
+        "Password", key="login_password", icon=_ICON_LOCK, type="password",
+        placeholder="Enter your password",
     )
 
     col_l, col_r = st.columns(2)
@@ -338,35 +361,30 @@ def _render_register_form() -> None:
         <div class="login-subheading">Get started with the study risk predictor</div>
     """)
 
-    full_name = st.text_input(
-        "Full Name", key="signup_full_name",
-        placeholder="e.g. Azra Özdaş", on_change=_clear_auth,
+    full_name = _auth_text_input(
+        "Full Name", key="signup_full_name", icon=_ICON_USER,
+        placeholder="e.g. Azra Özdaş",
     )
-    email = st.text_input(
-        "Email", key="signup_email",
-        placeholder="name@example.com", on_change=_clear_auth,
+    email = _auth_text_input(
+        "Email", key="signup_email", icon=_ICON_MAIL,
+        placeholder="name@example.com",
     )
-    new_password = st.text_input(
-        "Password", key="signup_password", type="password",
-        placeholder="At least 6 characters", on_change=_clear_auth,
+    new_password = _auth_text_input(
+        "Password", key="signup_password", icon=_ICON_LOCK, type="password",
+        placeholder="At least 6 characters",
     )
-    confirm_password = st.text_input(
-        "Confirm Password", key="signup_confirm", type="password",
-        placeholder="Repeat your password", on_change=_clear_auth,
+    confirm_password = _auth_text_input(
+        "Confirm Password", key="signup_confirm", icon=_ICON_LOCK, type="password",
+        placeholder="Repeat your password",
     )
 
-    render_html("""
-        <div class="signup-section-label">
-            Security Question — used if you ever forget your password
-        </div>
-    """)
-    security_question = st.selectbox(
-        "Choose a security question", SECURITY_QUESTIONS,
+    security_question = _auth_selectbox(
+        "Security question", SECURITY_QUESTIONS,
         key="signup_sec_question",
     )
-    security_answer = st.text_input(
-        "Your Answer", key="signup_sec_answer",
-        placeholder="Not case-sensitive", on_change=_clear_auth,
+    security_answer = _auth_text_input(
+        "Your Answer", key="signup_sec_answer", icon=_ICON_KEY,
+        placeholder="Not case-sensitive",
     )
 
     if st.session_state.signup_error:
@@ -424,13 +442,16 @@ def render_login_page() -> None:
     _, center, _ = st.columns([1, 1.5, 1])
 
     with center:
+        mode_slug = _auth_mode_slug()
         render_html(f"""
-            <div class="login-brand">
-                <div class="login-logo-icon">{_logo_html()}</div>
-                <div class="login-brand-name">Studor</div>
-                <div class="login-brand-subtitle">Risk &amp; Performance Predictor</div>
+            <div id="studor-auth" class="login-auth-root" data-auth-mode="{mode_slug}">
+                <div class="login-brand">
+                    <div class="login-logo-icon">{_logo_html()}</div>
+                    <div class="login-brand-name">Studor</div>
+                    <div class="login-brand-subtitle">Risk &amp; Performance Predictor</div>
+                </div>
+                <hr class="login-divider" />
             </div>
-            <hr class="login-divider" />
         """)
 
         _render_tabs(st.session_state.auth_mode)
@@ -439,3 +460,6 @@ def render_login_page() -> None:
             _render_login_form()
         else:
             _render_register_form()
+
+    # Re-inject after widgets so auth CSS wins over Streamlit 1.57 theme rules
+    inject_login_styles(st.session_state.auth_mode)

@@ -34,6 +34,7 @@ Student Input → Dataset → Preprocessing → Machine Learning Model → Risk 
 * NumPy
 * Scikit-learn
 * Streamlit
+* Plotly
 * Joblib
 * PostgreSQL (Supabase — hosted, shared database)
 * GitHub
@@ -57,7 +58,14 @@ Source/
 │   └── db.py
 └── Frontend/
     ├── app.py
+    ├── bootstrap.py
     ├── login.py
+    ├── pages/
+    │   ├── 1_Login.py
+    │   └── 3_My_Courses.py
+    ├── pages_/
+    │   ├── my_courses.py
+    │   └── …
     ├── styles.py
     ├── utils.py
     └── assets/
@@ -75,6 +83,7 @@ Outputs/
 └── feature_importance.png
 
 Documentation/
+├── deployment_plan.md
 ├── workflow_diagram.png
 ├── system_design.md
 ├── problem_analysis.md
@@ -128,15 +137,23 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+Configure environment:
+
+```bash
+cp .env.example .env   # Windows: copy .env.example .env
+```
+
+Edit `.env` and set `DATABASE_URL` from your Supabase project settings.
+
 ---
 
 ## First-Run Setup
 
-The trained model (`Models/study_risk_model.pkl`), the encoders (`Models/encoders.pkl`), and the ML output files in `Outputs/` are **already included** in this repository so the app runs out of the box.
+The trained model (`Models/study_risk_model.pkl`), the encoders (`Models/encoders.pkl`), and the ML output files in `Outputs/` are **already included** in this repository so inference works without retraining.
 
-The `.env` file is also included and pre-configured with the shared Supabase database — no additional database setup is required.
+**Database credentials are not in the repo.** Copy `.env.example` to `.env` and set `DATABASE_URL` to your Supabase PostgreSQL URL. Login and saved predictions require internet access to that database.
 
-You only need to re-run the steps below if you change the dataset and want to retrain.
+You only need to re-run preprocessing and training if you change the dataset.
 
 ### Step 1 — Data Preprocessing
 
@@ -163,12 +180,16 @@ Register a new account on the login screen. All users share the same hosted Supa
 ## Dashboard Features
 
 * Login and registration (Supabase PostgreSQL)
+* **My Courses** — per-user add / edit / delete (database)
+* **Dataset Course Stats** — aggregated view of the training CSV (not personal courses)
 * Academic risk prediction
 * Study recommendations
-* Dataset preview
+* Dataset preview (dashboard + CSV-backed pages)
 * Model output visualization
-* Team information page
+* Profile and study schedule
 * Interactive user interface
+
+**Live demo:** see [Documentation/demo_script.md](Documentation/demo_script.md).
 
 ---
 
@@ -192,7 +213,7 @@ Register a new account on the login screen. All users share the same hosted Supa
 
 ## Screenshots
 
-<!-- Replace with real captures saved under Documentation/Screenshots/ -->
+Save captures as PNGs under `Documentation/Screenshots/` (see `Documentation/Screenshots/README.md`).
 
 ![Login](Documentation/Screenshots/01_login.png)
 ![Project Overview](Documentation/Screenshots/02_overview.png)
