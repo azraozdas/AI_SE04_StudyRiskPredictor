@@ -349,22 +349,27 @@ Next Steps:
 
 ### 05.06.2026
 
-**Azra Özdaş – Frontend Buildout & Page Modules**
-
+**Azra Özdaş – Frontend Buildout & Presentation Polish**
 Completed:
 - Refactored `app.py` into a query-param router (`?nav=`, `?logout=`) with a custom HTML sidebar (icon nav, brand block, profile shortcut, logout) and a login gate that dispatches to the `pages_/` modules.
 - Built/polished the dark-theme login UI in `login.py`: Sign In / Create Account tabs, security-question selector, "Remember me for 30 days", a 3-step forgot-password flow, inline error/success banners, and Material field icons.
 - Implemented `styles.py` `inject_app_styles()` for the sidebar and dashboard dark theme, plus the compact/relaxed login styles (`inject_login_styles(mode)`).
 - Built out the `pages_/` modules:
-  - Risk Prediction — input form wired to the model helper with a heuristic fallback, confidence display, recommendation list, and a Plotly input-overview chart.
-  - Study Schedule — weekly plan generated from course risk levels and deadlines, with focus filters and a 7-day calendar grid.
-  - Recommendations — risk-based action plans tied to the latest prediction, plus general study-science tips.
-  - Dataset Course Stats, Model Results, Profile, My Courses, and Dashboard pages.
+  - **Dashboard** — KPI cards, risk distribution, deadlines from training CSV.
+  - **Course Analytics** — aggregated per-course stats with search and risk filter.
+  - **Risk Prediction** — model form, confidence, recommendations, Plotly input chart.
+  - **Study Schedule** — weekly plan from dataset risk levels and deadlines.
+  - **Recommendations** — tips linked to latest prediction plus general study tips.
+  - **Model Results** — confusion matrix, feature importance, predictions table.
+  - **Profile** — account settings and project team section.
 - Added `course_colors.py` for consistent per-course color coding across schedule and recommendations.
 - Made all frontend paths portable via `os.path` and added defensive imports/fallbacks (missing model files, empty dataset).
 - Renamed the app to **Studor** across login branding, page title, sidebar, and dashboard.
 - Verified the app boots and the full login → navigation → prediction flow works on `localhost`; captured page screenshots under `Documentation/Screenshots/`.
-
+- Clarified page subtitles so Dashboard and Course Analytics clearly use the shared training CSV (not user-specific data).
+- Removed stale “My Courses” reference from Course Analytics.
+- Updated Study Schedule and Recommendations wording to rule-based/heuristic (not a separate ML model).
+- Updated Profile stat label to “Predictions (session)” and Model Results subtitle to reference `Outputs/metrics.json` and `Documentation/evaluation_report.md`.
 Next Steps:
-- Final UI review and responsive/layout polish across all pages.
-- End-to-end testing of the prediction and navigation flows.
+- Final demo rehearsal before progress presentation.
+- Confirm all screenshots match the live app.
