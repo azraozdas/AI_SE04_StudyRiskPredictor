@@ -200,6 +200,76 @@ def reset_password_direct(email: str, new_password: str) -> bool:
         conn.close()
 
 
+# ── Course CRUD ───────────────────────────────────────────────────────────────
+
+def create_course(user_id: int, name: str, difficulty: str = "Medium", workload: int = 5) -> int:
+    """Add a course for a user and return the new course id."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO courses (user_id, name, difficulty, workload)
+                    VALUES (%s, %s, %s, %s) RETURNING id
+                    """,
+                    (user_id, name.strip(), difficulty, workload),
+                )
+                return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
+def get_user_courses(user_id: int) -> list:
+    """Return all courses for a user, ordered by creation date."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, name, difficulty, workload, created_at
+                FROM courses WHERE user_id = %s ORDER BY created_at DESC
+                """,
+                (user_id,),
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def update_course(course_id: int, user_id: int, name: str, difficulty: str, workload: int) -> bool:
+    """Update a course. Only the owning user can modify it."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE courses SET name = %s, difficulty = %s, workload = %s
+                    WHERE id = %s AND user_id = %s
+                    """,
+                    (name.strip(), difficulty, workload, course_id, user_id),
+                )
+                return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
+def delete_course(course_id: int, user_id: int) -> bool:
+    """Delete a course. Only the owning user can delete it."""
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM courses WHERE id = %s AND user_id = %s",
+                    (course_id, user_id),
+                )
+                return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
 # ── Persistent sessions (Remember Me) ────────────────────────────────────────
 
 def create_session(user_id: int, days: int = 30) -> str:

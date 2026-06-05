@@ -9,4 +9,8 @@ psycopg2-binary
 python-dotenv
 bcrypt
 streamlit-cookies-controller
+<<<<<<< HEAD
 plotly
+=======
+pypdf
+>>>>>>> 7b5e2eb8716a57dfbd06a107298c4850c204f3e1

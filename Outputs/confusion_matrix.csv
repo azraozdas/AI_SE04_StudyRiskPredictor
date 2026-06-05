@@ -1,4 +1,4 @@
 ,predicted_0,predicted_1,predicted_2
-actual_0,14,0,1
-actual_1,0,14,1
-actual_2,2,0,13
+actual_0,15,0,0
+actual_1,0,22,0
+actual_2,0,0,23

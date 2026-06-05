@@ -237,6 +237,22 @@ Next Steps:
 - Participate in tonight's clean-machine rehearsal and tag `v1.0`.
 - Plan the migration from the sidebar-radio layout to Streamlit's native `pages/` structure for the 2 June scaffold work.
 
+### 01.06.2026
+
+**Dilay Tarhan – Testing & Documentation**
+
+Completed:
+- Reviewed repository documentation consistency.
+- Corrected `progress_report.md` prediction bug description.
+- Updated documentation to reflect frontend correction using `pass_grade` to match the trained model.
+- Synced documentation updates with repository progress tracking.
+- Prepared Teams project status update.
+
+Next Steps:
+- Continue final documentation review.
+- Support final repository consistency checks.
+- Assist final submission preparation.
+
 ### 02.06.2026
 
 **Eylül Özekinci – ML Honest Evaluation**
@@ -274,6 +290,27 @@ Next Steps:
 * Add screenshots to `Documentation/Screenshots/`.
 * Perform final UI review and testing.
 
+
+### 04.06.2026 
+
+**Müslüm Selim Akşahin – Backend & Data**
+
+Completed:
+- Expanded dataset from 210 to 300 rows (100 per class) via `Source/data_generation.py`; regenerated `Data/student_study_data.csv` and `Data/cleaned_student_data.csv`.
+- Re-ran `Source/preprocessing.py` to rebuild `Models/encoders.pkl` from the new 300-row data.
+- Re-ran `Source/ml_model.py` — retrained RandomForest; test accuracy 1.00, 5-Fold CV mean 1.00; updated `Outputs/` artifacts.
+- Added course CRUD to `Source/Backend/db.py`: `create_course`, `get_user_courses`, `update_course`, `delete_course` — all scoped to the owning user.
+- Created `Source/Backend/pdf_utils.py`: `extract_text`, `extract_metadata`, `save_upload` using `pypdf`; added `pypdf` to `requirements.txt`.
+- Updated `Data/data_dictionary.md` to v1.5: corrected row count to 300, added Encoder Mapping section, expanded Limitations.
+- Created `Documentation/performance_check.md`: model metrics, feature importances, DB latency measurements, key optimisations, known limitations.
+- Fixed encoder integration gap: `Source/Frontend/pages_/risk_prediction.py` now loads `encoders.pkl` via `joblib` and calls `encoders[col].transform()` instead of hardcoded integer maps; prediction results saved to `predictions` table.
+- Implemented `Source/Frontend/pages_/courses.py` with full create / read / edit / delete UI backed by Supabase.
+- Fixed Supabase connectivity for IPv4-only networks: switched `DATABASE_URL` to Supabase Supavisor pooler (`aws-0-eu-west-1.pooler.supabase.com:6543`).
+
+Next Steps:
+- Implement remaining stub pages: `model_results.py`, `profile.py`, `recommendations.py`, `study_schedule.py`.
+- Capture screenshots for README.
+- Final documentation review before submission.
 
 ### 04.06.2026
 
