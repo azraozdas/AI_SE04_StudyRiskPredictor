@@ -373,3 +373,15 @@ Completed:
 Next Steps:
 - Final demo rehearsal before progress presentation.
 - Confirm all screenshots match the live app.
+
+
+**Müslüm Selim Akşahin – Data Dictionary & Backend Cleanup**
+Completed:
+•⁠  ⁠Updated ⁠ Data/data_dictionary.md ⁠ (v1.6): overlapping class profiles, ~12% label noise, preprocessing steps, and corrected limitations.
+•⁠  ⁠Supported dataset regeneration via ⁠ Source/data_generation.py ⁠ and ⁠ Source/preprocessing.py ⁠.
+•⁠  ⁠Cleaned ⁠ Source/Backend/db.py ⁠: removed duplicate course CRUD functions; marked remaining course helpers as reserved for future UI.
+•⁠  ⁠Marked ⁠ Source/Backend/pdf_utils.py ⁠ as deferred (no upload UI in current MVP).
+•⁠  ⁠Verified ⁠ Data/student_study_data.csv ⁠ and ⁠ Data/cleaned_student_data.csv ⁠ remain aligned with preprocessing and model training.
+Next Steps:
+•⁠  ⁠Support final data-related questions during presentation.
+•⁠  ⁠Document future scope for per-user courses and PDF upload if asked in Q&A.
