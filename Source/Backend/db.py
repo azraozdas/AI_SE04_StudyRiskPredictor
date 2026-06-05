@@ -16,15 +16,19 @@ import bcrypt
 import psycopg2
 from dotenv import load_dotenv
 
+# Resolve .env relative to this file so it is found regardless of the
+# working directory the app is launched from.
+_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".env")
+
 
 def get_connection():
     """Return a psycopg2 connection using DATABASE_URL from .env."""
-    load_dotenv()
+    load_dotenv(_ENV_PATH, override=True)
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         raise RuntimeError(
             "DATABASE_URL is not set. "
-            "Copy .env.example to .env and fill in your hosted PostgreSQL credentials."
+            "Ensure the .env file exists at the project root with a valid DATABASE_URL."
         )
     return psycopg2.connect(db_url)
 
