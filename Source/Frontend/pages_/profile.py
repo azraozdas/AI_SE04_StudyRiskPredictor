@@ -86,7 +86,7 @@ def render() -> None:
         render_html(_stat_card("Last Course Assessed", course_val, course_color))
     with c3:
         preds_run = 1 if pred else 0
-        render_html(_stat_card("Predictions Run", str(preds_run), "#6366F1"))
+        render_html(_stat_card("Predictions (session)", str(preds_run), "#6366F1"))
 
     render_html('<div class="section-h2 section-h2--follow">Edit Profile</div>')
 

@@ -1,13 +1,10 @@
 """
-PDF utilities for AI Smart Study Risk Predictor.
+PDF utilities — deferred (no Streamlit upload UI in current MVP).
 
-Provides text extraction and metadata reading for uploaded course materials.
-Requires: pypdf (pip install pypdf)
+Provides text extraction and metadata reading for future course-material uploads.
+Requires: pypdf (listed in requirements.txt for future use)
 
-Usage:
-    from pdf_utils import extract_text, extract_metadata, save_upload
-
-The pdfs table in Supabase stores the record; actual files live under Uploads/.
+The pdfs table in Supabase is created by init_db(); files would live under Uploads/.
 """
 
 import os

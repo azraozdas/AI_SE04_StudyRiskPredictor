@@ -1,4 +1,4 @@
-"""Study Schedule page — AI-generated weekly study plan."""
+"""Study Schedule page — rule-based weekly study plan from dataset risk levels."""
 
 import os
 import sys
@@ -86,7 +86,10 @@ letter-spacing:0.1em;margin-bottom:4px;">{day}</div>
 
 def render() -> None:
     render_html('<div class="page-h1">Study Schedule</div>')
-    render_html('<div class="page-sub">AI-generated weekly plan based on course risk levels and deadlines</div>')
+    render_html(
+        '<div class="page-sub">Weekly plan generated from dataset course risk levels and deadlines '
+        '(heuristic scheduler — not a separate ML model)</div>'
+    )
 
     df = _load()
     if df is None or df.empty:

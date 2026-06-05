@@ -1,26 +1,47 @@
 # Data Dictionary — Student Study Risk Dataset
-**Version 1.5** — updated 04.06.2026: expanded to 300 rows (100 per class), retrained model.
 
-The cleaned dataset (`cleaned_student_data.csv`) contains 8 columns. The `student_id` column present in the raw dataset is dropped during preprocessing and is not included here.
+**Version 1.6** — aligned with `Source/data_generation.py` (300 rows, overlapping profiles, ~12% label noise).
+
+The cleaned dataset (`cleaned_student_data.csv`) contains **8 columns**. The `student_id` column in the raw CSV is dropped during preprocessing and is not used for training.
 
 | Column | Type | Values / Range | Meaning |
 |---|---|---|---|
-| course | categorical (encoded) | 0–19 | Name of the course being studied |
+| course | categorical (encoded) | 0–19 | Name of the course being studied (20 courses) |
 | study_hours | integer | 0–15 | Weekly hours the student spends studying |
 | attendance | integer | 0–100 | Attendance percentage for the course |
 | deadline_days | integer | 0–30 | Days remaining until the next assignment deadline |
 | pass_grade | integer | 0–100 | Student's current or most recent grade in the course |
-| assignment_difficulty | categorical (encoded) | 0=High, 1=Low, 2=Medium | Difficulty level of the current assignment |
-| workload_level | categorical (encoded) | 0=High, 1=Low, 2=Medium | Overall workload level for the course |
-| risk_level | categorical (encoded, target) | 0=High, 1=Low, 2=Medium | Predicted academic risk level — this is what the model predicts |
+| assignment_difficulty | categorical (encoded) | High=0, Low=1, Medium=2 | Difficulty of the current assignment |
+| workload_level | categorical (encoded) | High=0, Low=1, Medium=2 | Overall workload level for the course |
+| risk_level | categorical (encoded, target) | High=0, Low=1, Medium=2 | Academic risk level — model prediction target |
 
-## Simulation Rules
+## Generation Rules (`Source/data_generation.py`)
 
-Risk levels were assigned based on a combination of academic performance and workload indicators. A student was labelled **High Risk** when they had low study hours (1–3 h/week), low attendance (30–58%), a deadline within 0–3 days, a low pass grade (40–62), and High assignment difficulty together with High workload. **Medium Risk** was assigned for moderate values across all indicators: 3–5 study hours, 55–80% attendance, 2–8 days to deadline, a pass grade of 56–76, and Medium difficulty and workload. **Low Risk** was assigned when a student showed strong engagement: 5–8 study hours, 78–100% attendance, at least 6 days until the deadline, a pass grade of 74–100, and Low difficulty and workload. The dataset was constructed with balanced class sizes (100 rows per class, 300 total) to avoid bias toward any single risk category during model training.
+- **300 rows** — 100 per nominal risk class (High, Medium, Low) before noise.
+- **Overlapping profiles** — each class samples from overlapping ranges (e.g. High: 1–4 study hours, 30–65% attendance; Low: 5–9 hours, 75–100% attendance). Classes are not perfectly separable.
+- **Probabilistic categoricals** — assignment difficulty and workload are drawn from class-specific weight distributions, not fixed rules.
+- **Label noise** — after generation, **~12%** of rows have `risk_level` randomly reassigned to reduce deterministic leakage.
+- **Balanced classes** — 100 rows per nominal class before noise; after noise the class counts may differ slightly.
+
+Regenerate the raw CSV with:
+
+```bash
+python Source/data_generation.py
+python Source/preprocessing.py
+```
+
+## Preprocessing (`Source/preprocessing.py`)
+
+1. Drop `student_id`.
+2. Fill numeric missing values with column medians; categoricals with mode.
+3. Drop duplicate rows.
+4. Clip `attendance` and `pass_grade` to 0–100.
+5. Label-encode categoricals (`course`, `assignment_difficulty`, `workload_level`, `risk_level`).
+6. Save encoders to `Models/encoders.pkl` and cleaned CSV to `Data/cleaned_student_data.csv`.
 
 ## Encoder Mapping
 
-Categorical columns are encoded with `sklearn.preprocessing.LabelEncoder` (alphabetical order). The fitted encoders are serialised to `Models/encoders.pkl` via `joblib`. **Always use `encoders.pkl` for inference** — do not rely on hardcoded integer maps, as re-running `preprocessing.py` may produce a different ordering if new category values are added.
+Categorical columns use `sklearn.preprocessing.LabelEncoder` (alphabetical order). Fitted encoders are saved to `Models/encoders.pkl`. **Always use `encoders.pkl` for inference** — do not hardcode integer maps.
 
 | Column | Encoded as |
 |---|---|
@@ -31,7 +52,8 @@ Categorical columns are encoded with `sklearn.preprocessing.LabelEncoder` (alpha
 
 ## Limitations
 
-- Dataset is fully simulated. No real student records.
-- Target leakage by construction. risk_level is a deterministic function of the same six features the model trains on.
-- Small sample. 300 rows / no noise / balanced classes inflate apparent performance.
-- Multi-user story not supported by per-user data store — all 300 rows represent the global dataset, not individual student histories.
+- **Fully simulated** — no real student records.
+- **Small sample** — 300 rows; metrics have wide confidence intervals on real data.
+- **Label noise** — reduces but does not eliminate synthetic bias; patterns still approximate designed profiles.
+- **Global dataset** — all 300 rows are shared training/demo data, not per-user histories in the database.
+- **Course feature** — low model importance; risk is driven mainly by attendance, deadlines, grades, and study hours (see `Outputs/feature_importance.csv`).

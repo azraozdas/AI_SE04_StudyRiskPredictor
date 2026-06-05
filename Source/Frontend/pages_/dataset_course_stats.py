@@ -94,8 +94,8 @@ def render() -> None:
     render_html('<div class="page-h1">Course Analytics</div>')
     render_html(
         '<div class="page-sub">Aggregated statistics from the shared training CSV '
-        '(<code>Data/student_study_data.csv</code>) — not your personal courses. '
-        'Use <strong>My Courses</strong> in the sidebar to add your own subjects.</div>'
+        '(<code>Data/student_study_data.csv</code>) — read-only dataset analytics, '
+        'not linked to your login account.</div>'
     )
 
     df = _load()

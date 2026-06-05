@@ -1,70 +1,69 @@
 # Progress Report
 
+**Project:** Studor — AI Smart Study Risk & Performance Predictor  
+**Status:** MVP complete — documentation and metrics aligned (05.06.2026)
+
+---
+
 ## Completed Tasks
 
 ### Documentation
-- Problem Analysis completed
-- Workflow Diagram finalized and uploaded
-- System Design documented
-- Testing Report prepared
-- Gantt Chart created and documented
-- Daily logs updated
-- Repository documentation reviewed and synchronized
+- Problem analysis
+- Workflow diagram (`Documentation/workflow_diagram.png`)
+- System design (architecture aligned with implementation)
+- Gantt chart timeline (`Documentation/gantt_chart.md`)
+- Testing report
+- Evaluation report + `Outputs/metrics.json`
+- Daily logs (`Logs/daily_logs.md`)
+- Demo script and deployment plan
+- Team contributions
 
-### Development
-- Dataset creation completed
-- Data preprocessing implemented
-- Random Forest model training completed
-- Streamlit frontend developed
-- Prediction feature bug fixed — frontend corrected to use pass_grade to match the trained model.
-- Local environment setup issues resolved
-- Streamlit application successfully tested
-- Requirements configuration updated with working versions
+### Data & Machine Learning
+- 300-row simulated dataset with overlapping profiles and ~12% label noise
+- Preprocessing pipeline with portable paths and `encoders.pkl`
+- Random Forest classifier with 70/15/15 stratified split
+- 5-fold CV on training set; validation and test evaluation
+- Inference API (`Source/model_utils.py`)
+- Regenerated model artifacts in `Models/` and `Outputs/`
 
-### Repository Maintenance
-- Project structure reorganized
-- GitHub repository synchronized
-- `.gitignore` configured
-- MIT `LICENSE` added
-- `Reports/` folder created
-- Placeholder `final_audit_summary.md` added
-- Documentation consistency reviewed and corrected
+### Frontend (Studor)
+- Login / registration (Supabase)
+- Dashboard, Course Analytics, Risk Prediction, Study Schedule, Recommendations, Model Results, Profile
+- Custom dark-theme UI with query-param router
+- Screenshots in `Documentation/Screenshots/`
+
+### Backend
+- Supabase PostgreSQL: users, sessions, predictions
+- bcrypt authentication and security-question password reset
+- Saved predictions on successful inference
+
+### Repository
+- `.gitignore`, MIT `LICENSE`, `requirements.txt`
+- Consistent naming: `AI_SE04_StudyRiskPredictor`
 
 ---
 
 ## Current Status
 
-Project MVP is completed and functional.
-
-Current system status:
-- Frontend operational
-- Model loading successful
-- Prediction workflow functioning
-- Local deployment verified
-- Documentation structure finalized
-- Repository maintenance completed
+| Area | Status |
+|------|--------|
+| Frontend | Operational |
+| ML inference | Operational |
+| Database auth | Operational (requires `.env`) |
+| Documentation | Aligned with implementation |
+| Metrics | Single source: `Outputs/metrics.json` |
 
 ---
 
-## Remaining Tasks
+## Remaining / Future Work (out of current MVP)
 
-### Testing & Validation
-- Full system validation testing
-- Final model performance review
-
-### Documentation Finalization
-- Complete final audit summary
-- Final documentation consistency review
-
-### Submission Preparation
-- Presentation outline preparation
-- Final submission packaging
-- Final repository review
+- Display saved prediction history from database on Profile
+- Per-user course management UI (schema reserved in `db.py`)
+- Automated unit tests for `model_utils.py`
+- Streamlit Cloud deployment
 
 ---
 
 ## Overall Progress
 
-The project is in the final completion stage.
-
-All core development, documentation, workflow planning, and repository maintenance tasks have been completed. Remaining work focuses on final validation, review, and submission preparation.
+Core development, ML pipeline, dashboard, authentication, and documentation are complete. The project is ready for progress presentation and demo with honest discussion of simulated data limitations.

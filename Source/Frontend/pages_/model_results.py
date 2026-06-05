@@ -218,7 +218,11 @@ def _distribution_chart(preds: pd.DataFrame, col_name: str) -> None:
 
 def render() -> None:
     render_html('<div class="page-h1">Model Results</div>')
-    render_html('<div class="page-sub">Random Forest classifier — training outputs and performance metrics</div>')
+    render_html(
+        '<div class="page-sub">Random Forest classifier — held-out test outputs '
+        '(see <code>Outputs/metrics.json</code> and '
+        '<code>Documentation/evaluation_report.md</code>)</div>'
+    )
 
     preds_df = _load_predictions()
     fi_df    = _load(FEATURE_IMP_PATH)

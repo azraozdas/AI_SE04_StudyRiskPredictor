@@ -279,7 +279,10 @@ def render() -> None:
     df = _load_data()
 
     render_html('<div class="page-h1">Dashboard</div>')
-    render_html('<div class="page-sub">Academic risk overview across all students and courses</div>')
+    render_html(
+        '<div class="page-sub">Academic risk overview from the shared training dataset '
+        '(<code>student_study_data.csv</code>) — not your personal account data</div>'
+    )
 
     if df is None or df.empty:
         st.warning("Dataset not found. Place `student_study_data.csv` in the `Data/` folder.")

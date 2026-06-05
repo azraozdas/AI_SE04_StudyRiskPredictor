@@ -1,4 +1,4 @@
-"""Recommendations page — AI study tips based on risk patterns."""
+"""Recommendations page — rule-based study tips linked to risk prediction."""
 
 import os
 import sys
@@ -144,7 +144,10 @@ def _general_tip(icon: str, title: str, body: str) -> str:
 
 def render() -> None:
     render_html('<div class="page-h1">Recommendations</div>')
-    render_html('<div class="page-sub">Personalised study strategies based on your risk profile</div>')
+    render_html(
+        '<div class="page-sub">Study strategies based on your latest risk prediction '
+        'or general tips from dataset patterns</div>'
+    )
 
     # Check if there is a recent prediction result
     result = st.session_state.get("prediction_result")

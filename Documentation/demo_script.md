@@ -1,4 +1,4 @@
-# Live Demo Script
+# Live Demo Script — Studor
 
 Use this walkthrough for presentations and local smoke tests. Allow **5–8 minutes**.
 
@@ -18,40 +18,39 @@ streamlit run Source/Frontend/app.py
 
 ## 1. Login (≈1 min)
 
-- Open the app in the browser (default `http://localhost:8501`).
-- **Register** a new account or **sign in** with an existing one.
-- Confirm you land on the **Dashboard** with the custom Studor sidebar.
+- Open the app (default `http://localhost:8501`).
+- **Register** a new account or **sign in**.
+- Confirm you land on the **Dashboard** with the Studor sidebar.
 
-**Talking point:** Authentication uses a hosted Supabase database; credentials are not stored in the repo.
+**Talking point:** Authentication uses Supabase PostgreSQL; credentials are not stored in the repository.
 
 ---
 
 ## 2. Dashboard (≈1 min)
 
-- Review KPI cards (risk distribution, study hours, attendance).
-- Point out dataset-backed overview from `Data/student_study_data.csv`.
-- Optional: mention profile link at the bottom of the sidebar.
+- Review KPI cards and risk distribution chart.
+- Explain data comes from the shared training CSV (`Data/student_study_data.csv`), not personal enrollments.
 
 ---
 
 ## 3. Risk Prediction (≈2 min)
 
 - Sidebar → **Risk Prediction**.
-- Fill in the form (course, study hours, attendance, deadline, grade, difficulty, workload).
+- Enter study hours, attendance, deadline, pass grade, difficulty, workload.
 - Click **Predict Risk**.
-- Show the result panel: risk level, confidence, recommendations, and input chart.
+- Show risk level, confidence, recommendations, and input chart.
 
-**Talking point:** Predictions use `Models/study_risk_model.pkl` and `Models/encoders.pkl` via `Source/model_utils.py`, with a rule-based fallback if the model is unavailable.
+**Talking point:** Predictions use `Models/study_risk_model.pkl` and `Models/encoders.pkl` via `Source/model_utils.py`. Test accuracy is **91.11%** on held-out data (see `Outputs/metrics.json`).
 
 ---
 
 ## 4. Course Analytics (≈1 min)
 
 - Sidebar → **Course Analytics**.
-- Show aggregated per-course stats from the training CSV (not personal enrollments).
-- Demo **Search courses** and **Filter by risk**.
+- Show aggregated per-course stats from the training CSV.
+- Demo search and risk filter.
 
-**Talking point:** This page is read-only analytics on the shared dataset; it is separate from user login data.
+**Talking point:** Read-only analytics on the shared dataset — separate from user login data.
 
 ---
 
@@ -59,10 +58,10 @@ streamlit run Source/Frontend/app.py
 
 | Page | What to show |
 |------|----------------|
-| Study Schedule | Weekly plan from dataset risk levels |
-| Recommendations | Study tips by risk band |
-| Model Results | Confusion matrix, feature importance |
-| Profile | User info and prediction history |
+| Study Schedule | Rule-based weekly plan from dataset risk levels |
+| Recommendations | Tips linked to your latest prediction |
+| Model Results | Confusion matrix, feature importance, test predictions |
+| Profile | Account info and project team |
 
 ---
 
@@ -71,15 +70,15 @@ streamlit run Source/Frontend/app.py
 | Issue | Fix |
 |-------|-----|
 | Login fails | Check `.env` `DATABASE_URL` and internet |
-| `pip install` error | Ensure `requirements.txt` has no merge conflict markers |
-| Risk page chart missing | `pip install plotly` |
+| Risk page error | Confirm `Models/` and `Outputs/` exist; run `python Source/ml_model.py` |
 | Empty Course Analytics | Confirm `Data/student_study_data.csv` exists |
+| Chart missing | `pip install plotly` |
 
 ---
 
 ## Screenshot checklist
 
-After a successful run, capture PNGs under `Documentation/Screenshots/`:
+PNGs under `Documentation/Screenshots/`:
 
 1. `01_login.png` — login screen
 2. `02_overview.png` — dashboard

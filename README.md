@@ -1,10 +1,10 @@
-# AI Smart Study Risk & Performance Predictor
+# AI Smart Study Risk & Performance Predictor (Studor)
 
 ## Project Overview
 
-AI Smart Study Risk & Performance Predictor is a prototype system designed to help students identify potential academic risks before they become serious problems. The system analyzes factors such as study hours, attendance, deadlines, grades, assignment difficulty, and workload level to predict whether a student has a Low, Medium, or High academic risk level.
+**Studor** (AI Smart Study Risk & Performance Predictor) is a prototype system that helps students identify potential academic risks before they become serious problems. The system analyzes study hours, attendance, deadlines, pass grades, assignment difficulty, and workload level to predict whether a student has a **Low**, **Medium**, or **High** academic risk level.
 
-The project combines data preprocessing, machine learning, and an interactive Streamlit dashboard to provide risk predictions and study recommendations.
+The project combines data preprocessing, machine learning, and an interactive Streamlit dashboard for risk prediction and study recommendations.
 
 ---
 
@@ -24,6 +24,13 @@ The project combines data preprocessing, machine learning, and an interactive St
 ![Workflow Diagram](Documentation/workflow_diagram.png)
 
 Student Input → Dataset → Preprocessing → Machine Learning Model → Risk Prediction → Study Recommendation → Dashboard
+
+---
+
+## Daily Progress Logs
+
+Recent work is recorded in [`Logs/daily_logs.md`](Logs/daily_logs.md).  
+Progress updates are also shared with the team on **Microsoft Teams** during the project timeline.
 
 ---
 
@@ -53,16 +60,17 @@ Data/
 Source/
 ├── preprocessing.py
 ├── ml_model.py
+├── model_utils.py
 ├── data_generation.py
 ├── Backend/
 │   └── db.py
 └── Frontend/
     ├── app.py              # main router + custom sidebar
     ├── bootstrap.py
-    ├── login.py            # login / registration (not pages/ wrapper)
+    ├── login.py
     ├── pages_/             # feature pages (imported by app.py)
     │   ├── dashboard.py
-    │   ├── dataset_course_stats.py
+    │   ├── dataset_course_stats.py   # Course Analytics
     │   ├── risk_prediction.py
     │   ├── study_schedule.py
     │   ├── recommendations.py
@@ -78,6 +86,7 @@ Models/
 └── encoders.pkl
 
 Outputs/
+├── metrics.json
 ├── predictions.csv
 ├── confusion_matrix.csv
 ├── confusion_matrix.png
@@ -87,12 +96,14 @@ Outputs/
 Documentation/
 ├── demo_script.md
 ├── deployment_plan.md
+├── gantt_chart.md
 ├── workflow_diagram.png
 ├── system_design.md
 ├── problem_analysis.md
 ├── progress_report.md
 ├── testing_report.md
 ├── evaluation_report.md
+├── performance_check.md
 ├── team_contributions.md
 └── Screenshots/
 
@@ -152,11 +163,11 @@ Edit `.env` and set `DATABASE_URL` from your Supabase project settings.
 
 ## First-Run Setup
 
-The trained model (`Models/study_risk_model.pkl`), the encoders (`Models/encoders.pkl`), and the ML output files in `Outputs/` are **already included** in this repository so inference works without retraining.
+The trained model (`Models/study_risk_model.pkl`), encoders (`Models/encoders.pkl`), and ML outputs in `Outputs/` are **included** so inference works without retraining.
 
-**Database credentials are not in the repo.** Copy `.env.example` to `.env` and set `DATABASE_URL` to your Supabase PostgreSQL URL. Login and saved predictions require internet access to that database.
+**Database credentials are not in the repo.** Copy `.env.example` to `.env` and set `DATABASE_URL`. Login and saved predictions require internet access to Supabase.
 
-You only need to re-run preprocessing and training if you change the dataset.
+Retrain only if you change the dataset:
 
 ### Step 1 — Data Preprocessing
 
@@ -176,30 +187,31 @@ python Source/ml_model.py
 streamlit run Source/Frontend/app.py
 ```
 
-Register a new account on the login screen. All users share the same hosted Supabase database.
+Register a new account on the login screen.
 
 ---
 
 ## Dashboard Features
 
-* Login and registration (Supabase PostgreSQL)
-* **Course Analytics** — aggregated view of the training CSV (read-only)
-* Academic risk prediction
-* Study recommendations
-* Dataset preview (dashboard + CSV-backed pages)
-* Model output visualization
-* Profile and study schedule
-* Interactive user interface
+| Page | Description |
+|------|-------------|
+| **Dashboard** | Dataset-backed academic overview (KPIs, risk distribution, deadlines) |
+| **Course Analytics** | Aggregated statistics from the training CSV (read-only) |
+| **Risk Prediction** | ML risk classification with confidence and recommendations |
+| **Study Schedule** | Rule-based weekly plan from dataset risk patterns |
+| **Recommendations** | Study tips linked to your latest prediction |
+| **Model Results** | Confusion matrix, feature importance, test predictions |
+| **Profile** | Account settings and project team info |
 
-> **Note:** Native Streamlit `pages/` wrappers (`1_Login.py`, `3_My_Courses.py`, `4_Upload_PDF.py`) are optional/deferred. The live app uses `app.py` + `pages_/` only.
+Authentication uses Supabase PostgreSQL (register, sign in, password reset via security question).
 
-**Live demo:** see [Documentation/demo_script.md](Documentation/demo_script.md).
+**Live demo:** [Documentation/demo_script.md](Documentation/demo_script.md)
 
 ---
 
 ## Model Performance
 
-**Random Forest Classifier — 300-row simulated dataset (with label noise)**
+**Random Forest Classifier — 300-row simulated dataset (~12% label noise)**
 
 | Metric | Value |
 | --- | --- |
@@ -209,32 +221,31 @@ Register a new account on the login screen. All users share the same hosted Supa
 | 5-Fold CV Std Deviation | 0.0513 |
 | Macro Avg F1 Score | 0.91 |
 
-> The dataset uses overlapping feature ranges and ~12% label noise so metrics reflect learnable signal, not a deterministic lookup.
-> Cross-validation runs only on the training set; validation and test sets are held out.
-> See `Documentation/evaluation_report.md` for limitations and the Q&A answer on earlier 100% CV.
+Split: **70% train / 15% validation / 15% test** (stratified). Cross-validation runs on the training set only.
+
+Authoritative metrics: `Outputs/metrics.json` and [Documentation/evaluation_report.md](Documentation/evaluation_report.md).
 
 ---
 
 ## Screenshots
 
-Save captures as PNGs under `Documentation/Screenshots/` (see `Documentation/Screenshots/README.md`).
+Application screenshots are stored under `Documentation/Screenshots/`:
 
 ![Login](Documentation/Screenshots/01_login.png)
-![Project Overview](Documentation/Screenshots/02_overview.png)
+![Dashboard](Documentation/Screenshots/02_overview.png)
 ![Risk Prediction](Documentation/Screenshots/03_risk_prediction.png)
 ![Course Analytics](Documentation/Screenshots/04_dataset_preview.png)
-![Model Outputs](Documentation/Screenshots/05_model_outputs.png)
+![Model Results](Documentation/Screenshots/05_model_outputs.png)
 
 ---
 
 ## Future Improvements
 
 * Larger and real-world academic datasets
-* More advanced machine learning models
-* Personalized AI recommendations (OpenAI / Gemini API)
-* PDF and document analysis
-* Real-time notifications and reminders
-* Cloud deployment support
+* Hyperparameter tuning and additional ML models
+* Display saved prediction history on the Profile page
+* Per-user course management (database schema reserved)
+* Cloud deployment on Streamlit Community Cloud
 
 ---
 

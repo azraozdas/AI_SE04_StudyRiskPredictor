@@ -1,0 +1,48 @@
+{
+  "dataset_rows": 300,
+  "train_samples": 210,
+  "validation_samples": 45,
+  "test_samples": 45,
+  "cv_fold_scores": [
+    0.9285714285714286,
+    0.7857142857142857,
+    0.8809523809523809,
+    0.8333333333333334,
+    0.9047619047619048
+  ],
+  "cv_mean_accuracy": 0.8666666666666668,
+  "cv_std_accuracy": 0.05128728387747147,
+  "validation_accuracy": 0.8888888888888888,
+  "test_accuracy": 0.9111111111111111,
+  "test_macro_f1": 0.9118032381658633,
+  "feature_importance_ranking": [
+    {
+      "feature": "attendance",
+      "importance": 0.24652766018640215
+    },
+    {
+      "feature": "deadline_days",
+      "importance": 0.22367559666438702
+    },
+    {
+      "feature": "pass_grade",
+      "importance": 0.21458442634574182
+    },
+    {
+      "feature": "study_hours",
+      "importance": 0.18181935137179794
+    },
+    {
+      "feature": "course",
+      "importance": 0.061497227018388986
+    },
+    {
+      "feature": "workload_level",
+      "importance": 0.04533901577917536
+    },
+    {
+      "feature": "assignment_difficulty",
+      "importance": 0.026556722634106703
+    }
+  ]
+}
