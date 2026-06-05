@@ -385,3 +385,17 @@ Completed:
 Next Steps:
 •⁠  ⁠Support final data-related questions during presentation.
 •⁠  ⁠Document future scope for per-user courses and PDF upload if asked in Q&A.
+
+**Eylül Özekinci – ML Pipeline Alignment & Evaluation**
+Completed:
+- Finalized `Source/ml_model.py` with **70/15/15 stratified split** (210 train / 45 validation / 45 test) and 5-fold CV on the training set only.
+- Regenerated dataset, encoders, model, and all `Outputs/` artifacts after label-noise data generation.
+- Added `Outputs/metrics.json` as the single authoritative metrics file for the project.
+- Confirmed final metrics: CV mean **86.67%** (±0.0513), validation **88.89%**, test **91.11%**, macro F1 **0.91**.
+- Updated `Documentation/evaluation_report.md` so confusion matrix, feature importance, and split methodology match committed artifacts.
+- Rewrote `Documentation/performance_check.md` to remove outdated 100% accuracy and 80/20 split claims.
+- Verified `Source/model_utils.py` inference remains aligned with `Models/encoders.pkl` and the retrained model.
+Next Steps:
+- Support demo Q&A on simulated data limitations and evaluation methodology.
+- Assist with final model-results walkthrough during presentation.
+---
