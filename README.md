@@ -57,15 +57,17 @@ Source/
 ├── Backend/
 │   └── db.py
 └── Frontend/
-    ├── app.py
+    ├── app.py              # main router + custom sidebar
     ├── bootstrap.py
-    ├── login.py
-    ├── pages/
-    │   ├── 1_Login.py
-    │   └── 3_My_Courses.py
-    ├── pages_/
-    │   ├── my_courses.py
-    │   └── …
+    ├── login.py            # login / registration (not pages/ wrapper)
+    ├── pages_/             # feature pages (imported by app.py)
+    │   ├── dashboard.py
+    │   ├── dataset_course_stats.py
+    │   ├── risk_prediction.py
+    │   ├── study_schedule.py
+    │   ├── recommendations.py
+    │   ├── model_results.py
+    │   └── profile.py
     ├── styles.py
     ├── utils.py
     └── assets/
@@ -83,6 +85,7 @@ Outputs/
 └── feature_importance.png
 
 Documentation/
+├── demo_script.md
 ├── deployment_plan.md
 ├── workflow_diagram.png
 ├── system_design.md
@@ -180,14 +183,15 @@ Register a new account on the login screen. All users share the same hosted Supa
 ## Dashboard Features
 
 * Login and registration (Supabase PostgreSQL)
-* **My Courses** — per-user add / edit / delete (database)
-* **Dataset Course Stats** — aggregated view of the training CSV (not personal courses)
+* **Course Analytics** — aggregated view of the training CSV (read-only)
 * Academic risk prediction
 * Study recommendations
 * Dataset preview (dashboard + CSV-backed pages)
 * Model output visualization
 * Profile and study schedule
 * Interactive user interface
+
+> **Note:** Native Streamlit `pages/` wrappers (`1_Login.py`, `3_My_Courses.py`, `4_Upload_PDF.py`) are optional/deferred. The live app uses `app.py` + `pages_/` only.
 
 **Live demo:** see [Documentation/demo_script.md](Documentation/demo_script.md).
 
@@ -218,7 +222,7 @@ Save captures as PNGs under `Documentation/Screenshots/` (see `Documentation/Scr
 ![Login](Documentation/Screenshots/01_login.png)
 ![Project Overview](Documentation/Screenshots/02_overview.png)
 ![Risk Prediction](Documentation/Screenshots/03_risk_prediction.png)
-![Dataset Preview](Documentation/Screenshots/04_dataset_preview.png)
+![Course Analytics](Documentation/Screenshots/04_dataset_preview.png)
 ![Model Outputs](Documentation/Screenshots/05_model_outputs.png)
 
 ---
