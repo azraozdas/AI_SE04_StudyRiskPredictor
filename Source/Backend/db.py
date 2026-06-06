@@ -30,7 +30,7 @@ def get_connection():
             "DATABASE_URL is not set. "
             "Ensure the .env file exists at the project root with a valid DATABASE_URL."
         )
-    return psycopg2.connect(db_url)
+    return psycopg2.connect(db_url, connect_timeout=5)
 
 
 def init_db():

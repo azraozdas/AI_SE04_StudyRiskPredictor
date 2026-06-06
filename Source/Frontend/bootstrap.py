@@ -14,6 +14,8 @@ _BACKEND = os.path.join(_ROOT, "Source", "Backend")
 if _BACKEND not in sys.path:
     sys.path.insert(0, _BACKEND)
 
+_DB_INIT_ATTEMPTED = False
+
 _SESSION_DEFAULTS = {
     "logged_in": False,
     "current_page": "dashboard",
@@ -64,6 +66,9 @@ def _restore_remember_me_cookie() -> None:
     """Log in from a valid Remember Me token stored in the browser cookie."""
     if st.session_state.get("logged_in"):
         return
+    if st.session_state.get("_remember_me_attempted"):
+        return
+    st.session_state._remember_me_attempted = True
     try:
         from cookie_session import get_session_token
         from db import get_session_user
@@ -101,12 +106,19 @@ def init_session_state() -> None:
         if key not in st.session_state:
             st.session_state[key] = value
 
+    from utils import restore_auth_session
+
+    restore_auth_session()
     _restore_remember_me_cookie()
     _flush_pending_session_cookie()
 
 
 def ensure_database() -> None:
-    """Create tables if missing. Skips silently when DATABASE_URL is not set."""
+    """Create tables if missing. Runs at most once per server process."""
+    global _DB_INIT_ATTEMPTED
+    if _DB_INIT_ATTEMPTED:
+        return
+    _DB_INIT_ATTEMPTED = True
     try:
         from db import init_db
 

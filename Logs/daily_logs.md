@@ -414,3 +414,17 @@ Next Steps:
 - Final documentation consistency check before presentation.
 - Support team during demo rehearsal and instructor Q&A.
 ---
+
+### 06.06.2026
+
+**Azra Özdaş – Frontend Resilience: DB Timeout & One-Time Init**
+Completed:
+- Diagnosed app freeze / very slow page loads as a blocking database connection: `Source/Frontend/app.py` ran `init_db()` and a Remember-Me lookup on every load/navigation, with no connection timeout, so an unreachable Supabase host blocked for tens of seconds per attempt.
+- Added a 5-second `connect_timeout` to `psycopg2.connect()` in `Source/Backend/db.py` so the app fails fast and reaches the login screen instead of hanging.
+- Guarded `ensure_database()` in `Source/Frontend/bootstrap.py` with a module-level `_DB_INIT_DONE` flag so `init_db()` runs only once per Streamlit server process instead of on every page reload/navigation.
+- Guarded the Remember-Me cookie lookup with a `_REMEMBER_ME_DB_LOOKUP_DONE` flag so `get_session_user()` is queried at most once per process when a cookie exists.
+- Kept all existing login, session, logout, and saved-prediction behavior unchanged; no Supabase credentials, schema, `.env`, or database settings were modified.
+
+Next Steps:
+- Optional: surface a non-blocking warning banner in the UI when the database is unreachable.
+- Confirm normal startup timing once the Supabase project is back online.
