@@ -41,6 +41,19 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 LOGO_PATH = ASSETS_DIR / "logo.png"
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+DEPARTMENTS = [
+    "Computer Science",
+    "Software Engineering",
+    "Information Technology",
+    "Electrical Engineering",
+    "Mathematics",
+    "Physics",
+    "Business Administration",
+    "Other",
+]
+
+SEMESTERS = [f"Semester {i}" for i in range(1, 9)]
+
 SECURITY_QUESTIONS = [
     "What was the name of your first pet?",
     "What was the name of your first teacher?",
@@ -128,6 +141,245 @@ def _auth_selectbox(label: str, options, key: str, **kwargs):
 def _clear_auth() -> None:
     st.session_state.login_error = None
     st.session_state.signup_error = None
+
+
+# Shared auth shell — same width, header spacing, and tabs for both modes
+_AUTH_LAYOUT_CSS = """
+<style>
+html body .stApp [data-testid="stMain"] > [data-testid="block-container"]:has(#studor-auth),
+html body .stApp [data-testid="stMain"] .block-container:has(#studor-auth) {
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: 8px !important;
+    padding-bottom: 12px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:has(#studor-auth) {
+    max-width: min(880px, 96vw) !important;
+    width: 100% !important;
+    padding: 8px 20px 12px 20px !important;
+    margin-top: 0 !important;
+    zoom: 0.9 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-brand {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-logo-icon,
+div[data-testid="column"]:has(#studor-auth) .login-logo-icon img.login-logo-img,
+div[data-testid="column"]:has(#studor-auth) .login-logo-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 auto 4px auto !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-brand-name {
+    font-size: 16px !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-brand-subtitle {
+    font-size: 11px !important;
+    margin-top: 2px !important;
+    line-height: 1.15 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-divider {
+    margin: 8px 0 0 0 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-auth-tabs-spacer {
+    display: block;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+div[data-testid="column"]:has(#studor-auth) [data-testid="stHorizontalBlock"]:has(.st-key-tab_signin) {
+    margin: 0 0 8px 0 !important;
+    padding: 3px !important;
+    gap: 6px !important;
+}
+
+html body .stApp div[data-testid="column"]:has(#studor-auth) [data-testid="stHorizontalBlock"]:has(.st-key-tab_signin) [data-testid="stButton"] > button {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-heading--auth {
+    margin: 2px 0 2px 0 !important;
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .login-subheading--auth {
+    margin: 0 0 10px 0 !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+}
+
+div[data-testid="column"]:has(#studor-auth) .auth-form-panel {
+    width: 100% !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="sign-in"]) [data-testid="stTextInput"],
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="sign-in"]) [data-testid="stCheckbox"],
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="sign-in"]) [data-testid="stButton"] {
+    width: 100% !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="sign-in"]) [data-testid="stTextInput"] {
+    margin-bottom: 8px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="sign-in"]) [data-testid="stHorizontalBlock"]:has(.st-key-remember_me) {
+    margin: 2px 0 8px 0 !important;
+}
+</style>
+"""
+
+# Create Account field density — keeps the two-column form compact
+_REGISTER_COMPACT_CSS = """
+<style>
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .login-heading--register {
+    margin: 2px 0 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .signup-section-label {
+    margin: 0 0 0 !important;
+    font-size: 9px !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1.1 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="element-container"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stVerticalBlock"],
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stVerticalBlock"] > div,
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stVerticalBlockBorderWrapper"] {
+    gap: 0 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stHorizontalBlock"] {
+    gap: 0.35rem !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"],
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stSelectbox"] {
+    margin-bottom: 0 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"] label p,
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stSelectbox"] label p,
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stWidgetLabel"] p {
+    margin-bottom: 0 !important;
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stWidgetLabel"] {
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInputRootElement"],
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"] div[data-baseweb="input"] {
+    min-height: 26px !important;
+}
+
+html body .stApp div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInputRootElement"],
+html body .stApp div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"] div[data-baseweb="input"] {
+    min-height: 26px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"] input {
+    min-height: 26px !important;
+    padding: 2px 6px 2px 2px !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+}
+
+html body .stApp div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stTextInput"] input {
+    min-height: 26px !important;
+    padding: 2px 6px 2px 2px !important;
+    font-size: 11px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    min-height: 26px !important;
+    height: 26px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+html body .stApp div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    min-height: 26px !important;
+    height: 26px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .st-key-signup_sec_question [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    padding-left: 26px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .login-error {
+    margin: 2px 0 !important;
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+}
+
+div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .st-key-signup_submit {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+}
+
+html body .stApp div[data-testid="column"]:has(#studor-auth[data-auth-mode="create-account"]) .st-key-signup_submit [data-testid="stButton"] > button {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 3px 0 !important;
+    font-size: 12px !important;
+}
+</style>
+"""
+
+
+def _inject_auth_layout_styles() -> None:
+    st.markdown(_AUTH_LAYOUT_CSS, unsafe_allow_html=True)
+
+
+def _inject_register_compact_styles() -> None:
+    st.markdown(_REGISTER_COMPACT_CSS, unsafe_allow_html=True)
+
+
+def _render_auth_brand_html() -> None:
+    """Render Studor logo/title block — shared by Sign In and Create Account."""
+    mode_slug = _auth_mode_slug()
+    render_html(f"""
+<div id="studor-auth" class="login-auth-root" data-auth-mode="{mode_slug}">
+<div class="login-brand">
+<div class="login-logo-icon">{_logo_html()}</div>
+<div class="login-brand-name">Studor</div>
+<div class="login-brand-subtitle">Risk &amp; Performance Predictor</div>
+</div>
+<hr class="login-divider" />
+</div>
+""")
 
 
 def _set_mode(mode: str) -> None:
@@ -305,9 +557,9 @@ def _render_login_form() -> None:
         return
 
     render_html("""
-        <div class="login-heading">Welcome back</div>
-        <div class="login-subheading">Sign in to continue to your dashboard</div>
-    """)
+<div class="login-heading login-heading--auth">Welcome back</div>
+<div class="login-subheading login-subheading--auth">Sign in to continue to your dashboard</div>
+""")
 
     # Success banner after password reset
     if st.session_state.pop("reset_success", False):
@@ -356,36 +608,59 @@ def _render_login_form() -> None:
 # ── Registration form ─────────────────────────────────────────────────────────
 
 def _render_register_form() -> None:
-    render_html("""
-        <div class="login-heading">Create your account</div>
-        <div class="login-subheading">Get started with the study risk predictor</div>
-    """)
+    render_html('<div class="login-heading login-heading--auth login-heading--register">Create your account</div>')
 
-    full_name = _auth_text_input(
-        "Full Name", key="signup_full_name", icon=_ICON_USER,
-        placeholder="e.g. Azra Özdaş",
-    )
-    email = _auth_text_input(
-        "Email", key="signup_email", icon=_ICON_MAIL,
-        placeholder="name@example.com",
-    )
-    new_password = _auth_text_input(
-        "Password", key="signup_password", icon=_ICON_LOCK, type="password",
-        placeholder="At least 6 characters",
-    )
-    confirm_password = _auth_text_input(
-        "Confirm Password", key="signup_confirm", icon=_ICON_LOCK, type="password",
-        placeholder="Repeat your password",
-    )
+    col_account, col_academic = st.columns(2, gap="small")
 
-    security_question = _auth_selectbox(
-        "Security question", SECURITY_QUESTIONS,
-        key="signup_sec_question",
-    )
-    security_answer = _auth_text_input(
-        "Your Answer", key="signup_sec_answer", icon=_ICON_KEY,
-        placeholder="Not case-sensitive",
-    )
+    with col_account:
+        render_html('<div class="signup-section-label">Account Information</div>')
+        full_name = _auth_text_input(
+            "Full Name", key="signup_full_name", icon=_ICON_USER,
+            placeholder="e.g. Azra Özdaş",
+        )
+        email = _auth_text_input(
+            "Email", key="signup_email", icon=_ICON_MAIL,
+            placeholder="name@example.com",
+        )
+        new_password = _auth_text_input(
+            "Password", key="signup_password", icon=_ICON_LOCK, type="password",
+            placeholder="At least 6 characters",
+        )
+        confirm_password = _auth_text_input(
+            "Confirm Password", key="signup_confirm", icon=_ICON_LOCK, type="password",
+            placeholder="Repeat your password",
+        )
+
+    with col_academic:
+        render_html('<div class="signup-section-label">Academic Profile</div>')
+        university = _auth_text_input(
+            "University / School", key="signup_university", icon=_ICON_USER,
+            placeholder="e.g. Istanbul University",
+        )
+        signup_dept = _auth_selectbox(
+            "Department / Program", DEPARTMENTS, key="signup_department",
+        )
+        signup_sem = _auth_selectbox(
+            "Semester", SEMESTERS, key="signup_semester",
+        )
+        target_gpa_str = _auth_text_input(
+            "Target GPA (optional)", key="signup_target_gpa", icon=_ICON_KEY,
+            placeholder="e.g. 3.5",
+        )
+
+    col_sec_q, col_sec_a = st.columns(2, gap="small")
+    with col_sec_q:
+        render_html('<div class="signup-section-label">Security</div>')
+        security_question = _auth_selectbox(
+            "Security question", SECURITY_QUESTIONS,
+            key="signup_sec_question",
+        )
+    with col_sec_a:
+        render_html('<div class="signup-section-label" style="visibility:hidden;">&nbsp;</div>')
+        security_answer = _auth_text_input(
+            "Your Answer", key="signup_sec_answer", icon=_ICON_KEY,
+            placeholder="Not case-sensitive",
+        )
 
     if st.session_state.signup_error:
         render_html(_error_html(st.session_state.signup_error))
@@ -417,6 +692,15 @@ def _render_register_form() -> None:
                     security_answer=answer,
                 )
                 _set_session_from_user(mail, full_name=name)
+                # Save academic profile into session (TODO: persist to Supabase users table later)
+                st.session_state.profile_university  = (university or "").strip()
+                st.session_state.profile_department  = signup_dept
+                st.session_state.profile_semester    = signup_sem
+                try:
+                    st.session_state.profile_target_gpa = float(target_gpa_str) if (target_gpa_str or "").strip() else None
+                except ValueError:
+                    st.session_state.profile_target_gpa = None
+                st.session_state.user_courses = []
                 st.session_state.signup_error = None
                 st.rerun()
             except ValueError:
@@ -437,23 +721,18 @@ def render_login_page() -> None:
     st.session_state.setdefault("login_error", None)
     st.session_state.setdefault("signup_error", None)
 
-    inject_login_styles(st.session_state.auth_mode)
+    is_register = st.session_state.auth_mode == "Create Account"
 
-    _, center, _ = st.columns([1, 1.5, 1])
+    inject_login_styles(st.session_state.auth_mode)
+    _inject_auth_layout_styles()
+    if is_register:
+        _inject_register_compact_styles()
+
+    _, center, _ = st.columns([0.25, 3.5, 0.25])
 
     with center:
-        mode_slug = _auth_mode_slug()
-        render_html(f"""
-            <div id="studor-auth" class="login-auth-root" data-auth-mode="{mode_slug}">
-                <div class="login-brand">
-                    <div class="login-logo-icon">{_logo_html()}</div>
-                    <div class="login-brand-name">Studor</div>
-                    <div class="login-brand-subtitle">Risk &amp; Performance Predictor</div>
-                </div>
-                <hr class="login-divider" />
-            </div>
-        """)
-
+        _render_auth_brand_html()
+        render_html('<div class="login-auth-tabs-spacer" aria-hidden="true"></div>')
         _render_tabs(st.session_state.auth_mode)
 
         if st.session_state.auth_mode == "Sign In":
@@ -463,3 +742,6 @@ def render_login_page() -> None:
 
     # Re-inject after widgets so auth CSS wins over Streamlit 1.57 theme rules
     inject_login_styles(st.session_state.auth_mode)
+    _inject_auth_layout_styles()
+    if is_register:
+        _inject_register_compact_styles()

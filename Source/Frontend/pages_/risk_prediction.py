@@ -205,14 +205,50 @@ def render() -> None:
 
     model, encoders = _load_artifacts()
     raw_df = _load_raw()
-    course_options = _course_options(encoders, raw_df)
 
-    default_course = st.session_state.get("selected_course")
+    # ── Read and immediately clear the prefill so it doesn't stick ──────────
+    prefill = st.session_state.pop("prefill_course", {})
+
+    # ── Course list: use student's own courses when available ────────────────
+    user_courses = st.session_state.get("user_courses", [])
+    if user_courses:
+        course_options = [c["name"] for c in user_courses]
+        render_html(
+            '<div style="font-size:12px;color:#3B82F6;margin-bottom:6px;">'
+            '✔ Showing your saved courses. Go to <b>My Courses</b> to manage them.'
+            '</div>'
+        )
+    else:
+        course_options = _course_options(encoders, raw_df)
+
+    # Determine default course selection
+    prefill_name = prefill.get("name", "")
+    default_course = prefill_name or st.session_state.get("selected_course", "")
     default_idx = (
         course_options.index(default_course)
         if default_course and default_course in course_options
         else 0
     )
+
+    # ── Default values: from prefill if available, otherwise sensible defaults
+    default_study_hours   = int(prefill.get("study_hours",   4))
+    default_attendance    = int(prefill.get("attendance",    75))
+    default_deadline_days = int(prefill.get("deadline_days", 7))
+    default_pass_grade    = int(prefill.get("pass_grade",    70))
+    _diff_opts = ["Low", "Medium", "High"]
+    _wl_opts   = ["Low", "Medium", "High"]
+    default_difficulty    = prefill.get("difficulty", "Medium")
+    default_workload      = prefill.get("workload",   "Medium")
+    diff_idx = _diff_opts.index(default_difficulty) if default_difficulty in _diff_opts else 1
+    wl_idx   = _wl_opts.index(default_workload)     if default_workload   in _wl_opts   else 1
+
+    if prefill:
+        render_html(
+            '<div style="font-size:12px;color:#22C55E;margin-bottom:8px;padding:6px 10px;'
+            'background:rgba(34,197,94,0.08);border-radius:6px;border:1px solid rgba(34,197,94,0.3);">'
+            f'✔ Form pre-filled from course card: <b>{prefill_name}</b>'
+            '</div>'
+        )
 
     render_html(
         '<div class="section-h2">Student Input Form</div>'
@@ -225,14 +261,14 @@ def render() -> None:
 
     with col1:
         course = st.selectbox("Course", course_options, index=default_idx)
-        study_hours = st.slider("Weekly Study Hours", 0, 15, 4)
-        attendance = st.slider("Attendance (%)", 0, 100, 75)
+        study_hours = st.slider("Weekly Study Hours", 0, 15, default_study_hours)
+        attendance = st.slider("Attendance (%)", 0, 100, default_attendance)
 
     with col2:
-        deadline_days = st.slider("Days Until Deadline", 0, 30, 7)
-        pass_grade = st.slider("Current Pass Grade", 0, 100, 70)
-        assignment_difficulty = st.selectbox("Assignment Difficulty", ["Low", "Medium", "High"])
-        workload_level = st.selectbox("Workload Level", ["Low", "Medium", "High"])
+        deadline_days = st.slider("Days Until Deadline", 0, 30, min(default_deadline_days, 30))
+        pass_grade = st.slider("Current Pass Grade", 0, 100, default_pass_grade)
+        assignment_difficulty = st.selectbox("Assignment Difficulty", _diff_opts, index=diff_idx)
+        workload_level = st.selectbox("Workload Level", _wl_opts, index=wl_idx)
 
     predict_clicked = st.button("Predict Risk", type="primary", use_container_width=True)
 

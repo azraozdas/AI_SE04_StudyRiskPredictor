@@ -16,6 +16,8 @@ _AUTH_KEYS = (
     "student_id",
     "profile_department",
     "profile_semester",
+    "profile_university",
+    "profile_target_gpa",
 )
 
 

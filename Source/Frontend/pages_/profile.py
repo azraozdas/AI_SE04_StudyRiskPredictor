@@ -51,8 +51,12 @@ def render() -> None:
     initial    = full_name[0].upper() if full_name else "S"
     dept       = st.session_state.get("profile_department", DEPARTMENTS[0])
     sem        = st.session_state.get("profile_semester", SEMESTERS[5])
+    university = st.session_state.get("profile_university", "")
+    target_gpa = st.session_state.get("profile_target_gpa", None)
 
     # ── Profile header card ──────────────────────────────────────────────────
+    uni_badge = f'<span class="badge badge-blue">{university}</span>' if university else ""
+    gpa_badge = f'<span class="badge badge-blue">GPA goal: {target_gpa}</span>' if target_gpa else ""
     render_html(f"""
 <div class="card" style="margin-bottom:10px;">
 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -63,6 +67,8 @@ def render() -> None:
 <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
 <span class="badge badge-blue">{dept}</span>
 <span class="badge badge-blue">{sem}</span>
+{uni_badge}
+{gpa_badge}
 </div>
 </div>
 </div>
@@ -91,12 +97,26 @@ def render() -> None:
     render_html('<div class="section-h2 section-h2--follow">Edit Profile</div>')
 
     new_name = st.text_input("Full Name", value=full_name, key="profile_new_name")
+    new_university = st.text_input(
+        "University / School",
+        value=university,
+        key="profile_university_input",
+        placeholder="e.g. Istanbul University",
+    )
 
     dept_idx = DEPARTMENTS.index(dept) if dept in DEPARTMENTS else 0
     sem_idx  = SEMESTERS.index(sem)    if sem  in SEMESTERS  else 5
 
     new_dept = st.selectbox("Department", DEPARTMENTS, index=dept_idx, key="profile_dept_sel")
     new_sem  = st.selectbox("Semester",   SEMESTERS,   index=sem_idx,  key="profile_sem_sel")
+
+    gpa_default = str(target_gpa) if target_gpa is not None else ""
+    new_gpa_str = st.text_input(
+        "Target GPA (optional)",
+        value=gpa_default,
+        key="profile_gpa_input",
+        placeholder="e.g. 3.5",
+    )
 
     col_save, col_reset = st.columns(2)
     with col_save:
@@ -105,7 +125,13 @@ def render() -> None:
                 st.session_state.full_name          = new_name.strip()
             st.session_state.profile_department = new_dept
             st.session_state.profile_semester   = new_sem
+            st.session_state.profile_university = new_university.strip()
+            try:
+                st.session_state.profile_target_gpa = float(new_gpa_str) if new_gpa_str.strip() else None
+            except ValueError:
+                st.session_state.profile_target_gpa = None
             save_auth_session()
+            # TODO: persist university + target_gpa to Supabase users table (Selim)
             st.success("Profile updated.")
     with col_reset:
         if st.button("Reset Prediction", use_container_width=True):

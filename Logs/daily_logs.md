@@ -428,3 +428,21 @@ Completed:
 Next Steps:
 - Optional: surface a non-blocking warning banner in the UI when the database is unreachable.
 - Confirm normal startup timing once the Supabase project is back online.
+
+### 24.06.2026
+
+**Azra Özdaş – Frontend Personalization & Auth UI**
+
+Completed:
+- Extended session defaults in `Source/Frontend/bootstrap.py` and `utils.py` for `profile_university`, `profile_target_gpa`, `user_courses`, and `prefill_course`.
+- Updated sign-up form in `Source/Frontend/login.py`: two-column layout (Account Information | Academic Profile), optional Target GPA, security question/answer side by side; unified auth shell so Sign In and Create Account share the same card width, header spacing, and tab button styling.
+- Updated `Source/Frontend/pages_/profile.py` to display and edit university and target GPA.
+- Reworked `Source/Frontend/pages_/dashboard.py`: welcome empty state for new users; personalized KPIs, course list, deadlines, and last prediction when `user_courses` exists; training CSV stats moved to collapsible “Benchmark / Training Dataset Insights”.
+- Added `Source/Frontend/pages_/my_courses.py`: add/delete courses in `st.session_state`, duplicate-name check, “Predict Risk” navigates with `prefill_course` (TODO: Supabase persistence — Selim).
+- Wired `my_courses` into `Source/Frontend/app.py` navigation and routing.
+- Updated `Source/Frontend/pages_/risk_prediction.py` to prefer user courses in the dropdown and pre-fill sliders from course cards.
+
+Next Steps:
+- Selim: extend Supabase `users` / `courses` tables and replace session-only course/profile storage.
+- Restore or update `DATABASE_URL` in `.env` (current pooler user returns `tenant/user not found`).
+- PDF upload feature remains deferred to a future phase.
