@@ -127,8 +127,16 @@ def ensure_database() -> None:
         from db import init_db
 
         init_db()
-    except Exception:
-        pass
+    except Exception as e:
+        _msg = str(e).lower()
+        if "enotfound" in _msg or "tenant" in _msg or "not found" in _msg or "nodename" in _msg:
+            st.warning(
+                "⚠️ Database is paused. Go to **supabase.com/dashboard** → your project → **Restore project**, "
+                "then refresh this page.",
+                icon="🔌",
+            )
+        else:
+            st.warning(f"⚠️ Database connection failed: {e}", icon="🔌")
 
 
 def handle_logout_query() -> None:

@@ -600,8 +600,14 @@ def _render_login_form() -> None:
             else:
                 st.session_state.login_error = "Invalid email or password. Please try again."
                 st.rerun()
-        except Exception:
-            st.session_state.login_error = "Database unavailable. Please try again later."
+        except Exception as _e:
+            _msg = str(_e).lower()
+            if "enotfound" in _msg or "tenant" in _msg or "not found" in _msg or "nodename" in _msg:
+                st.session_state.login_error = (
+                    "Database is paused. Please go to supabase.com/dashboard and click 'Restore project', then try again."
+                )
+            else:
+                st.session_state.login_error = "Database unavailable. Please try again later."
             st.rerun()
 
 
@@ -707,10 +713,16 @@ def _render_register_form() -> None:
                 st.session_state.signup_error = (
                     "This email is already registered. Please sign in instead."
                 )
-            except Exception:
-                st.session_state.signup_error = (
-                    "Database unavailable. Please try again later."
-                )
+            except Exception as _e:
+                _msg = str(_e).lower()
+                if "enotfound" in _msg or "tenant" in _msg or "not found" in _msg or "nodename" in _msg:
+                    st.session_state.signup_error = (
+                        "Database is paused. Please go to supabase.com/dashboard and click 'Restore project', then try again."
+                    )
+                else:
+                    st.session_state.signup_error = (
+                        "Database unavailable. Please try again later."
+                    )
         st.rerun()
 
 
