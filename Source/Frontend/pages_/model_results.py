@@ -266,24 +266,27 @@ Model not found. Run <code style="background:#0F172A;padding:2px 6px;border-radi
             correct = (preds_df[pred_col] == preds_df[actual_col]).sum()
             accuracy = correct / max(total, 1) * 100
 
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
+        if accuracy is not None:
+            m1, m2, m3, m4 = st.columns(4)
+            cols_iter = [m1, m2, m3, m4]
+        else:
+            m1, m3, m4 = st.columns(3)
+            cols_iter = [m1, m3, m4]
+
+        with cols_iter[0]:
             st.metric("Predictions", f"{total:,}")
-        with m2:
-            st.metric("Accuracy", f"{accuracy:.1f}%" if accuracy is not None else "N/A")
-        with m3:
+        if accuracy is not None:
+            with cols_iter[1]:
+                st.metric("Accuracy", f"{accuracy:.1f}%")
+        with cols_iter[-2]:
             if pred_col:
                 decoded = preds_df[pred_col].apply(_decode_risk)
                 high_n = int((decoded == "High Risk").sum())
                 st.metric("High Risk (predicted)", high_n)
-            else:
-                st.metric("High Risk", "N/A")
-        with m4:
+        with cols_iter[-1]:
             if pred_col:
                 low_n = int((decoded == "Low Risk").sum())
                 st.metric("Low Risk (predicted)", low_n)
-            else:
-                st.metric("Low Risk", "N/A")
 
         render_html('<div class="section-spacer"></div>')
 

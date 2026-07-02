@@ -91,10 +91,10 @@ _ICON = {
 NAV_ITEMS = [
     ("dashboard",       "Dashboard"),
     ("my_courses",      "My Courses"),
-    ("courses",         "Course Analytics"),
-    ("schedule",        "Study Schedule"),
     ("risk",            "Risk Prediction"),
+    ("schedule",        "Study Schedule"),
     ("recommendations", "Recommendations"),
+    ("courses",         "Dataset Insights"),
     ("model",           "Model Results"),
 ]
 

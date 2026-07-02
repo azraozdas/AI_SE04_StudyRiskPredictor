@@ -1,197 +1,342 @@
-"""Study Schedule page — rule-based weekly study plan from dataset risk levels."""
+"""Study Schedule page — personalized planner built from the student's own courses and predictions."""
+
+# TODO (Selim): Replace session_state schedule with db.upsert_schedule_entry() / db.get_user_schedule()
 
 import os
 import sys
 
-import pandas as pd
 import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from course_colors import course_color_bg, get_course_color
-from utils import ROOT, render_html
+from utils import render_html
 
-RAW_PATH = os.path.join(ROOT, "Data", "student_study_data.csv")
+# Hours recommended per risk level (AI decision)
+RISK_HOURS: dict[str, float] = {
+    "High Risk":   5.0,
+    "Medium Risk": 3.0,
+    "Low Risk":    1.5,
+}
 
-DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
-# Hours allocated per risk level
-RISK_HOURS = {"High Risk": 4, "Medium Risk": 2.5, "Low Risk": 1.5}
-
-RISK_COLOR = {
+RISK_COLOR: dict[str, str] = {
     "High Risk":   "#DC2626",
     "Medium Risk": "#F59E0B",
     "Low Risk":    "#22C55E",
 }
 
-RISK_BG = {
-    "High Risk":   "rgba(220,38,38,0.08)",
-    "Medium Risk": "rgba(245,158,11,0.08)",
-    "Low Risk":    "rgba(34,197,94,0.08)",
-}
+DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+DAYS_OPTIONS = ["(Not assigned)"] + DAYS
 
 
-def _load() -> pd.DataFrame | None:
-    if os.path.exists(RAW_PATH):
-        return pd.read_csv(RAW_PATH)
-    return None
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _navigate(page: str) -> None:
+    st.session_state.current_page = page
+    st.rerun()
 
 
-def _build_schedule(courses: list[dict]) -> dict[str, list[dict]]:
-    """Distribute course study blocks across the week."""
-    schedule: dict[str, list[dict]] = {d: [] for d in DAYS}
-    day_idx = 0
-    for c in courses:
-        hrs = RISK_HOURS.get(c["risk"], 2.0)
-        # Spread large blocks across two days
-        if hrs >= 3:
-            schedule[DAYS[day_idx % 7]].append({**c, "hours": hrs / 2, "label": "Part 1"})
-            day_idx += 1
-            schedule[DAYS[day_idx % 7]].append({**c, "hours": hrs / 2, "label": "Part 2"})
-        else:
-            schedule[DAYS[day_idx % 7]].append({**c, "hours": hrs, "label": ""})
-        day_idx += 1
-    return schedule
+def _slug(name: str) -> str:
+    """Convert course name to a safe session_state key segment."""
+    return name.lower().replace(" ", "_").replace("-", "_")[:40]
 
 
-def _day_card(day: str, blocks: list[dict]) -> str:
-    if not blocks:
-        body = (
-            '<div style="font-size:12px;color:#475569;padding:2px 0;">'
-            'Rest day — recovery is part of learning.'
-            '</div>'
-        )
-    else:
-        rows = ""
-        for b in blocks:
-            cc     = get_course_color(b["course"])
-            cbg    = course_color_bg(b["course"])
-            label  = f" · {b['label']}" if b["label"] else ""
-            rows += f"""
+# ---------------------------------------------------------------------------
+# State 1 — No courses
+# ---------------------------------------------------------------------------
+
+def _render_no_courses() -> None:
+    render_html("""
+<div class="card" style="text-align:center;padding:48px 24px;">
+<div style="font-size:44px;margin-bottom:14px;">📅</div>
+<div style="font-size:20px;font-weight:800;color:#F8FAFC;margin-bottom:10px;">
+No Courses Yet
+</div>
+<div style="font-size:14px;color:#64748B;max-width:440px;margin:0 auto 24px;line-height:1.7;">
+Add your enrolled courses first. Once you have courses and predictions, Studor
+will generate a personalized weekly study plan for you.
+</div>
+</div>
+""")
+    col_a, col_b, col_c = st.columns([1, 1.4, 1])
+    with col_b:
+        if st.button("📚  Go to My Courses", type="primary", use_container_width=True, key="sched_empty_btn"):
+            _navigate("my_courses")
+
+
+# ---------------------------------------------------------------------------
+# State 2 — Has courses, no predictions yet
+# ---------------------------------------------------------------------------
+
+def _render_no_predictions(courses: list) -> None:
+    render_html("""
+<div class="card" style="padding:20px;border-left:3px solid #F59E0B;
+background:rgba(245,158,11,0.06);margin-bottom:12px;">
+<div style="font-size:13px;font-weight:700;color:#FCD34D;margin-bottom:4px;">
+⚡ Predictions needed
+</div>
+<div style="font-size:13px;color:#94A3B8;line-height:1.5;">
+Your courses are added. Run a risk prediction for each course so Studor can
+recommend how many hours per week you should study.
+</div>
+</div>
+""")
+
+    render_html('<div class="section-h2">Your Courses — Awaiting Prediction</div>')
+
+    for c in sorted(courses, key=lambda x: x.get("deadline_days", 999)):
+        name = str(c.get("name", ""))
+        dl   = c.get("deadline_days", "?")
+        hrs  = c.get("study_hours", 0)
+        att  = c.get("attendance", 0)
+        cc   = get_course_color(name)
+        cbg  = course_color_bg(name)
+        cid  = c.get("id", 0)
+
+        render_html(f"""
+<div class="card" style="border-left:3px solid {cc};
+background:linear-gradient(135deg,{cbg} 0%,rgba(15,23,42,0) 60%);
+padding:12px 16px;margin-bottom:6px;">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+<div>
+<div style="font-size:14px;font-weight:700;color:{cc};">{name}</div>
+<div style="font-size:11px;color:#64748B;margin-top:2px;">
+{hrs}h/wk · {att}% attendance · deadline in {dl}d
+</div>
+</div>
+<span class="badge" style="background:#1E293B;color:#64748B;border:1px solid #334155;">
+No prediction
+</span>
+</div>
+</div>
+""")
+        btn_col, _ = st.columns([1, 3])
+        with btn_col:
+            if st.button(
+                "🎯  Predict Risk",
+                key=f"sched_predict_{cid}_{_slug(name)}",
+                use_container_width=True,
+                type="primary",
+            ):
+                st.session_state.prefill_course = c.copy()
+                _navigate("risk")
+
+
+# ---------------------------------------------------------------------------
+# State 3 — Full schedule builder
+# ---------------------------------------------------------------------------
+
+def _render_schedule_builder(predicted_courses: list) -> None:
+    sched = st.session_state.setdefault("schedule_assignments", {})
+
+    total_hours = sum(
+        RISK_HOURS.get(c.get("risk_level", ""), 2.0) for c in predicted_courses
+    )
+    high_n   = sum(1 for c in predicted_courses if "high"   in str(c.get("risk_level","")).lower())
+    medium_n = sum(1 for c in predicted_courses if "medium" in str(c.get("risk_level","")).lower())
+    low_n    = sum(1 for c in predicted_courses if "low"    in str(c.get("risk_level","")).lower())
+
+    render_html(f"""
+<div class="card card-accent-blue" style="display:flex;gap:20px;flex-wrap:wrap;
+align-items:center;padding:16px 20px;margin-bottom:12px;">
+<div>
+<div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;
+letter-spacing:0.1em;margin-bottom:2px;">This Week</div>
+<div style="font-size:30px;font-weight:800;color:#F8FAFC;line-height:1.1;">{total_hours:.1f}h</div>
+<div style="font-size:11px;color:#64748B;">recommended total</div>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+<div style="text-align:center;">
+<div style="font-size:22px;font-weight:800;color:#FCA5A5;">{high_n}</div>
+<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">High Risk</div>
+</div>
+<div style="text-align:center;">
+<div style="font-size:22px;font-weight:800;color:#FCD34D;">{medium_n}</div>
+<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">Medium</div>
+</div>
+<div style="text-align:center;">
+<div style="font-size:22px;font-weight:800;color:#86EFAC;">{low_n}</div>
+<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">Low Risk</div>
+</div>
+</div>
+<div style="flex:1;min-width:220px;font-size:12px;color:#64748B;line-height:1.6;
+border-left:1px solid #273449;padding-left:16px;">
+🤖 <strong style="color:#93C5FD;">AI recommends</strong> how many hours to study.<br>
+📅 <strong style="color:#93C5FD;">You choose</strong> which day each course falls on.
+</div>
+</div>
+""")
+
+    # ── Course-day assignment table ──────────────────────────────────────────
+    render_html('<div class="section-h2">Assign Study Days</div>')
+
+    sorted_courses = sorted(
+        predicted_courses,
+        key=lambda c: (
+            0 if "high"   in str(c.get("risk_level","")).lower() else
+            1 if "medium" in str(c.get("risk_level","")).lower() else 2,
+            c.get("deadline_days", 999),
+        ),
+    )
+
+    # Collect assignments from selectboxes during this render
+    live_assignments: dict[str, dict] = {}
+
+    for c in sorted_courses:
+        name     = str(c.get("name", ""))
+        risk_lv  = c.get("risk_level", "")
+        hours    = RISK_HOURS.get(risk_lv, 2.0)
+        rc       = RISK_COLOR.get(risk_lv, "#64748B")
+        cc       = get_course_color(name)
+        key      = f"sched_day_{_slug(name)}"
+
+        # Default from saved assignments
+        saved_day = sched.get(name, {}).get("assigned_day") or "(Not assigned)"
+        default_idx = DAYS_OPTIONS.index(saved_day) if saved_day in DAYS_OPTIONS else 0
+
+        col_name, col_risk, col_hours, col_day = st.columns([2.2, 1.2, 0.9, 1.9])
+        with col_name:
+            render_html(
+                f'<div style="font-size:13px;font-weight:700;color:{cc};'
+                f'padding-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+                f'{name}</div>'
+            )
+        with col_risk:
+            render_html(
+                f'<div style="padding-top:6px;">'
+                f'<span class="badge" style="background:{rc}22;color:{rc};'
+                f'border:1px solid {rc}55;">{risk_lv}</span></div>'
+            )
+        with col_hours:
+            render_html(
+                f'<div style="font-size:15px;font-weight:800;color:#F8FAFC;'
+                f'padding-top:4px;text-align:center;">{hours:.1f}h</div>'
+            )
+        with col_day:
+            selected = st.selectbox(
+                "Day",
+                DAYS_OPTIONS,
+                index=default_idx,
+                key=key,
+                label_visibility="collapsed",
+            )
+
+        assigned = selected if selected != "(Not assigned)" else None
+        live_assignments[name] = {"suggested_hours": hours, "assigned_day": assigned}
+
+    # Save button
+    render_html('<div style="margin-top:8px;"></div>')
+    save_col, _ = st.columns([1, 3])
+    with save_col:
+        if st.button("💾  Save My Schedule", type="primary", use_container_width=True, key="sched_save_btn"):
+            st.session_state.schedule_assignments = live_assignments
+            sched = live_assignments
+            # TODO (Selim): db.upsert_schedule_entry(user_id, course_id, ...) for each entry
+            st.success("✅ Schedule saved!")
+
+    # ── Weekly planner ───────────────────────────────────────────────────────
+    render_html('<div class="section-h2 section-h2--follow">Weekly Planner</div>')
+
+    # Build day → list of (name, hours) from current selectbox values
+    weekly: dict[str, list[dict]] = {d: [] for d in DAYS}
+    for name, data in live_assignments.items():
+        day = data.get("assigned_day")
+        if day and day in weekly:
+            weekly[day].append({"name": name, "hours": data["suggested_hours"]})
+
+    day_cols = st.columns(7)
+    for col, day in zip(day_cols, DAYS):
+        with col:
+            blocks = weekly[day]
+            if not blocks:
+                render_html(f"""
+<div class="card schedule-day-card" style="min-height:90px;">
+<div style="font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;
+letter-spacing:0.1em;margin-bottom:6px;">{day}</div>
+<div style="font-size:11px;color:#475569;font-style:italic;">Rest day</div>
+</div>
+""")
+            else:
+                blocks_html = ""
+                for b in blocks:
+                    cc  = get_course_color(b["name"])
+                    cbg = course_color_bg(b["name"])
+                    blocks_html += f"""
 <div style="background:{cbg};border-left:3px solid {cc};border-radius:5px;
-padding:5px 8px;margin-bottom:4px;">
-<div style="font-size:11px;font-weight:700;color:{cc};line-height:1.35;">{b['course']}{label}</div>
-<div style="font-size:10px;color:#64748B;margin-top:2px;line-height:1.25;">{b['hours']:.1f}h · {b['risk']}</div>
+padding:6px 8px;margin-bottom:5px;">
+<div style="font-size:10px;font-weight:700;color:{cc};line-height:1.3;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{b['name']}</div>
+<div style="font-size:11px;font-weight:600;color:#F8FAFC;margin-top:2px;">{b['hours']:.1f} hours</div>
 </div>
 """
-        body = f'<div class="schedule-day-blocks">{rows}</div>'
-
-    return f"""
-<div class="card schedule-day-card">
-<div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;
-letter-spacing:0.1em;margin-bottom:4px;">{day}</div>
-{body}
+                render_html(f"""
+<div class="card schedule-day-card" style="min-height:90px;">
+<div style="font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;
+letter-spacing:0.1em;margin-bottom:6px;">{day}</div>
+{blocks_html}
 </div>
-"""
+""")
 
+    # ── Study tips ───────────────────────────────────────────────────────────
+    render_html("""
+<div class="card" style="margin-top:10px;">
+<div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;
+letter-spacing:0.1em;margin-bottom:4px;">Study Science Tips</div>
+<div style="font-size:12px;color:#94A3B8;line-height:1.6;">
+High-risk courses benefit from studying earlier in the week while cognitive energy is highest.
+Avoid scheduling more than 3 hours of a single course in one day — use spaced sessions.
+Rest days are intentional: sleep consolidates memory and improves recall.
+</div>
+</div>
+""")
+
+    # ── CTAs ─────────────────────────────────────────────────────────────────
+    render_html('<div style="margin-top:10px;"></div>')
+    cta1, cta2 = st.columns(2)
+    with cta1:
+        if st.button("🏠  View Dashboard", use_container_width=True, key="sched_dash_btn"):
+            _navigate("dashboard")
+    with cta2:
+        if st.button("💡  Recommendations", use_container_width=True, key="sched_rec_btn"):
+            _navigate("recommendations")
+
+
+# ---------------------------------------------------------------------------
+# Main render
+# ---------------------------------------------------------------------------
 
 def render() -> None:
     render_html('<div class="page-h1">Study Schedule</div>')
     render_html(
-        '<div class="page-sub">Weekly plan generated from dataset course risk levels and deadlines '
-        '(heuristic scheduler — not a separate ML model)</div>'
+        '<div class="page-sub">AI recommends weekly study hours · '
+        'You choose the days · Your courses only</div>'
     )
 
-    df = _load()
-    if df is None or df.empty:
-        st.warning("Dataset not found. Place `student_study_data.csv` in the `Data/` folder.")
+    user_courses = st.session_state.get("user_courses", [])
+
+    if not user_courses:
+        _render_no_courses()
         return
 
-    # Build course list from dataset
-    courses_raw: list[dict] = []
-    if "course" in df.columns:
-        agg: dict = {}
-        if "risk_level" in df.columns:
-            risk_mode = df.groupby("course")["risk_level"].agg(
-                lambda x: x.value_counts().idxmax()
-            )
-        else:
-            risk_mode = pd.Series(dtype=str)
+    predicted = [c for c in user_courses if c.get("risk_level")]
+    unpredicted = [c for c in user_courses if not c.get("risk_level")]
 
-        if "deadline_days" in df.columns:
-            deadline_avg = df.groupby("course")["deadline_days"].mean()
-        else:
-            deadline_avg = pd.Series(dtype=float)
-
-        for course_name in sorted(df["course"].unique()):
-            risk = risk_mode.get(course_name, "Medium Risk")
-            days = int(deadline_avg.get(course_name, 7))
-            courses_raw.append({"course": course_name, "risk": risk, "deadline": days})
-
-    # Sort by deadline urgency then risk severity
-    risk_order = {"High Risk": 0, "Medium Risk": 1, "Low Risk": 2}
-    courses_raw.sort(key=lambda c: (risk_order.get(c["risk"], 1), c["deadline"]))
-
-    # Controls (anchor for scoped alignment / date-input styling)
-    render_html('<span id="schedule-controls" aria-hidden="true"></span>')
-    col_ctrl1, col_ctrl2 = st.columns(2)
-    with col_ctrl1:
-        week_start = st.date_input("Week starting", key="schedule_week")
-    with col_ctrl2:
-        focus = st.selectbox(
-            "Focus filter",
-            ["All courses", "High Risk only", "Medium & High Risk"],
-            key="schedule_focus",
-        )
-
-    if focus == "High Risk only":
-        courses_filtered = [c for c in courses_raw if c["risk"] == "High Risk"]
-    elif focus == "Medium & High Risk":
-        courses_filtered = [c for c in courses_raw if c["risk"] in ("High Risk", "Medium Risk")]
-    else:
-        courses_filtered = courses_raw
-
-    if not courses_filtered:
-        st.info("No courses match the selected filter.")
+    if not predicted:
+        _render_no_predictions(user_courses)
         return
 
-    schedule = _build_schedule(courses_filtered)
-
-    # Summary banner
-    total_hrs = sum(
-        RISK_HOURS.get(c["risk"], 2.0)
-        for c in courses_filtered
-    )
-    high_n  = sum(1 for c in courses_filtered if c["risk"] == "High Risk")
-    mid_n   = sum(1 for c in courses_filtered if c["risk"] == "Medium Risk")
-    low_n   = sum(1 for c in courses_filtered if c["risk"] == "Low Risk")
-
-    render_html(f"""
-<div class="card card-accent-blue schedule-summary" style="display:flex;gap:10px;flex-wrap:nowrap;align-items:center;">
-<div>
-<div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;">This Week</div>
-<div style="font-size:28px;font-weight:800;color:#F8FAFC;line-height:1.1;">{total_hrs:.0f}h</div>
-<div style="font-size:12px;color:#64748B;">total study time</div>
-</div>
-<div style="display:flex;gap:20px;flex-wrap:wrap;">
-<div style="text-align:center;">
-<div style="font-size:20px;font-weight:800;color:#FCA5A5;">{high_n}</div>
-<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">High Risk</div>
-</div>
-<div style="text-align:center;">
-<div style="font-size:20px;font-weight:800;color:#FCD34D;">{mid_n}</div>
-<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">Medium Risk</div>
-</div>
-<div style="text-align:center;">
-<div style="font-size:20px;font-weight:800;color:#86EFAC;">{low_n}</div>
-<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;">Low Risk</div>
-</div>
+    # Show partial-state banner if some courses still lack predictions
+    if unpredicted:
+        render_html(f"""
+<div class="card" style="padding:12px 16px;border-left:3px solid #3B82F6;
+background:rgba(59,130,246,0.06);margin-bottom:10px;">
+<div style="font-size:12px;color:#93C5FD;">
+ℹ️ {len(unpredicted)} course{"s" if len(unpredicted) != 1 else ""} still
+{"have" if len(unpredicted) != 1 else "has"} no prediction.
+Go to <strong>Risk Prediction</strong> to complete your schedule.
 </div>
 </div>
 """)
 
-    # Calendar grid — single row (7 days) to fit laptop viewport
-    day_cols = st.columns(7)
-    for col, day in zip(day_cols, DAYS):
-        with col:
-            render_html(_day_card(day, schedule[day]))
-
-    render_html("""
-<div class="card" style="margin-top:8px;">
-<div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;">Study Tips</div>
-<div style="font-size:13px;color:#94A3B8;line-height:1.4;">
-High-risk sessions are placed earlier in the week when cognitive energy is highest.
-Rest days are intentional — sleep consolidates memory and improves recall.
-Adjust session length based on your personal focus capacity.
-</div>
-</div>
-""")
+    _render_schedule_builder(predicted)

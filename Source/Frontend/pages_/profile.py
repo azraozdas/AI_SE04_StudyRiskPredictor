@@ -76,23 +76,26 @@ def render() -> None:
 """)
 
     # ── Academic stats ───────────────────────────────────────────────────────
-    pred = st.session_state.get("prediction_result")
-    pred_level = pred["level"] if pred else "N/A"
-    pred_course = pred["course"] if pred else "—"
+    pred          = st.session_state.get("prediction_result")
+    pred_level    = pred["level"] if pred else None
+    total_courses = len(st.session_state.get("user_courses", []))
+    total_preds   = len(st.session_state.get("prediction_history", []))
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        render_html(_stat_card("Last Risk Level", pred_level,
-                               "#DC2626" if "high" in pred_level.lower() else
-                               "#F59E0B" if "medium" in pred_level.lower() else
-                               "#22C55E" if "low" in pred_level.lower() else "#64748B"))
+        render_html(_stat_card("Total Courses", str(total_courses) if total_courses else "0", "#3B82F6"))
     with c2:
-        course_val = pred_course[:16] if pred_course != "—" else "—"
-        course_color = get_course_color(pred_course) if pred_course != "—" else "#64748B"
-        render_html(_stat_card("Last Course Assessed", course_val, course_color))
+        render_html(_stat_card("Total Predictions", str(total_preds) if total_preds else "0", "#6366F1"))
     with c3:
-        preds_run = 1 if pred else 0
-        render_html(_stat_card("Predictions (session)", str(preds_run), "#6366F1"))
+        if pred_level:
+            lvl_color = (
+                "#DC2626" if "high"   in pred_level.lower() else
+                "#F59E0B" if "medium" in pred_level.lower() else
+                "#22C55E"
+            )
+            render_html(_stat_card("Current Risk Level", pred_level, lvl_color))
+        else:
+            render_html(_stat_card("Current Risk Level", "No Prediction Yet", "#475569"))
 
     render_html('<div class="section-h2 section-h2--follow">Edit Profile</div>')
 
@@ -138,6 +141,50 @@ def render() -> None:
             st.session_state.prediction_result = None
             st.session_state.selected_course   = None
             st.info("Prediction data cleared.")
+
+    # ── Prediction History ───────────────────────────────────────────────────
+    # TODO (Selim): Load history from db.get_user_predictions(user_id) instead of session_state
+    render_html('<div class="section-h2 section-h2--follow">Prediction History</div>')
+
+    history = st.session_state.get("prediction_history", [])
+    if not history:
+        render_html("""
+<div class="card" style="text-align:center;padding:28px 16px;color:#64748B;">
+<div style="font-size:28px;margin-bottom:8px;">📊</div>
+<div style="font-size:13px;color:#94A3B8;">
+No predictions yet this session.
+Run a risk prediction on any course to see your history here.
+</div>
+</div>
+""")
+    else:
+        _risk_color_map = {
+            "high":   ("#DC2626", "#FCA5A5"),
+            "medium": ("#F59E0B", "#FCD34D"),
+            "low":    ("#22C55E", "#86EFAC"),
+        }
+        rows_html = ""
+        for entry in reversed(history):
+            c_name  = entry.get("course", "—")
+            c_risk  = entry.get("risk_level", "Unknown")
+            c_date  = entry.get("created_at", "")
+            lkey    = c_risk.lower()
+            border, text = next(
+                (v for k, v in _risk_color_map.items() if k in lkey),
+                ("#64748B", "#94A3B8"),
+            )
+            cc = get_course_color(c_name)
+            rows_html += f"""
+<div class="panel-row" style="display:flex;align-items:center;gap:10px;
+border-bottom:1px solid #273449;flex-wrap:wrap;">
+<div style="flex:1;min-width:120px;">
+<div style="font-size:13px;font-weight:700;color:{cc};">{c_name}</div>
+{"" if not c_date else f'<div style="font-size:10px;color:#475569;margin-top:1px;">{c_date}</div>'}
+</div>
+<span class="badge" style="background:{border}22;color:{text};border:1px solid {border}55;">{c_risk}</span>
+</div>
+"""
+        render_html(f'<div class="card list-panel">{rows_html}</div>')
 
     # ── Account section ──────────────────────────────────────────────────────
     render_html('<div class="section-h2 section-h2--follow">Account</div>')

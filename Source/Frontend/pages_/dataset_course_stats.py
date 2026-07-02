@@ -91,11 +91,11 @@ font-size:16px;font-weight:800;color:{cc};">{initial}</div>
 
 
 def render() -> None:
-    render_html('<div class="page-h1">Course Analytics</div>')
+    render_html('<div class="page-h1">Dataset Insights</div>')
     render_html(
         '<div class="page-sub">Aggregated statistics from the shared training CSV '
-        '(<code>Data/student_study_data.csv</code>) — read-only dataset analytics, '
-        'not linked to your login account.</div>'
+        '(<code>Data/student_study_data.csv</code>) — read-only benchmark data, '
+        'not linked to your personal courses or account.</div>'
     )
 
     df = _load()
