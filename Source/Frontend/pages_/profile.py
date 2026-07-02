@@ -209,7 +209,7 @@ def render() -> None:
     history_rows: list[dict] = []
     if user_id:
         try:
-            db_hist = get_user_predictions(user_id, limit=20)
+            db_hist = get_user_predictions(user_id, limit=100)
             history_rows = [
                 {
                     "course":     h.get("course_name") or "—",

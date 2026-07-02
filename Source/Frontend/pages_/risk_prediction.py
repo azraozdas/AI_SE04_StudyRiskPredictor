@@ -73,8 +73,6 @@ def _load_raw():
 
 
 def _course_options(encoders, raw_df) -> list[str]:
-    if encoders and "course" in encoders:
-        return sorted(encoders["course"].classes_.tolist())
     if raw_df is not None and "course" in raw_df.columns:
         return sorted(raw_df["course"].unique().tolist())
     return [
@@ -83,25 +81,6 @@ def _course_options(encoders, raw_df) -> list[str]:
         "Machine Learning",
         "Software Engineering",
     ]
-
-
-def _normalize_course(name: str, encoders) -> str:
-    """Return the encoder-canonical form of a course name, or the original if no match."""
-    if encoders is None or "course" not in encoders:
-        return name
-    classes = encoders["course"].classes_
-    name_lower = name.strip().lower()
-    for cls in classes:
-        if cls.lower() == name_lower:
-            return cls
-    return name
-
-
-def _is_known_course(name: str, encoders) -> bool:
-    """Return True if name (after normalization) exists in the encoder's class list."""
-    if encoders is None or "course" not in encoders:
-        return False
-    return _normalize_course(name, encoders) in encoders["course"].classes_
 
 
 def _risk_pct(label: str, study_hours, attendance, pass_grade) -> int:
@@ -333,13 +312,11 @@ def render() -> None:
         risk_raw   = None
         confidence = None
 
-        # ── Hybrid routing: known course → Random Forest; custom → fallback ──
-        if model is not None and encoders is not None and _is_known_course(course, encoders):
-            canonical = _normalize_course(course, encoders)
+        # ── Always attempt Random Forest; fall back only on genuine model failure ──
+        if model is not None and encoders is not None:
             try:
                 result     = predict_for_user(
                     model, encoders,
-                    course=canonical,
                     study_hours=study_hours,
                     attendance=attendance,
                     deadline_days=deadline_days,
@@ -353,11 +330,8 @@ def render() -> None:
             except Exception:
                 # Genuine unexpected model error — fall through to heuristic
                 source = "Rule-based fallback (model error)"
-        elif model is None or encoders is None:
-            source = "Rule-based fallback (model files missing)"
         else:
-            # Custom course not in training set — intentional path, no warning
-            source = "Rule-based fallback for custom course"
+            source = "Rule-based fallback (model files missing)"
 
         if risk_raw is None:
             risk_label = _fallback(
