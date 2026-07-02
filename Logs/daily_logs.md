@@ -446,3 +446,21 @@ Next Steps:
 - Selim: extend Supabase `users` / `courses` tables and replace session-only course/profile storage.
 - Restore or update `DATABASE_URL` in `.env` (current pooler user returns `tenant/user not found`).
 - PDF upload feature remains deferred to a future phase.
+
+### 05.06.2026
+
+**Dilay Tarhan – Documentation, Testing & Submission Readiness**
+
+Completed:
+- Updated documentation for the final six-feature model logic.
+- Updated `evaluation_report.md` with 93.33% test accuracy and 91.11% validation accuracy.
+- Updated `data_dictionary.md` to clarify that `course` is not encoded and not used as a model input.
+- Updated `README.md` with final prediction logic, My Courses, current model performance, and corrected future work.
+- Refreshed `testing_report.md` with current auth, My Courses, Random Forest prediction, confidence, schedule, recommendations, and profile history tests.
+- Updated `progress_report.md` to reflect final MVP scope and completed features.
+- Removed outdated documentation references to custom course fallback, course encoding 0–19, prediction history missing, and per-user course UI as future work.
+
+Next Steps:
+- Run final manual validation.
+- Update testing statuses from Pending to Passed/Failed.
+- Support demo rehearsal and instructor Q&A.
