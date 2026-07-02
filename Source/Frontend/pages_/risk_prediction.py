@@ -369,7 +369,7 @@ def render() -> None:
             user_id = st.session_state.get("user_id")
             if user_id:
                 try:
-                    save_prediction(user_id, risk_raw)
+                    save_prediction(user_id, risk_raw, course_name=course)
                 except Exception as exc:
                     st.warning(f"Could not save prediction to database ({exc}).")
 

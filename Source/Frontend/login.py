@@ -392,16 +392,40 @@ def _set_mode(mode: str) -> None:
 
 def _set_session_from_user(email: str, full_name: str = "", remember: bool = False) -> None:
     """Populate session state and optionally create a persistent Remember Me cookie."""
+    from db import get_user_profile, get_user_courses  # noqa: E402
+
     user_row = get_user_by_email(email)
-    st.session_state.logged_in = True
-    st.session_state.user_id = user_row[0] if user_row else None
-    st.session_state.user_email = email
-    st.session_state.full_name = (user_row[3] if user_row else full_name) or ""
-    st.session_state.student_id = email  # back-compat
+    user_id = user_row[0] if user_row else None
+
+    st.session_state.logged_in   = True
+    st.session_state.user_id     = user_id
+    st.session_state.user_email  = email
+    st.session_state.full_name   = (user_row[3] if user_row else full_name) or ""
+    st.session_state.student_id  = email  # back-compat
+
+    # Load persisted profile fields from DB
+    if user_id:
+        try:
+            profile = get_user_profile(user_id)
+            if profile:
+                st.session_state.full_name           = profile.get("full_name") or st.session_state.full_name
+                st.session_state.profile_university  = profile.get("university") or ""
+                st.session_state.profile_department  = profile.get("department") or "Computer Science"
+                st.session_state.profile_semester    = profile.get("semester")   or "Semester 6"
+                st.session_state.profile_target_gpa  = profile.get("target_gpa")
+        except Exception:
+            pass
+
+        # Load courses into session state
+        try:
+            st.session_state.user_courses   = get_user_courses(user_id)
+            st.session_state._courses_loaded = True
+        except Exception:
+            pass
+
     if remember and user_row:
         try:
             token = create_session(user_row[0])
-            # Stored here; app.py will write it to the cookie on the next render
             st.session_state._pending_session_cookie = token
         except Exception:
             pass
@@ -690,22 +714,27 @@ def _render_register_form() -> None:
             st.session_state.signup_error = "Please provide an answer for your security question."
         else:
             try:
+                try:
+                    gpa_val = float(target_gpa_str) if (target_gpa_str or "").strip() else None
+                except ValueError:
+                    gpa_val = None
+
                 create_user(
                     email=mail,
                     password=pwd,
                     full_name=name,
                     security_question=security_question,
                     security_answer=answer,
+                    university=(university or "").strip() or None,
+                    department=signup_dept,
+                    semester=signup_sem,
+                    target_gpa=gpa_val,
                 )
                 _set_session_from_user(mail, full_name=name)
-                # Save academic profile into session (TODO: persist to Supabase users table later)
                 st.session_state.profile_university  = (university or "").strip()
                 st.session_state.profile_department  = signup_dept
                 st.session_state.profile_semester    = signup_sem
-                try:
-                    st.session_state.profile_target_gpa = float(target_gpa_str) if (target_gpa_str or "").strip() else None
-                except ValueError:
-                    st.session_state.profile_target_gpa = None
+                st.session_state.profile_target_gpa = gpa_val
                 st.session_state.user_courses = []
                 st.session_state.signup_error = None
                 st.rerun()

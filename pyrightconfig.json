@@ -1,0 +1,9 @@
+{
+  "extraPaths": [
+    "/Users/selimaksahin/Downloads/AI_SE04_StudyRiskPredictor/Source/Backend",
+    "/Users/selimaksahin/Downloads/AI_SE04_StudyRiskPredictor/Source/Frontend",
+    "/Users/selimaksahin/Downloads/AI_SE04_StudyRiskPredictor/Source"
+  ],
+  "pythonVersion": "3.13",
+  "typeCheckingMode": "off"
+}

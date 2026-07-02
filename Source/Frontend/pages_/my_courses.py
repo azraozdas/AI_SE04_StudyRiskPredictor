@@ -1,20 +1,22 @@
 """My Courses page — add, view, edit, delete, and predict risk for personal courses."""
 
-# TODO (Selim):
-# Replace session_state CRUD with:
-#   db.create_course()  — on form submit
-#   db.get_user_courses()  — on page load (first render per session)
-#   db.update_course()  — on edit save
-#   db.delete_course()  — on delete button
-
 import os
 import sys
 
 import streamlit as st
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_FRONTEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _FRONTEND not in sys.path:
+    sys.path.insert(0, _FRONTEND)
+
 from course_colors import course_color_bg, get_course_color
-from utils import render_html
+from utils import ROOT, render_html
+
+_BACKEND = os.path.join(ROOT, "Source", "Backend")
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
+
+from db import create_course, delete_course, get_user_courses, update_course  # noqa: E402
 
 _LEVELS = ["Low", "Medium", "High"]
 
@@ -58,14 +60,25 @@ def _risk_badge_html(risk_level: str | None) -> str:
     )
 
 
+def _load_courses_from_db() -> None:
+    """Fetch courses from Supabase and store in session state."""
+    user_id = st.session_state.get("user_id")
+    if not user_id:
+        return
+    try:
+        st.session_state.user_courses = get_user_courses(user_id)
+    except Exception:
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Course card renderer
 # ---------------------------------------------------------------------------
 
 def _course_card(course: dict, idx: int) -> None:
     name    = course.get("name", "Unnamed")
-    diff    = course.get("assignment_difficulty", "Medium")
-    wl      = course.get("workload_level", "Medium")
+    diff    = course.get("assignment_difficulty") or course.get("difficulty", "Medium")
+    wl      = course.get("workload_level") or course.get("workload", "Medium")
     hrs     = course.get("study_hours", 0)
     att     = course.get("attendance", 0)
     dl      = course.get("deadline_days", 0)
@@ -138,20 +151,27 @@ Workload: {wl}</span>
             st.session_state.prefill_course = course.copy()
             _navigate("risk")
     with btn2:
-        edit_key = f"_editing_{cid}"
+        edit_key   = f"_editing_{cid}"
         edit_label = "✕  Cancel" if st.session_state.get(edit_key) else "✏️  Edit"
         if st.button(edit_label, key=f"edit_toggle_{cid}_{idx}", use_container_width=True):
             st.session_state[edit_key] = not st.session_state.get(edit_key, False)
             st.rerun()
     with btn3:
         if st.button("🗑  Delete", key=f"delete_{cid}_{idx}", use_container_width=True):
-            st.session_state.user_courses = [
-                c for c in st.session_state.user_courses if c.get("id") != cid
-            ]
-            # Also remove from schedule_assignments
-            sched = st.session_state.get("schedule_assignments", {})
-            sched.pop(name, None)
-            st.session_state.schedule_assignments = sched
+            user_id = st.session_state.get("user_id")
+            deleted = False
+            if user_id and cid:
+                try:
+                    deleted = delete_course(cid, user_id)
+                except Exception:
+                    pass
+            if deleted or not user_id:
+                st.session_state.user_courses = [
+                    c for c in st.session_state.user_courses if c.get("id") != cid
+                ]
+                sched = st.session_state.get("schedule_assignments", {})
+                sched.pop(name, None)
+                st.session_state.schedule_assignments = sched
             st.rerun()
 
     # ── Inline edit form ─────────────────────────────────────────────────────
@@ -180,11 +200,34 @@ Workload: {wl}</span>
                 if not e_name:
                     st.error("Course name cannot be empty.")
                 else:
+                    user_id = st.session_state.get("user_id")
+                    if user_id:
+                        try:
+                            update_course(
+                                course_id=cid,
+                                user_id=user_id,
+                                name=e_name,
+                                difficulty=e_diff,
+                                workload=e_wl,
+                                study_hours=e_hrs,
+                                attendance=e_att,
+                                deadline_days=e_dl,
+                                pass_grade=e_grade,
+                                instructor=e_instr,
+                                notes=e_notes.strip(),
+                            )
+                        except ValueError as ve:
+                            st.error(str(ve))
+                            st.stop()
+                        except Exception:
+                            pass
                     for c in st.session_state.user_courses:
                         if c.get("id") == cid:
                             c["name"]                  = e_name
                             c["assignment_difficulty"] = e_diff
+                            c["difficulty"]            = e_diff
                             c["workload_level"]        = e_wl
+                            c["workload"]              = e_wl
                             c["instructor"]            = e_instr
                             c["study_hours"]           = e_hrs
                             c["attendance"]            = e_att
@@ -192,7 +235,6 @@ Workload: {wl}</span>
                             c["pass_grade"]            = e_grade
                             c["notes"]                 = e_notes.strip()
                             break
-                    # TODO (Selim): db.update_course(cid, user_id, ...)
                     st.session_state[f"_editing_{cid}"] = False
                     st.success(f'"{e_name}" updated.')
                     st.rerun()
@@ -208,18 +250,20 @@ def _add_course_form() -> None:
     with st.form("add_course_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
-            name   = st.text_input("Course Name *", placeholder="e.g. Machine Learning, IT Security…")
-            diff   = st.selectbox("Assignment Difficulty *", _LEVELS, index=1)
-            wl     = st.selectbox("Workload Level *",        _LEVELS, index=1)
-            instr  = st.text_input("Instructor (optional)", placeholder="e.g. Dr. Smith")
+            name  = st.text_input("Course Name *", placeholder="e.g. Machine Learning, IT Security…")
+            diff  = st.selectbox("Assignment Difficulty *", _LEVELS, index=1)
+            wl    = st.selectbox("Workload Level *",        _LEVELS, index=1)
+            instr = st.text_input("Instructor (optional)", placeholder="e.g. Dr. Smith")
         with col2:
-            hrs    = st.slider("Weekly Study Hours *",    0, 15, 4)
-            att    = st.slider("Attendance (%) *",        0, 100, 75)
-            dl     = st.slider("Days Until Deadline *",   0, 60,  14)
-            grade  = st.slider("Current / Pass Grade (%) *", 0, 100, 70)
-        notes  = st.text_area("Notes (optional)",
-                               placeholder="e.g. Focus on chapters 3–5, exam on Friday…",
-                               height=68)
+            hrs   = st.slider("Weekly Study Hours *",       0, 15, 4)
+            att   = st.slider("Attendance (%) *",           0, 100, 75)
+            dl    = st.slider("Days Until Deadline *",      0, 60, 14)
+            grade = st.slider("Current / Pass Grade (%) *", 0, 100, 70)
+        notes = st.text_area(
+            "Notes (optional)",
+            placeholder="e.g. Focus on chapters 3–5, exam on Friday…",
+            height=68,
+        )
         submitted = st.form_submit_button("➕  Add Course", type="primary", use_container_width=True)
 
     if submitted:
@@ -232,21 +276,67 @@ def _add_course_form() -> None:
             st.warning(f'A course named "{name}" already exists. Use a different name.')
             return
 
-        new_course = {
-            "id":                    _next_id(st.session_state.user_courses),
-            "name":                  name,
-            "instructor":            instr.strip() if instr else "",
-            "assignment_difficulty": diff,
-            "workload_level":        wl,
-            "study_hours":           hrs,
-            "attendance":            att,
-            "deadline_days":         dl,
-            "pass_grade":            grade,
-            "notes":                 (notes or "").strip(),
-            "risk_level":            None,
-        }
+        user_id    = st.session_state.get("user_id")
+        new_course = None
+
+        if user_id:
+            try:
+                course_id = create_course(
+                    user_id=user_id,
+                    name=name,
+                    difficulty=diff,
+                    workload=wl,
+                    study_hours=hrs,
+                    attendance=att,
+                    deadline_days=dl,
+                    pass_grade=grade,
+                    instructor=instr.strip() if instr else "",
+                    notes=(notes or "").strip(),
+                )
+                new_course = {
+                    "id":                    course_id,
+                    "user_id":               user_id,
+                    "name":                  name,
+                    "instructor":            instr.strip() if instr else "",
+                    "assignment_difficulty": diff,
+                    "difficulty":            diff,
+                    "workload_level":        wl,
+                    "workload":              wl,
+                    "study_hours":           hrs,
+                    "attendance":            att,
+                    "deadline_days":         dl,
+                    "pass_grade":            grade,
+                    "notes":                 (notes or "").strip(),
+                    "risk_level":            None,
+                }
+            except ValueError as e:
+                st.warning(str(e))
+                return
+            except Exception as exc:
+                _msg = str(exc).lower()
+                if "enotfound" in _msg or "tenant" in _msg or "nodename" in _msg:
+                    st.error("Database is paused. Go to supabase.com/dashboard and restore the project.")
+                else:
+                    st.error(f"Could not save course to database: {exc}")
+                return
+        else:
+            new_course = {
+                "id":                    _next_id(st.session_state.user_courses),
+                "name":                  name,
+                "instructor":            instr.strip() if instr else "",
+                "assignment_difficulty": diff,
+                "difficulty":            diff,
+                "workload_level":        wl,
+                "workload":              wl,
+                "study_hours":           hrs,
+                "attendance":            att,
+                "deadline_days":         dl,
+                "pass_grade":            grade,
+                "notes":                 (notes or "").strip(),
+                "risk_level":            None,
+            }
+
         st.session_state.user_courses.append(new_course)
-        # TODO (Selim): db.create_course(st.session_state.user_id, ...)
         st.success(f'✅ "{name}" added successfully!')
         st.rerun()
 
@@ -262,17 +352,9 @@ def render() -> None:
         'then predict risk directly from each card.</div>'
     )
 
-    # TODO (Selim): Load courses from Supabase on first render
-    # if st.session_state.get("user_id") and not st.session_state.get("_courses_loaded"):
-    #     rows = db.get_user_courses(st.session_state.user_id)
-    #     st.session_state.user_courses = [
-    #         {"id": r[0], "name": r[1], "assignment_difficulty": r[2],
-    #          "workload_level": r[3], "study_hours": r[4], "attendance": r[5],
-    #          "deadline_days": r[6], "pass_grade": r[7], "instructor": r[8],
-    #          "notes": r[9], "risk_level": None}
-    #         for r in rows
-    #     ]
-    #     st.session_state._courses_loaded = True
+    if not st.session_state.get("_courses_loaded"):
+        _load_courses_from_db()
+        st.session_state._courses_loaded = True
 
     _add_course_form()
 

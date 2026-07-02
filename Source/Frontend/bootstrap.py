@@ -41,24 +41,16 @@ _SESSION_DEFAULTS = {
 
 
 def _query_get(name: str) -> str | None:
-    """Read a single query-string value (Streamlit 1.30+ or legacy API)."""
+    """Read a single query-string value from st.query_params."""
     try:
         val = st.query_params.get(name)
         if val is None:
             return None
         if isinstance(val, list):
             return val[0] if val else None
-        return str(val)
+        return val
     except Exception:
-        pass
-    try:
-        params = st.experimental_get_query_params()
-        vals = params.get(name)
-        if vals:
-            return vals[0]
-    except Exception:
-        pass
-    return None
+        return None
 
 
 def _drop_query_keys(*keys: str) -> None:
@@ -80,7 +72,7 @@ def _restore_remember_me_cookie() -> None:
     st.session_state._remember_me_attempted = True
     try:
         from cookie_session import get_session_token
-        from db import get_session_user
+        from db import get_session_user, get_user_profile, get_user_courses
 
         token = get_session_token()
         if not token:
@@ -88,11 +80,33 @@ def _restore_remember_me_cookie() -> None:
         user = get_session_user(token)
         if not user:
             return
-        st.session_state.logged_in = True
-        st.session_state.user_id = user[0]
-        st.session_state.user_email = user[1]
-        st.session_state.full_name = (user[3] or "") if len(user) > 3 else ""
-        st.session_state.student_id = user[1]
+
+        user_id = user[0]
+        st.session_state.logged_in   = True
+        st.session_state.user_id     = user_id
+        st.session_state.user_email  = user[1]
+        st.session_state.full_name   = (user[3] or "") if len(user) > 3 else ""
+        st.session_state.student_id  = user[1]
+
+        # Load persisted profile fields
+        try:
+            profile = get_user_profile(user_id)
+            if profile:
+                st.session_state.full_name           = profile.get("full_name") or st.session_state.full_name
+                st.session_state.profile_university  = profile.get("university") or ""
+                st.session_state.profile_department  = profile.get("department") or "Computer Science"
+                st.session_state.profile_semester    = profile.get("semester")   or "Semester 6"
+                st.session_state.profile_target_gpa  = profile.get("target_gpa")
+        except Exception:
+            pass
+
+        # Load user's courses
+        try:
+            st.session_state.user_courses    = get_user_courses(user_id)
+            st.session_state._courses_loaded = True
+        except Exception:
+            pass
+
     except Exception:
         pass
 

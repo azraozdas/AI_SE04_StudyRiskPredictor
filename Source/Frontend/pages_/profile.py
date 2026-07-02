@@ -5,9 +5,18 @@ import sys
 
 import streamlit as st
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_FRONTEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _FRONTEND not in sys.path:
+    sys.path.insert(0, _FRONTEND)
+
 from course_colors import get_course_color
 from utils import ROOT, render_html, clear_auth_session, save_auth_session
+
+_BACKEND = os.path.join(ROOT, "Source", "Backend")
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
+
+from db import get_user_profile, update_user_profile, get_user_predictions  # noqa: E402
 
 DEPARTMENTS = [
     "Computer Science",
@@ -41,11 +50,37 @@ def _stat_card(label: str, value: str, color: str = "#3B82F6") -> str:
     )
 
 
+def _load_profile_from_db() -> None:
+    """Fetch profile from Supabase and merge into session state."""
+    user_id = st.session_state.get("user_id")
+    if not user_id:
+        return
+    try:
+        profile = get_user_profile(user_id)
+        if profile:
+            if profile.get("full_name"):
+                st.session_state.full_name = profile["full_name"]
+            if profile.get("university"):
+                st.session_state.profile_university = profile["university"]
+            if profile.get("department"):
+                st.session_state.profile_department = profile["department"]
+            if profile.get("semester"):
+                st.session_state.profile_semester = profile["semester"]
+            if profile.get("target_gpa") is not None:
+                st.session_state.profile_target_gpa = profile["target_gpa"]
+    except Exception:
+        pass
+
+
 def render() -> None:
     render_html('<div class="page-h1">Profile</div>')
     render_html('<div class="page-sub">Manage your academic profile and account settings</div>')
 
-    # Retrieve session values
+    # Load from DB once per session
+    if not st.session_state.get("_profile_loaded"):
+        _load_profile_from_db()
+        st.session_state._profile_loaded = True
+
     full_name  = st.session_state.get("full_name", "") or "Student"
     email      = st.session_state.get("user_email", "")
     initial    = full_name[0].upper() if full_name else "S"
@@ -79,13 +114,21 @@ def render() -> None:
     pred          = st.session_state.get("prediction_result")
     pred_level    = pred["level"] if pred else None
     total_courses = len(st.session_state.get("user_courses", []))
-    total_preds   = len(st.session_state.get("prediction_history", []))
+
+    user_id = st.session_state.get("user_id")
+    history_count = 0
+    if user_id:
+        try:
+            history = get_user_predictions(user_id, limit=100)
+            history_count = len(history)
+        except Exception:
+            history_count = 1 if pred else 0
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        render_html(_stat_card("Total Courses", str(total_courses) if total_courses else "0", "#3B82F6"))
+        render_html(_stat_card("Total Courses", str(total_courses), "#3B82F6"))
     with c2:
-        render_html(_stat_card("Total Predictions", str(total_preds) if total_preds else "0", "#6366F1"))
+        render_html(_stat_card("Total Predictions", str(history_count), "#6366F1"))
     with c3:
         if pred_level:
             lvl_color = (
@@ -96,6 +139,34 @@ def render() -> None:
             render_html(_stat_card("Current Risk Level", pred_level, lvl_color))
         else:
             render_html(_stat_card("Current Risk Level", "No Prediction Yet", "#475569"))
+
+    # ── Prediction history ───────────────────────────────────────────────────
+    if user_id and history_count > 0:
+        render_html('<div class="section-h2 section-h2--follow">Prediction History</div>')
+        try:
+            history = get_user_predictions(user_id, limit=10)
+            rows_html = ""
+            for h in history:
+                rl = h.get("risk_level", "Unknown")
+                cn = h.get("course_name") or "—"
+                ts = h.get("created_at")
+                date_str = ts.strftime("%d %b %Y %H:%M") if ts else "—"
+                color = (
+                    "#DC2626" if "high"   in rl.lower() else
+                    "#F59E0B" if "medium" in rl.lower() else
+                    "#22C55E"
+                )
+                rows_html += f"""
+<div class="panel-row" style="display:flex;align-items:center;justify-content:space-between;
+gap:8px;border-bottom:1px solid #273449;padding:6px 0;">
+<span style="font-size:12px;color:#94A3B8;flex:1;">{cn}</span>
+<span style="font-size:12px;font-weight:700;color:{color};min-width:90px;text-align:center;">{rl}</span>
+<span style="font-size:11px;color:#475569;min-width:110px;text-align:right;">{date_str}</span>
+</div>
+"""
+            render_html(f'<div class="card list-panel">{rows_html}</div>')
+        except Exception:
+            pass
 
     render_html('<div class="section-h2 section-h2--follow">Edit Profile</div>')
 
@@ -110,8 +181,8 @@ def render() -> None:
     dept_idx = DEPARTMENTS.index(dept) if dept in DEPARTMENTS else 0
     sem_idx  = SEMESTERS.index(sem)    if sem  in SEMESTERS  else 5
 
-    new_dept = st.selectbox("Department", DEPARTMENTS, index=dept_idx, key="profile_dept_sel")
-    new_sem  = st.selectbox("Semester",   SEMESTERS,   index=sem_idx,  key="profile_sem_sel")
+    new_dept    = st.selectbox("Department", DEPARTMENTS, index=dept_idx, key="profile_dept_sel")
+    new_sem     = st.selectbox("Semester",   SEMESTERS,   index=sem_idx,  key="profile_sem_sel")
 
     gpa_default = str(target_gpa) if target_gpa is not None else ""
     new_gpa_str = st.text_input(
@@ -124,18 +195,36 @@ def render() -> None:
     col_save, col_reset = st.columns(2)
     with col_save:
         if st.button("Save Changes", type="primary", use_container_width=True):
-            if new_name.strip():
-                st.session_state.full_name          = new_name.strip()
-            st.session_state.profile_department = new_dept
-            st.session_state.profile_semester   = new_sem
-            st.session_state.profile_university = new_university.strip()
+            new_name_clean = new_name.strip()
             try:
-                st.session_state.profile_target_gpa = float(new_gpa_str) if new_gpa_str.strip() else None
+                new_gpa = float(new_gpa_str) if new_gpa_str.strip() else None
             except ValueError:
-                st.session_state.profile_target_gpa = None
+                new_gpa = None
+
+            # Persist to Supabase
+            if user_id:
+                try:
+                    update_user_profile(
+                        user_id,
+                        full_name=new_name_clean or None,
+                        university=new_university.strip() or None,
+                        department=new_dept,
+                        semester=new_sem,
+                        target_gpa=new_gpa,
+                    )
+                except Exception:
+                    st.warning("Could not save to database — changes saved to session only.")
+
+            # Always update session state
+            if new_name_clean:
+                st.session_state.full_name = new_name_clean
+            st.session_state.profile_department  = new_dept
+            st.session_state.profile_semester    = new_sem
+            st.session_state.profile_university  = new_university.strip()
+            st.session_state.profile_target_gpa  = new_gpa
             save_auth_session()
-            # TODO: persist university + target_gpa to Supabase users table (Selim)
             st.success("Profile updated.")
+
     with col_reset:
         if st.button("Reset Prediction", use_container_width=True):
             st.session_state.prediction_result = None
