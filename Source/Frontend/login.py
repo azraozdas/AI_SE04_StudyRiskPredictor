@@ -423,6 +423,17 @@ def _set_session_from_user(email: str, full_name: str = "", remember: bool = Fal
         except Exception:
             pass
 
+        # Restore most-recent risk level on each course from prediction history
+        try:
+            from db import get_user_predictions  # noqa: E402
+            preds = get_user_predictions(user_id, limit=50)
+            risk_map = {p["course_name"]: p["risk_level"] for p in reversed(preds) if p.get("course_name")}
+            for c in st.session_state.user_courses:
+                if c.get("name") in risk_map:
+                    c["risk_level"] = risk_map[c["name"]]
+        except Exception:
+            pass
+
     if remember and user_row:
         try:
             token = create_session(user_row[0])

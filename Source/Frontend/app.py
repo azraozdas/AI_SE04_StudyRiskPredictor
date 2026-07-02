@@ -66,6 +66,10 @@ if not st.session_state.logged_in:
 # Persist auth so sidebar navigation / reloads keep the session
 save_auth_session()
 
+# Ensure user data is loaded (restores state across browser reloads)
+from bootstrap import ensure_user_data_loaded
+ensure_user_data_loaded()
+
 # ---------------------------------------------------------------------------
 # Inject design-system styles
 # ---------------------------------------------------------------------------

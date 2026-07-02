@@ -140,34 +140,6 @@ def render() -> None:
         else:
             render_html(_stat_card("Current Risk Level", "No Prediction Yet", "#475569"))
 
-    # ── Prediction history ───────────────────────────────────────────────────
-    if user_id and history_count > 0:
-        render_html('<div class="section-h2 section-h2--follow">Prediction History</div>')
-        try:
-            history = get_user_predictions(user_id, limit=10)
-            rows_html = ""
-            for h in history:
-                rl = h.get("risk_level", "Unknown")
-                cn = h.get("course_name") or "—"
-                ts = h.get("created_at")
-                date_str = ts.strftime("%d %b %Y %H:%M") if ts else "—"
-                color = (
-                    "#DC2626" if "high"   in rl.lower() else
-                    "#F59E0B" if "medium" in rl.lower() else
-                    "#22C55E"
-                )
-                rows_html += f"""
-<div class="panel-row" style="display:flex;align-items:center;justify-content:space-between;
-gap:8px;border-bottom:1px solid #273449;padding:6px 0;">
-<span style="font-size:12px;color:#94A3B8;flex:1;">{cn}</span>
-<span style="font-size:12px;font-weight:700;color:{color};min-width:90px;text-align:center;">{rl}</span>
-<span style="font-size:11px;color:#475569;min-width:110px;text-align:right;">{date_str}</span>
-</div>
-"""
-            render_html(f'<div class="card list-panel">{rows_html}</div>')
-        except Exception:
-            pass
-
     render_html('<div class="section-h2 section-h2--follow">Edit Profile</div>')
 
     new_name = st.text_input("Full Name", value=full_name, key="profile_new_name")
@@ -231,18 +203,45 @@ gap:8px;border-bottom:1px solid #273449;padding:6px 0;">
             st.session_state.selected_course   = None
             st.info("Prediction data cleared.")
 
-    # ── Prediction History ───────────────────────────────────────────────────
-    # TODO (Selim): Load history from db.get_user_predictions(user_id) instead of session_state
+    # ── Prediction History (unified: DB with session fallback) ──────────────
     render_html('<div class="section-h2 section-h2--follow">Prediction History</div>')
 
-    history = st.session_state.get("prediction_history", [])
-    if not history:
+    history_rows: list[dict] = []
+    if user_id:
+        try:
+            db_hist = get_user_predictions(user_id, limit=20)
+            history_rows = [
+                {
+                    "course":     h.get("course_name") or "—",
+                    "risk_level": h.get("risk_level", "Unknown"),
+                    "created_at": (
+                        h["created_at"].strftime("%d %b %Y %H:%M")
+                        if h.get("created_at") else ""
+                    ),
+                }
+                for h in db_hist
+            ]
+        except Exception:
+            pass  # DB offline — fall through to session fallback
+
+    # Fall back to in-session history when DB is unavailable
+    if not history_rows:
+        sess_hist = st.session_state.get("prediction_history", [])
+        history_rows = [
+            {
+                "course":     e.get("course", "—"),
+                "risk_level": e.get("risk_level", "Unknown"),
+                "created_at": e.get("created_at", ""),
+            }
+            for e in reversed(sess_hist)
+        ]
+
+    if not history_rows:
         render_html("""
 <div class="card" style="text-align:center;padding:28px 16px;color:#64748B;">
 <div style="font-size:28px;margin-bottom:8px;">📊</div>
 <div style="font-size:13px;color:#94A3B8;">
-No predictions yet this session.
-Run a risk prediction on any course to see your history here.
+No predictions yet. Run a risk prediction on any course to see your history here.
 </div>
 </div>
 """)
@@ -253,22 +252,23 @@ Run a risk prediction on any course to see your history here.
             "low":    ("#22C55E", "#86EFAC"),
         }
         rows_html = ""
-        for entry in reversed(history):
-            c_name  = entry.get("course", "—")
-            c_risk  = entry.get("risk_level", "Unknown")
-            c_date  = entry.get("created_at", "")
+        for entry in history_rows:
+            c_name  = entry["course"]
+            c_risk  = entry["risk_level"]
+            c_date  = entry["created_at"]
             lkey    = c_risk.lower()
             border, text = next(
                 (v for k, v in _risk_color_map.items() if k in lkey),
                 ("#64748B", "#94A3B8"),
             )
             cc = get_course_color(c_name)
+            date_line = f'<div style="font-size:10px;color:#475569;margin-top:1px;">{c_date}</div>' if c_date else ""
             rows_html += f"""
 <div class="panel-row" style="display:flex;align-items:center;gap:10px;
 border-bottom:1px solid #273449;flex-wrap:wrap;">
 <div style="flex:1;min-width:120px;">
 <div style="font-size:13px;font-weight:700;color:{cc};">{c_name}</div>
-{"" if not c_date else f'<div style="font-size:10px;color:#475569;margin-top:1px;">{c_date}</div>'}
+{date_line}
 </div>
 <span class="badge" style="background:{border}22;color:{text};border:1px solid {border}55;">{c_risk}</span>
 </div>

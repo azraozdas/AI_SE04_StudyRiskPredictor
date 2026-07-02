@@ -366,12 +366,14 @@ def render() -> None:
             )
         else:
             risk_label = _display_risk(risk_raw)
-            user_id = st.session_state.get("user_id")
-            if user_id:
-                try:
-                    save_prediction(user_id, risk_raw, course_name=course)
-                except Exception as exc:
-                    st.warning(f"Could not save prediction to database ({exc}).")
+
+        # ── Save prediction to DB for ALL paths (ML + fallback) ───────────
+        user_id = st.session_state.get("user_id")
+        if user_id:
+            try:
+                save_prediction(user_id, risk_label, course_name=course)
+            except Exception as exc:
+                st.warning(f"Could not save prediction to database ({exc}).")
 
         pct = _risk_pct(risk_label, study_hours, attendance, pass_grade)
         st.session_state.prediction_result = {
@@ -400,8 +402,6 @@ def render() -> None:
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         })
         st.session_state.prediction_history = history
-        # TODO (Selim): db.save_prediction(user_id, risk_raw, course_id) already called above;
-        # also call db.get_user_predictions() on Profile page to load full history.
 
     if st.session_state.get("prediction_result"):
         res = st.session_state.prediction_result

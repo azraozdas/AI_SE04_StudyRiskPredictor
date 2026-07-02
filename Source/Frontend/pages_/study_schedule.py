@@ -1,15 +1,20 @@
 """Study Schedule page — personalized planner built from the student's own courses and predictions."""
 
-# TODO (Selim): Replace session_state schedule with db.upsert_schedule_entry() / db.get_user_schedule()
-
 import os
 import sys
+from datetime import date, timedelta
 
 import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from course_colors import course_color_bg, get_course_color
-from utils import render_html
+from utils import ROOT, render_html
+
+_BACKEND = os.path.join(ROOT, "Source", "Backend")
+if _BACKEND not in sys.path:
+    sys.path.insert(0, _BACKEND)
+
+from db import upsert_study_schedule, get_user_schedule  # noqa: E402
 
 # Hours recommended per risk level (AI decision)
 RISK_HOURS: dict[str, float] = {
@@ -27,6 +32,9 @@ RISK_COLOR: dict[str, str] = {
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 DAYS_OPTIONS = ["(Not assigned)"] + DAYS
 
+# Map day names to a study_date offset from today's Monday (ISO weekday 1-7)
+_DAY_TO_ISO = {d: i + 1 for i, d in enumerate(DAYS)}
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -40,6 +48,57 @@ def _navigate(page: str) -> None:
 def _slug(name: str) -> str:
     """Convert course name to a safe session_state key segment."""
     return name.lower().replace(" ", "_").replace("-", "_")[:40]
+
+
+def _date_for_day(day_name: str) -> date:
+    """Return the date of the given weekday in the CURRENT week (Mon-Sun).
+
+    Uses timedelta so it correctly crosses month boundaries
+    (e.g. Wednesday when today is 30 June → 2 July, not ValueError).
+    """
+    today = date.today()
+    target_iso = _DAY_TO_ISO.get(day_name, 1)   # Mon=1 … Sun=7
+    diff = target_iso - today.isoweekday()       # may be negative (past days this week)
+    return today + timedelta(days=diff)
+
+
+def _load_schedule_from_db() -> None:
+    """Restore schedule_assignments from DB for the current user.
+
+    Converts stored study_schedules rows back into the
+    {course_name: {suggested_hours, assigned_day}} dict used by the UI.
+    Only called once per session (guarded by _schedule_loaded flag).
+    """
+    user_id = st.session_state.get("user_id")
+    if not user_id:
+        return
+    try:
+        rows = get_user_schedule(user_id)
+        if not rows:
+            return
+        assignments: dict[str, dict] = {}
+        for row in rows:
+            cname = row.get("course_name") or ""
+            if not cname:
+                continue
+            # Map study_date back to a day name (best effort)
+            sd = row.get("study_date")
+            day_name = None
+            if sd:
+                # date objects have isoweekday() 1-7; list is 0-indexed
+                try:
+                    day_name = DAYS[sd.isoweekday() - 1]
+                except Exception:
+                    day_name = None
+            hrs = row.get("duration_minutes", 60) / 60
+            assignments[cname] = {
+                "suggested_hours": hrs,
+                "assigned_day": day_name,
+            }
+        if assignments:
+            st.session_state.schedule_assignments = assignments
+    except Exception:
+        pass  # DB offline — fall back to session state silently
 
 
 # ---------------------------------------------------------------------------
@@ -232,8 +291,38 @@ border-left:1px solid #273449;padding-left:16px;">
         if st.button("💾  Save My Schedule", type="primary", use_container_width=True, key="sched_save_btn"):
             st.session_state.schedule_assignments = live_assignments
             sched = live_assignments
-            # TODO (Selim): db.upsert_schedule_entry(user_id, course_id, ...) for each entry
-            st.success("✅ Schedule saved!")
+
+            # ── Persist to database ────────────────────────────────────
+            user_id = st.session_state.get("user_id")
+            if user_id:
+                try:
+                    entries = []
+                    for cname, data in live_assignments.items():
+                        assigned_day = data.get("assigned_day")
+                        if not assigned_day:
+                            continue  # skip unassigned courses
+                        study_dt = _date_for_day(assigned_day)
+                        hours = data.get("suggested_hours", 1.0)
+                        entries.append({
+                            "course_name":      cname,
+                            "study_date":       study_dt.isoformat(),
+                            "duration_minutes": int(hours * 60),
+                            "priority":         "High" if hours >= 5 else (
+                                                "Medium" if hours >= 3 else "Low"),
+                            "topic":            "",
+                            "completed":        False,
+                            "notes":            "",
+                        })
+                    saved_n = upsert_study_schedule(user_id, entries)
+                    if entries:
+                        st.success(f"✅ Schedule saved! ({saved_n} entries persisted to database)")
+                    else:
+                        st.success("✅ Schedule saved (no days assigned yet).")
+                except Exception as exc:
+                    st.success("✅ Schedule saved to session!")
+                    st.warning(f"Could not persist to database: {exc}")
+            else:
+                st.success("✅ Schedule saved!")
 
     # ── Weekly planner ───────────────────────────────────────────────────────
     render_html('<div class="section-h2 section-h2--follow">Weekly Planner</div>')
@@ -312,6 +401,11 @@ def render() -> None:
         '<div class="page-sub">AI recommends weekly study hours · '
         'You choose the days · Your courses only</div>'
     )
+
+    # Load saved schedule from DB once per session
+    if not st.session_state.get("_schedule_loaded"):
+        _load_schedule_from_db()
+        st.session_state._schedule_loaded = True
 
     user_courses = st.session_state.get("user_courses", [])
 

@@ -7,6 +7,8 @@ Design notes:
 - Passwords and security answers are stored as bcrypt hashes. Plaintext is never saved.
 - Security questions enable in-app password reset without any email infrastructure.
 - All query-result functions return plain dicts so callers never depend on column order.
+- All parameterised queries use %s placeholders — psycopg2 escapes values automatically,
+  providing full protection against SQL injection.
 
 Data structures returned (stable contract for frontend):
 
@@ -23,6 +25,32 @@ Data structures returned (stable contract for frontend):
   Study Schedule entry dict:
     { id, user_id, course_id, course_name, study_date, duration_minutes,
       topic, priority, completed, notes, created_at }
+
+Public API summary:
+  get_connection()                      — open a DB connection
+  init_db()                             — create / migrate schema (idempotent)
+  create_user(...)                      — register new user
+  get_user_by_email(email)              — raw user row
+  verify_user_password(email, password) — bcrypt check
+  get_user_profile(user_id)             — profile dict
+  update_user_profile(user_id, ...)     — update profile fields
+  get_security_question(email)          — security question string
+  verify_security_answer(email, answer) — bcrypt check
+  reset_password_direct(email, pw)      — set new password hash
+  create_course(user_id, name, ...)     — add course, returns id
+  get_user_courses(user_id)             — list[dict]
+  update_course(course_id, user_id, ...)— update course fields
+  delete_course(course_id, user_id)     — delete course
+  create_session(user_id)               — persistent login token
+  get_session_user(token)               — raw user row for token
+  delete_session(token)                 — invalidate token
+  save_prediction(user_id, risk, ...)   — store prediction, returns id
+  get_user_predictions(user_id, limit)  — list[dict] newest-first
+  save_study_schedule(user_id, entries) — INSERT list of schedule entries
+  upsert_study_schedule(user_id, entries)— REPLACE all schedule entries atomically
+  get_user_schedule(user_id, ...)       — list[dict] filtered by date
+  mark_schedule_complete(id, user_id)   — toggle completed flag
+  clear_user_schedule(user_id)          — delete all schedule rows
 """
 
 import os
@@ -170,6 +198,11 @@ def init_db():
                         created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
+                # Add updated_at column for schedule entries (backward compat)
+                cur.execute(
+                    "ALTER TABLE study_schedules "
+                    "ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+                )
     finally:
         conn.close()
 
@@ -642,7 +675,7 @@ def get_user_predictions(user_id: int, limit: int = 20) -> list[dict]:
 # ── Study schedule ────────────────────────────────────────────────────────────
 
 def save_study_schedule(user_id: int, entries: list[dict]) -> int:
-    """Persist a list of schedule entries for a user.
+    """Append a list of schedule entries for a user.
 
     Each entry dict may contain:
         course_id (int, optional), course_name (str, optional),
@@ -651,6 +684,7 @@ def save_study_schedule(user_id: int, entries: list[dict]) -> int:
         completed (bool), notes (str)
 
     Returns the number of rows inserted.
+    Note: prefer upsert_study_schedule() to avoid duplicate entries.
     """
     if not entries:
         return 0
@@ -658,6 +692,55 @@ def save_study_schedule(user_id: int, entries: list[dict]) -> int:
     try:
         with conn:
             with conn.cursor() as cur:
+                rows = [
+                    (
+                        user_id,
+                        e.get("course_id"),
+                        e.get("course_name"),
+                        e["study_date"],
+                        int(e.get("duration_minutes", 60)),
+                        e.get("topic"),
+                        e.get("priority", "Medium"),
+                        bool(e.get("completed", False)),
+                        e.get("notes"),
+                    )
+                    for e in entries
+                ]
+                cur.executemany(
+                    """
+                    INSERT INTO study_schedules
+                        (user_id, course_id, course_name, study_date,
+                         duration_minutes, topic, priority, completed, notes)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    rows,
+                )
+                return cur.rowcount
+    finally:
+        conn.close()
+
+
+def upsert_study_schedule(user_id: int, entries: list[dict]) -> int:
+    """Replace ALL schedule entries for a user with the given list.
+
+    This is an atomic delete-then-insert inside a single transaction,
+    ensuring no duplicate rows accumulate when the user saves the schedule
+    multiple times.
+
+    Each entry dict accepts the same keys as save_study_schedule().
+    Returns the number of rows inserted.
+    """
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                # Delete existing schedule for this user atomically
+                cur.execute(
+                    "DELETE FROM study_schedules WHERE user_id = %s",
+                    (user_id,),
+                )
+                if not entries:
+                    return 0
                 rows = [
                     (
                         user_id,

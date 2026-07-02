@@ -33,7 +33,9 @@ _SESSION_DEFAULTS = {
     "selected_course": "",
     "prediction_history": [],
     "schedule_assignments": {},
-    "_courses_loaded": False,
+    "_courses_loaded":  False,
+    "_schedule_loaded": False,
+    "_profile_loaded":  False,
     "auth_mode": "Sign In",
     "login_error": None,
     "signup_error": None,
@@ -87,8 +89,25 @@ def _restore_remember_me_cookie() -> None:
         st.session_state.user_email  = user[1]
         st.session_state.full_name   = (user[3] or "") if len(user) > 3 else ""
         st.session_state.student_id  = user[1]
+        
+    except Exception:
+        pass
 
-        # Load persisted profile fields
+
+def ensure_user_data_loaded() -> None:
+    """Ensure user profile, courses, and risk levels are loaded from DB.
+    Called after login gate to persist data across Streamlit browser reloads.
+    """
+    if not st.session_state.get("logged_in"):
+        return
+    user_id = st.session_state.get("user_id")
+    if not user_id:
+        return
+
+    from db import get_user_profile, get_user_courses, get_user_predictions
+
+    # Load profile
+    if not st.session_state.get("_profile_loaded"):
         try:
             profile = get_user_profile(user_id)
             if profile:
@@ -97,18 +116,22 @@ def _restore_remember_me_cookie() -> None:
                 st.session_state.profile_department  = profile.get("department") or "Computer Science"
                 st.session_state.profile_semester    = profile.get("semester")   or "Semester 6"
                 st.session_state.profile_target_gpa  = profile.get("target_gpa")
+            st.session_state._profile_loaded = True
         except Exception:
             pass
 
-        # Load user's courses
+    # Load courses and predictions
+    if not st.session_state.get("_courses_loaded"):
         try:
-            st.session_state.user_courses    = get_user_courses(user_id)
+            st.session_state.user_courses = get_user_courses(user_id)
+            preds = get_user_predictions(user_id, limit=50)
+            risk_map = {p["course_name"]: p["risk_level"] for p in reversed(preds) if p.get("course_name")}
+            for c in st.session_state.user_courses:
+                if c.get("name") in risk_map:
+                    c["risk_level"] = risk_map[c["name"]]
             st.session_state._courses_loaded = True
         except Exception:
             pass
-
-    except Exception:
-        pass
 
 
 def _flush_pending_session_cookie() -> None:
