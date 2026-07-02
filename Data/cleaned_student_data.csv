@@ -1,301 +1,301 @@
 course,study_hours,attendance,deadline_days,pass_grade,assignment_difficulty,workload_level,risk_level
-10,1,48,3,45,0,0,0
-18,3,56,5,60,0,1,2
-15,5,56,6,67,0,1,2
-17,3,71,6,57,1,2,2
-11,3,51,2,68,0,0,0
-7,7,86,20,90,1,1,1
-14,6,94,17,94,0,1,1
-18,3,79,7,73,1,0,2
-15,1,64,1,44,0,0,0
-9,3,62,4,72,0,2,2
-10,7,91,20,98,1,1,1
-10,5,88,26,81,2,2,1
-10,1,56,3,43,0,2,0
-9,4,78,4,68,0,0,0
-17,1,54,0,57,2,0,0
-9,4,55,5,46,1,0,0
-2,7,93,21,90,1,2,1
-1,8,76,26,89,1,1,1
-17,2,50,0,47,0,0,0
-13,3,80,4,75,2,0,0
-9,8,79,27,94,0,1,1
-1,6,82,9,68,2,2,2
-10,2,46,1,63,0,0,0
-13,3,64,3,53,1,0,2
-17,4,63,3,56,2,2,2
-2,4,63,12,76,0,1,2
-8,3,80,10,64,2,1,2
-9,5,87,8,82,1,0,0
-3,6,77,22,77,2,1,1
-5,4,31,1,63,0,0,0
-17,9,76,29,82,2,2,1
-12,9,77,20,99,1,1,1
-6,6,92,27,88,1,2,1
-12,4,82,9,56,2,2,2
-6,7,86,9,99,2,1,1
-2,4,75,12,55,1,2,2
-10,3,39,1,64,2,1,0
-5,8,76,21,83,2,1,1
-3,1,47,1,47,2,2,0
-17,8,97,26,81,1,1,1
-3,6,58,5,70,0,2,2
-10,5,85,11,89,2,1,1
-18,6,98,9,90,1,1,1
-14,9,91,27,77,1,0,1
-6,3,43,5,60,0,0,0
-17,7,79,28,81,2,1,1
-10,4,56,7,70,1,1,2
-14,3,57,5,63,0,0,2
-1,3,65,1,53,2,2,0
-14,1,45,1,42,2,0,0
-4,3,75,3,64,0,1,2
-2,2,36,3,48,0,0,0
-17,2,60,1,65,0,0,0
-5,8,91,20,89,1,2,1
-8,6,80,27,76,2,2,1
-11,4,57,7,65,2,1,2
-7,2,42,4,54,2,2,0
-3,3,52,4,48,0,0,0
-12,1,54,3,40,0,2,0
-2,6,66,9,65,2,1,2
-7,3,78,11,64,2,0,2
-18,9,85,28,82,1,1,1
-9,4,50,0,40,0,0,0
-12,4,55,1,44,0,1,0
-14,6,94,24,76,1,2,1
-14,5,61,9,70,1,2,2
-16,1,50,3,40,2,2,0
-4,4,37,4,46,0,2,0
-14,7,77,21,99,1,1,1
-13,8,89,14,82,2,1,1
-15,3,73,3,59,1,2,2
-17,3,57,4,52,2,0,0
-16,8,90,17,87,1,0,1
-4,4,57,11,61,2,0,2
-18,6,64,12,74,1,0,2
-6,3,66,9,58,2,2,2
-4,4,82,9,80,2,1,2
-6,4,50,3,54,0,2,0
-14,5,78,23,91,1,2,1
-1,6,63,6,58,0,0,2
-9,7,78,10,82,2,1,1
-9,5,58,12,71,1,2,2
-15,2,35,2,56,0,0,0
-17,3,69,4,65,2,1,2
-10,7,87,12,96,1,1,1
-1,3,43,5,47,0,2,1
-14,2,57,1,63,0,0,0
-3,8,79,16,95,1,1,2
-7,2,31,5,46,2,2,0
-8,2,62,0,67,0,0,0
-12,8,99,18,93,1,2,1
-17,1,37,5,68,0,2,0
-18,1,52,4,53,0,1,0
-8,3,73,3,74,2,0,2
-4,2,54,5,44,0,1,0
-1,8,100,26,92,1,2,1
-1,7,87,27,85,1,2,1
-12,4,64,5,63,0,0,0
-0,4,68,5,57,2,0,2
-2,7,82,8,82,0,2,1
-3,4,64,6,66,1,1,2
-12,3,76,11,69,2,1,2
-11,2,37,1,49,2,1,0
-19,3,37,5,68,2,2,0
-17,1,52,1,60,1,0,0
-9,5,66,3,60,0,2,2
-4,8,89,27,72,0,1,1
-16,2,33,4,42,0,1,1
-10,5,89,22,93,1,1,1
-3,6,66,9,78,1,2,0
-15,3,58,6,72,1,2,2
-11,2,34,0,61,2,2,0
-3,1,57,2,53,0,0,0
-3,9,79,17,77,1,0,1
-9,1,65,2,61,2,0,0
-8,6,81,8,58,2,2,2
-14,2,34,3,65,0,0,0
-4,5,69,10,58,1,2,2
-7,3,66,11,66,1,2,2
-7,1,49,5,59,0,0,0
-16,6,76,22,75,2,2,1
-17,1,50,0,41,0,0,0
-8,2,50,1,48,2,0,0
-8,6,81,10,70,1,2,2
-15,5,78,8,80,1,0,2
-19,4,59,3,66,0,2,0
-14,9,84,22,79,1,1,1
-17,3,31,0,68,0,2,0
-0,7,92,26,83,1,0,1
-12,2,49,3,57,0,2,0
-0,6,78,9,60,1,2,2
-0,2,53,3,42,0,0,0
-7,6,82,11,79,0,2,2
-5,9,93,12,77,2,2,1
-7,5,57,9,78,1,1,2
-7,6,73,5,62,2,2,0
-5,3,63,4,53,0,0,1
-0,3,64,6,67,2,2,2
-11,4,72,3,73,0,2,2
-12,2,59,1,59,0,0,0
-7,4,64,11,55,2,1,2
-4,6,58,3,73,2,2,0
-18,5,70,11,71,2,0,2
-4,6,77,17,99,2,1,0
-10,6,77,24,92,1,1,1
-0,9,90,16,92,2,2,1
-12,3,56,2,66,1,1,0
-7,4,47,0,64,0,0,0
-4,4,72,7,80,1,2,0
-16,6,88,10,79,2,2,1
-9,3,62,7,77,2,0,0
-1,1,56,5,58,0,2,0
-11,5,91,25,88,2,1,1
-1,3,34,4,47,2,0,0
-8,1,35,5,53,0,1,0
-9,6,81,18,96,1,1,1
-3,4,75,5,63,0,1,2
-11,6,75,10,79,1,2,1
-1,1,35,1,45,0,0,0
-5,8,97,23,83,0,1,1
-12,4,74,11,78,0,0,2
-14,7,86,22,96,1,1,1
-5,3,60,3,68,2,2,2
-3,4,44,1,65,0,0,0
-1,3,54,2,46,0,2,2
-12,7,79,29,94,2,2,1
-9,4,74,8,62,2,2,2
-3,6,60,7,55,1,0,2
-7,3,63,3,60,2,0,0
-19,1,65,1,62,0,0,0
-17,9,80,12,85,1,2,0
-18,6,97,12,81,1,2,1
-8,1,36,5,57,2,2,2
-16,6,78,14,97,1,2,1
-4,9,77,10,81,1,2,1
-19,5,67,12,71,2,2,2
-2,2,53,2,45,0,0,0
-11,8,85,28,80,1,1,2
-3,1,64,1,56,2,0,0
-10,9,86,12,78,2,1,1
-9,6,82,5,69,2,2,2
-5,8,97,23,92,1,1,1
-2,8,77,21,91,0,1,1
-3,9,78,17,74,2,1,1
-9,2,33,1,68,0,1,0
-4,4,35,0,67,2,0,0
-17,6,73,5,68,2,0,2
-19,6,85,10,90,2,0,1
-7,4,44,2,53,0,2,0
-7,7,78,9,79,1,2,1
-15,6,86,29,90,0,1,1
-0,8,95,25,81,2,1,1
-19,6,83,9,92,1,1,1
-9,6,63,11,72,2,1,2
-0,8,76,20,88,1,1,1
-16,8,82,14,90,1,1,1
-2,2,55,0,68,0,0,1
-11,9,88,16,92,0,0,1
-17,1,57,0,40,1,2,0
-16,5,95,29,85,1,1,1
-0,8,90,9,92,1,1,1
-0,4,63,3,59,2,2,1
-5,8,89,26,96,1,2,1
-5,5,74,12,64,2,2,2
-4,6,57,4,57,1,1,2
-18,1,35,5,53,2,0,0
-6,5,58,11,79,2,1,2
-6,3,55,5,60,2,0,0
-15,4,59,1,48,2,0,0
-2,3,52,5,56,2,0,0
-9,6,58,5,56,0,2,2
-1,4,44,1,66,0,2,0
-19,7,93,9,98,2,1,1
-7,5,79,5,80,0,1,2
-12,3,34,1,58,0,2,0
-13,1,54,4,46,2,0,0
-8,1,36,4,53,2,0,0
-14,5,73,7,75,0,2,2
-17,3,74,7,55,1,2,2
-4,5,71,11,63,0,2,2
-7,2,30,0,62,0,2,2
-12,1,40,3,40,0,2,0
-19,9,78,12,75,1,2,1
-5,7,93,18,78,2,1,1
-12,5,75,10,72,1,1,2
-2,2,49,1,65,2,1,0
-17,6,69,8,61,0,1,2
-15,9,95,29,87,1,1,1
-17,1,37,0,68,0,2,0
-17,4,39,1,67,2,0,0
-1,6,78,8,74,2,1,2
-12,3,59,3,57,2,1,2
-13,3,55,5,49,0,2,2
-7,5,58,8,72,0,2,2
-19,4,79,11,67,2,2,2
-0,6,94,29,97,1,1,1
-16,2,39,2,64,2,0,0
-13,3,65,9,65,2,2,2
-19,8,80,30,86,1,1,1
-2,2,64,5,47,2,2,0
-17,3,58,4,66,0,0,0
-15,2,42,2,46,0,0,0
-11,7,98,28,98,1,1,1
-6,5,61,5,79,2,2,2
-18,7,95,14,96,1,2,1
-7,7,91,17,99,1,1,1
-14,7,100,16,90,1,1,1
-17,4,77,10,75,2,2,2
-9,8,91,24,85,0,2,1
-5,8,94,17,90,1,2,1
-12,6,76,5,70,0,1,2
-0,4,55,8,80,0,2,2
-9,5,66,9,59,1,2,2
-10,6,89,11,80,1,1,1
-1,2,37,3,44,0,0,0
-18,5,82,4,69,1,0,2
-14,3,57,8,74,1,1,2
-3,9,98,18,76,1,1,1
-19,5,74,6,75,1,0,2
-11,8,87,22,100,0,1,1
-7,8,84,22,74,2,1,1
-5,4,60,4,74,0,2,2
-2,7,96,19,94,1,1,1
-3,4,75,6,63,2,1,2
-11,5,77,7,55,0,2,2
-10,6,75,4,65,0,0,2
-5,5,68,10,64,2,2,2
-12,3,31,3,67,2,0,0
-14,5,84,14,73,2,2,1
-8,6,65,11,63,0,2,2
-6,6,69,6,68,2,2,2
-2,6,69,8,71,2,2,2
-10,6,79,9,81,0,1,1
-1,1,45,1,66,1,2,0
-2,8,91,22,96,1,2,2
-13,6,65,5,66,2,2,2
-15,9,88,21,98,1,1,1
-0,7,100,10,83,1,2,1
-19,6,63,3,77,2,2,2
-15,5,78,12,79,2,2,2
-9,6,97,30,94,2,2,1
-7,4,34,3,53,0,0,0
-1,1,33,3,63,2,0,0
-7,9,88,13,93,2,1,1
-2,8,86,24,97,2,1,1
-9,8,89,9,73,1,1,1
-17,5,66,10,63,2,1,2
-2,9,94,24,84,1,1,1
-9,2,47,2,50,0,1,0
-2,9,95,13,73,1,1,1
-12,3,63,11,58,2,2,2
-19,8,79,13,77,2,2,1
-5,3,52,1,61,2,0,0
-7,1,47,3,47,0,0,0
-13,2,47,1,65,0,2,0
-1,5,76,12,94,1,1,1
-13,1,54,3,59,0,0,0
-15,6,63,5,73,2,0,2
-17,4,40,5,67,0,2,0
-2,5,69,9,70,2,2,2
+Information Systems,1,48,3,45,0,0,0
+Statistics,3,56,5,60,0,1,2
+Object-Oriented Programming,5,56,6,67,0,1,2
+Software Engineering,3,71,6,57,1,2,2
+Introduction to Programming,3,51,2,68,0,0,0
+Database Systems,7,86,20,90,1,1,1
+Mobile App Development,6,94,17,94,0,1,1
+Statistics,3,79,7,73,1,0,2
+Object-Oriented Programming,1,64,1,44,0,0,0
+Human-Computer Interaction,3,62,4,72,0,2,2
+Information Systems,7,91,20,98,1,1,1
+Information Systems,5,88,26,81,2,2,1
+Information Systems,1,56,3,43,0,2,0
+Human-Computer Interaction,4,78,4,68,0,0,0
+Software Engineering,1,54,0,57,2,0,0
+Human-Computer Interaction,4,55,5,46,1,0,0
+Cloud Computing,7,93,21,90,1,2,1
+Artificial Intelligence,8,76,26,89,1,1,1
+Software Engineering,2,50,0,47,0,0,0
+Machine Learning,3,80,4,75,2,0,0
+Human-Computer Interaction,8,79,27,94,0,1,1
+Artificial Intelligence,6,82,9,68,2,2,2
+Information Systems,2,46,1,63,0,0,0
+Machine Learning,3,64,3,53,1,0,2
+Software Engineering,4,63,3,56,2,2,2
+Cloud Computing,4,63,12,76,0,1,2
+Discrete Mathematics,3,80,10,64,2,1,2
+Human-Computer Interaction,5,87,8,82,1,0,0
+Computer Architecture,6,77,22,77,2,1,1
+Cybersecurity Fundamentals,4,31,1,63,0,0,0
+Software Engineering,9,76,29,82,2,2,1
+Linear Algebra,9,77,20,99,1,1,1
+Data Science,6,92,27,88,1,2,1
+Linear Algebra,4,82,9,56,2,2,2
+Data Science,7,86,9,99,2,1,1
+Cloud Computing,4,75,12,55,1,2,2
+Information Systems,3,39,1,64,2,1,0
+Cybersecurity Fundamentals,8,76,21,83,2,1,1
+Computer Architecture,1,47,1,47,2,2,0
+Software Engineering,8,97,26,81,1,1,1
+Computer Architecture,6,58,5,70,0,2,2
+Information Systems,5,85,11,89,2,1,1
+Statistics,6,98,9,90,1,1,1
+Mobile App Development,9,91,27,77,1,0,1
+Data Science,3,43,5,60,0,0,0
+Software Engineering,7,79,28,81,2,1,1
+Information Systems,4,56,7,70,1,1,2
+Mobile App Development,3,57,5,63,0,0,2
+Artificial Intelligence,3,65,1,53,2,2,0
+Mobile App Development,1,45,1,42,2,0,0
+Computer Networks,3,75,3,64,0,1,2
+Cloud Computing,2,36,3,48,0,0,0
+Software Engineering,2,60,1,65,0,0,0
+Cybersecurity Fundamentals,8,91,20,89,1,2,1
+Discrete Mathematics,6,80,27,76,2,2,1
+Introduction to Programming,4,57,7,65,2,1,2
+Database Systems,2,42,4,54,2,2,0
+Computer Architecture,3,52,4,48,0,0,0
+Linear Algebra,1,54,3,40,0,2,0
+Cloud Computing,6,66,9,65,2,1,2
+Database Systems,3,78,11,64,2,0,2
+Statistics,9,85,28,82,1,1,1
+Human-Computer Interaction,4,50,0,40,0,0,0
+Linear Algebra,4,55,1,44,0,1,0
+Mobile App Development,6,94,24,76,1,2,1
+Mobile App Development,5,61,9,70,1,2,2
+Operating Systems,1,50,3,40,2,2,0
+Computer Networks,4,37,4,46,0,2,0
+Mobile App Development,7,77,21,99,1,1,1
+Machine Learning,8,89,14,82,2,1,1
+Object-Oriented Programming,3,73,3,59,1,2,2
+Software Engineering,3,57,4,52,2,0,0
+Operating Systems,8,90,17,87,1,0,1
+Computer Networks,4,57,11,61,2,0,2
+Statistics,6,64,12,74,1,0,2
+Data Science,3,66,9,58,2,2,2
+Computer Networks,4,82,9,80,2,1,2
+Data Science,4,50,3,54,0,2,0
+Mobile App Development,5,78,23,91,1,2,1
+Artificial Intelligence,6,63,6,58,0,0,2
+Human-Computer Interaction,7,78,10,82,2,1,1
+Human-Computer Interaction,5,58,12,71,1,2,2
+Object-Oriented Programming,2,35,2,56,0,0,0
+Software Engineering,3,69,4,65,2,1,2
+Information Systems,7,87,12,96,1,1,1
+Artificial Intelligence,3,43,5,47,0,2,1
+Mobile App Development,2,57,1,63,0,0,0
+Computer Architecture,8,79,16,95,1,1,2
+Database Systems,2,31,5,46,2,2,0
+Discrete Mathematics,2,62,0,67,0,0,0
+Linear Algebra,8,99,18,93,1,2,1
+Software Engineering,1,37,5,68,0,2,0
+Statistics,1,52,4,53,0,1,0
+Discrete Mathematics,3,73,3,74,2,0,2
+Computer Networks,2,54,5,44,0,1,0
+Artificial Intelligence,8,100,26,92,1,2,1
+Artificial Intelligence,7,87,27,85,1,2,1
+Linear Algebra,4,64,5,63,0,0,0
+Algorithms,4,68,5,57,2,0,2
+Cloud Computing,7,82,8,82,0,2,1
+Computer Architecture,4,64,6,66,1,1,2
+Linear Algebra,3,76,11,69,2,1,2
+Introduction to Programming,2,37,1,49,2,1,0
+Web Development,3,37,5,68,2,2,0
+Software Engineering,1,52,1,60,1,0,0
+Human-Computer Interaction,5,66,3,60,0,2,2
+Computer Networks,8,89,27,72,0,1,1
+Operating Systems,2,33,4,42,0,1,1
+Information Systems,5,89,22,93,1,1,1
+Computer Architecture,6,66,9,78,1,2,0
+Object-Oriented Programming,3,58,6,72,1,2,2
+Introduction to Programming,2,34,0,61,2,2,0
+Computer Architecture,1,57,2,53,0,0,0
+Computer Architecture,9,79,17,77,1,0,1
+Human-Computer Interaction,1,65,2,61,2,0,0
+Discrete Mathematics,6,81,8,58,2,2,2
+Mobile App Development,2,34,3,65,0,0,0
+Computer Networks,5,69,10,58,1,2,2
+Database Systems,3,66,11,66,1,2,2
+Database Systems,1,49,5,59,0,0,0
+Operating Systems,6,76,22,75,2,2,1
+Software Engineering,1,50,0,41,0,0,0
+Discrete Mathematics,2,50,1,48,2,0,0
+Discrete Mathematics,6,81,10,70,1,2,2
+Object-Oriented Programming,5,78,8,80,1,0,2
+Web Development,4,59,3,66,0,2,0
+Mobile App Development,9,84,22,79,1,1,1
+Software Engineering,3,31,0,68,0,2,0
+Algorithms,7,92,26,83,1,0,1
+Linear Algebra,2,49,3,57,0,2,0
+Algorithms,6,78,9,60,1,2,2
+Algorithms,2,53,3,42,0,0,0
+Database Systems,6,82,11,79,0,2,2
+Cybersecurity Fundamentals,9,93,12,77,2,2,1
+Database Systems,5,57,9,78,1,1,2
+Database Systems,6,73,5,62,2,2,0
+Cybersecurity Fundamentals,3,63,4,53,0,0,1
+Algorithms,3,64,6,67,2,2,2
+Introduction to Programming,4,72,3,73,0,2,2
+Linear Algebra,2,59,1,59,0,0,0
+Database Systems,4,64,11,55,2,1,2
+Computer Networks,6,58,3,73,2,2,0
+Statistics,5,70,11,71,2,0,2
+Computer Networks,6,77,17,99,2,1,0
+Information Systems,6,77,24,92,1,1,1
+Algorithms,9,90,16,92,2,2,1
+Linear Algebra,3,56,2,66,1,1,0
+Database Systems,4,47,0,64,0,0,0
+Computer Networks,4,72,7,80,1,2,0
+Operating Systems,6,88,10,79,2,2,1
+Human-Computer Interaction,3,62,7,77,2,0,0
+Artificial Intelligence,1,56,5,58,0,2,0
+Introduction to Programming,5,91,25,88,2,1,1
+Artificial Intelligence,3,34,4,47,2,0,0
+Discrete Mathematics,1,35,5,53,0,1,0
+Human-Computer Interaction,6,81,18,96,1,1,1
+Computer Architecture,4,75,5,63,0,1,2
+Introduction to Programming,6,75,10,79,1,2,1
+Artificial Intelligence,1,35,1,45,0,0,0
+Cybersecurity Fundamentals,8,97,23,83,0,1,1
+Linear Algebra,4,74,11,78,0,0,2
+Mobile App Development,7,86,22,96,1,1,1
+Cybersecurity Fundamentals,3,60,3,68,2,2,2
+Computer Architecture,4,44,1,65,0,0,0
+Artificial Intelligence,3,54,2,46,0,2,2
+Linear Algebra,7,79,29,94,2,2,1
+Human-Computer Interaction,4,74,8,62,2,2,2
+Computer Architecture,6,60,7,55,1,0,2
+Database Systems,3,63,3,60,2,0,0
+Web Development,1,65,1,62,0,0,0
+Software Engineering,9,80,12,85,1,2,0
+Statistics,6,97,12,81,1,2,1
+Discrete Mathematics,1,36,5,57,2,2,2
+Operating Systems,6,78,14,97,1,2,1
+Computer Networks,9,77,10,81,1,2,1
+Web Development,5,67,12,71,2,2,2
+Cloud Computing,2,53,2,45,0,0,0
+Introduction to Programming,8,85,28,80,1,1,2
+Computer Architecture,1,64,1,56,2,0,0
+Information Systems,9,86,12,78,2,1,1
+Human-Computer Interaction,6,82,5,69,2,2,2
+Cybersecurity Fundamentals,8,97,23,92,1,1,1
+Cloud Computing,8,77,21,91,0,1,1
+Computer Architecture,9,78,17,74,2,1,1
+Human-Computer Interaction,2,33,1,68,0,1,0
+Computer Networks,4,35,0,67,2,0,0
+Software Engineering,6,73,5,68,2,0,2
+Web Development,6,85,10,90,2,0,1
+Database Systems,4,44,2,53,0,2,0
+Database Systems,7,78,9,79,1,2,1
+Object-Oriented Programming,6,86,29,90,0,1,1
+Algorithms,8,95,25,81,2,1,1
+Web Development,6,83,9,92,1,1,1
+Human-Computer Interaction,6,63,11,72,2,1,2
+Algorithms,8,76,20,88,1,1,1
+Operating Systems,8,82,14,90,1,1,1
+Cloud Computing,2,55,0,68,0,0,1
+Introduction to Programming,9,88,16,92,0,0,1
+Software Engineering,1,57,0,40,1,2,0
+Operating Systems,5,95,29,85,1,1,1
+Algorithms,8,90,9,92,1,1,1
+Algorithms,4,63,3,59,2,2,1
+Cybersecurity Fundamentals,8,89,26,96,1,2,1
+Cybersecurity Fundamentals,5,74,12,64,2,2,2
+Computer Networks,6,57,4,57,1,1,2
+Statistics,1,35,5,53,2,0,0
+Data Science,5,58,11,79,2,1,2
+Data Science,3,55,5,60,2,0,0
+Object-Oriented Programming,4,59,1,48,2,0,0
+Cloud Computing,3,52,5,56,2,0,0
+Human-Computer Interaction,6,58,5,56,0,2,2
+Artificial Intelligence,4,44,1,66,0,2,0
+Web Development,7,93,9,98,2,1,1
+Database Systems,5,79,5,80,0,1,2
+Linear Algebra,3,34,1,58,0,2,0
+Machine Learning,1,54,4,46,2,0,0
+Discrete Mathematics,1,36,4,53,2,0,0
+Mobile App Development,5,73,7,75,0,2,2
+Software Engineering,3,74,7,55,1,2,2
+Computer Networks,5,71,11,63,0,2,2
+Database Systems,2,30,0,62,0,2,2
+Linear Algebra,1,40,3,40,0,2,0
+Web Development,9,78,12,75,1,2,1
+Cybersecurity Fundamentals,7,93,18,78,2,1,1
+Linear Algebra,5,75,10,72,1,1,2
+Cloud Computing,2,49,1,65,2,1,0
+Software Engineering,6,69,8,61,0,1,2
+Object-Oriented Programming,9,95,29,87,1,1,1
+Software Engineering,1,37,0,68,0,2,0
+Software Engineering,4,39,1,67,2,0,0
+Artificial Intelligence,6,78,8,74,2,1,2
+Linear Algebra,3,59,3,57,2,1,2
+Machine Learning,3,55,5,49,0,2,2
+Database Systems,5,58,8,72,0,2,2
+Web Development,4,79,11,67,2,2,2
+Algorithms,6,94,29,97,1,1,1
+Operating Systems,2,39,2,64,2,0,0
+Machine Learning,3,65,9,65,2,2,2
+Web Development,8,80,30,86,1,1,1
+Cloud Computing,2,64,5,47,2,2,0
+Software Engineering,3,58,4,66,0,0,0
+Object-Oriented Programming,2,42,2,46,0,0,0
+Introduction to Programming,7,98,28,98,1,1,1
+Data Science,5,61,5,79,2,2,2
+Statistics,7,95,14,96,1,2,1
+Database Systems,7,91,17,99,1,1,1
+Mobile App Development,7,100,16,90,1,1,1
+Software Engineering,4,77,10,75,2,2,2
+Human-Computer Interaction,8,91,24,85,0,2,1
+Cybersecurity Fundamentals,8,94,17,90,1,2,1
+Linear Algebra,6,76,5,70,0,1,2
+Algorithms,4,55,8,80,0,2,2
+Human-Computer Interaction,5,66,9,59,1,2,2
+Information Systems,6,89,11,80,1,1,1
+Artificial Intelligence,2,37,3,44,0,0,0
+Statistics,5,82,4,69,1,0,2
+Mobile App Development,3,57,8,74,1,1,2
+Computer Architecture,9,98,18,76,1,1,1
+Web Development,5,74,6,75,1,0,2
+Introduction to Programming,8,87,22,100,0,1,1
+Database Systems,8,84,22,74,2,1,1
+Cybersecurity Fundamentals,4,60,4,74,0,2,2
+Cloud Computing,7,96,19,94,1,1,1
+Computer Architecture,4,75,6,63,2,1,2
+Introduction to Programming,5,77,7,55,0,2,2
+Information Systems,6,75,4,65,0,0,2
+Cybersecurity Fundamentals,5,68,10,64,2,2,2
+Linear Algebra,3,31,3,67,2,0,0
+Mobile App Development,5,84,14,73,2,2,1
+Discrete Mathematics,6,65,11,63,0,2,2
+Data Science,6,69,6,68,2,2,2
+Cloud Computing,6,69,8,71,2,2,2
+Information Systems,6,79,9,81,0,1,1
+Artificial Intelligence,1,45,1,66,1,2,0
+Cloud Computing,8,91,22,96,1,2,2
+Machine Learning,6,65,5,66,2,2,2
+Object-Oriented Programming,9,88,21,98,1,1,1
+Algorithms,7,100,10,83,1,2,1
+Web Development,6,63,3,77,2,2,2
+Object-Oriented Programming,5,78,12,79,2,2,2
+Human-Computer Interaction,6,97,30,94,2,2,1
+Database Systems,4,34,3,53,0,0,0
+Artificial Intelligence,1,33,3,63,2,0,0
+Database Systems,9,88,13,93,2,1,1
+Cloud Computing,8,86,24,97,2,1,1
+Human-Computer Interaction,8,89,9,73,1,1,1
+Software Engineering,5,66,10,63,2,1,2
+Cloud Computing,9,94,24,84,1,1,1
+Human-Computer Interaction,2,47,2,50,0,1,0
+Cloud Computing,9,95,13,73,1,1,1
+Linear Algebra,3,63,11,58,2,2,2
+Web Development,8,79,13,77,2,2,1
+Cybersecurity Fundamentals,3,52,1,61,2,0,0
+Database Systems,1,47,3,47,0,0,0
+Machine Learning,2,47,1,65,0,2,0
+Artificial Intelligence,5,76,12,94,1,1,1
+Machine Learning,1,54,3,59,0,0,0
+Object-Oriented Programming,6,63,5,73,2,0,2
+Software Engineering,4,40,5,67,0,2,0
+Cloud Computing,5,69,9,70,2,2,2

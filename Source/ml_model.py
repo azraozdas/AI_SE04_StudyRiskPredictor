@@ -38,7 +38,8 @@ print(f"Shape: {df.shape}")
 print(df.head())
 print(df.info())
 
-X = df.drop("risk_level", axis=1)
+# course is kept in the cleaned CSV for display/context but is NOT a model feature.
+X = df.drop(["risk_level", "course"], axis=1)
 y = df["risk_level"]
 
 # 70% train, 30% temporary (validation + test)

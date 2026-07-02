@@ -22,8 +22,10 @@ def preprocess():
     for column in numeric_columns:
         df[column] = df[column].fillna(df[column].median())
 
-    categorical_columns = ["course", "assignment_difficulty", "workload_level", "risk_level"]
-    for column in categorical_columns:
+    # course is kept as a string column for display/context but is NOT encoded
+    # for model training — it must not be a model feature.
+    categorical_fill = ["course", "assignment_difficulty", "workload_level", "risk_level"]
+    for column in categorical_fill:
         df[column] = df[column].fillna(df[column].mode()[0])
 
     df = df.drop_duplicates()
@@ -31,8 +33,11 @@ def preprocess():
     df["attendance"] = df["attendance"].clip(0, 100)
     df["pass_grade"] = df["pass_grade"].clip(0, 100)
 
+    # Only encode the columns that are used as model features or as the target.
+    # course is intentionally excluded from encoding.
+    encode_columns = ["assignment_difficulty", "workload_level", "risk_level"]
     encoders = {}
-    for column in categorical_columns:
+    for column in encode_columns:
         enc = LabelEncoder()
         df[column] = enc.fit_transform(df[column])
         encoders[column] = enc
@@ -41,8 +46,8 @@ def preprocess():
     df.to_csv(os.path.join(ROOT, "Data", "cleaned_student_data.csv"), index=False)
 
     print("\nPreprocessing completed successfully.")
-    print("Cleaned dataset saved.")
-    print("Encoders saved to Models/encoders.pkl")
+    print("Cleaned dataset saved (course column kept as string for display).")
+    print("Encoders saved to Models/encoders.pkl (course encoder removed)")
 
 
 if __name__ == "__main__":

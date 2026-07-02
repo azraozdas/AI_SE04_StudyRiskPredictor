@@ -4,45 +4,41 @@
   "validation_samples": 45,
   "test_samples": 45,
   "cv_fold_scores": [
-    0.9285714285714286,
+    0.9523809523809523,
     0.7857142857142857,
     0.8809523809523809,
     0.8333333333333334,
-    0.9047619047619048
+    0.8809523809523809
   ],
   "cv_mean_accuracy": 0.8666666666666668,
-  "cv_std_accuracy": 0.05128728387747147,
-  "validation_accuracy": 0.8888888888888888,
-  "test_accuracy": 0.9111111111111111,
-  "test_macro_f1": 0.9118032381658633,
+  "cv_std_accuracy": 0.055532875189002844,
+  "validation_accuracy": 0.9111111111111111,
+  "test_accuracy": 0.9333333333333333,
+  "test_macro_f1": 0.9340254603880855,
   "feature_importance_ranking": [
     {
       "feature": "attendance",
-      "importance": 0.24652766018640215
-    },
-    {
-      "feature": "deadline_days",
-      "importance": 0.22367559666438702
+      "importance": 0.31705271863818735
     },
     {
       "feature": "pass_grade",
-      "importance": 0.21458442634574182
+      "importance": 0.22758763061975298
+    },
+    {
+      "feature": "deadline_days",
+      "importance": 0.22016771482170008
     },
     {
       "feature": "study_hours",
-      "importance": 0.18181935137179794
-    },
-    {
-      "feature": "course",
-      "importance": 0.061497227018388986
+      "importance": 0.17310148361240887
     },
     {
       "feature": "workload_level",
-      "importance": 0.04533901577917536
+      "importance": 0.0408147213702003
     },
     {
       "feature": "assignment_difficulty",
-      "importance": 0.026556722634106703
+      "importance": 0.021275730937750467
     }
   ]
 }

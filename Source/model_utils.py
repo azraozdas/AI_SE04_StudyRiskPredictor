@@ -11,7 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # project ro
 MODEL_PATH = os.path.join(ROOT, "Models", "study_risk_model.pkl")
 ENCODERS_PATH = os.path.join(ROOT, "Models", "encoders.pkl")
 
-_CATEGORICAL = ("course", "assignment_difficulty", "workload_level")
+_CATEGORICAL = ("assignment_difficulty", "workload_level")
 
 
 def load_model():
@@ -43,16 +43,19 @@ def _encode(encoders, column, value):
     return int(enc.transform([value])[0])
 
 
-def predict_for_user(model, encoders, *, course, study_hours, attendance,
+def predict_for_user(model, encoders, *, study_hours, attendance,
                      deadline_days, pass_grade, assignment_difficulty,
                      workload_level):
     """Predict risk for one student. Categorical args are human-readable
     strings (e.g. 'High'); they are encoded here to match training.
 
+    course is NOT a parameter — it is display-only and does not affect
+    the prediction. Any course name can be shown in the UI without needing
+    to be in the training set.
+
     Returns: {"risk_level": str, "confidence": float, "probabilities": dict}
     """
     row = {
-        "course": _encode(encoders, "course", course),
         "study_hours": float(study_hours),
         "attendance": float(attendance),
         "deadline_days": float(deadline_days),
